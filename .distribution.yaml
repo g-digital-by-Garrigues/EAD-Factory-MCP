@@ -1,0 +1,94 @@
+# Distribution configuration for the EAD Factory MCP.
+#
+# Consumed by the g-digital by Garrigues MCP_Market_Distribution pipeline
+# (https://github.com/g-digital-by-Garrigues/MCP_Market_Distribution) when
+# this MCP is built and published to the 7 v1 stores: npm, Docker Hub,
+# the MCP Official Registry, the Docker MCP Catalog, Cline marketplace,
+# mcp.so, and Smithery (deferred).
+#
+# Schema validated by src/schemas/distribution-config.schema.ts in the
+# pipeline repo. To change publishing behavior for this MCP, edit this
+# file and open a PR here — the next pipeline dispatch picks up the
+# new values automatically.
+#
+# Anything that doesn't belong here (BOT_PAT, NPM_TOKEN, DOCKERHUB_TOKEN,
+# OKTA_CLIENT_SECRET, etc.) is held by the pipeline as GitHub Actions
+# secrets and is never exposed to this public repo.
+
+distribution_schema_version: 1
+
+# Identity per store / channel
+reverse_dns_name: io.github.g-digital-by-Garrigues/ead-factory  # MCP Official Registry
+npm_scope: "@g-digital"
+npm_package_name: "@g-digital/mcp-ead-factory"
+docker_image_name: gdigital/ead-factory                          # Docker Hub
+n8n_adapter_target_name: n8n-node-ead-factory                    # Track B (Epic 5) — n8n community node id
+
+# License — must match LICENSE file in this repo (FR14 Layer 1 enforces).
+license: MIT
+
+# Consumer-facing landing for credential acquisition (shown in
+# marketplace bodies + server.json#environmentVariables[].description).
+credential_help_url: https://eadtrust.example.com/onboarding
+
+# Per-target overrides (currently empty; populate if a specific target
+# needs a different value than what the pipeline computes by default).
+target_overrides: {}
+
+# Track A targets — 7 v1 stores or 'default' for full coverage.
+track_a_targets: default
+
+# Per-MCP list of target ids the pipeline must SKIP. Smithery is deferred
+# to v1.1 (its 2026 model requires MCPB bundles or self-hosted URL —
+# neither of which the pipeline implements yet). Remove 'smithery' from
+# this list once the MCPB generator/publisher lands.
+skip_targets:
+  - smithery
+
+# Track B (Epic 5 of the PRD) targets.
+track_b_targets:
+  - n8n
+  - make-rom
+
+# Git tag prefix the pipeline matches against pushed v* tags (Story 2.1
+# in the pipeline). Default 'v' is fine for single-MCP repos.
+git_tag_prefix: v
+
+# Logo asset path — relative to this repo's root. Shipped in the npm
+# tarball (see package.json#files: assets/) and surfaced via unpkg.com
+# in marketplace submission bodies and the Docker MCP Catalog server.yaml.
+# Marketplaces typically expect 400x400 PNG; champions.jpg is 275x183
+# JPEG. To-do: replace with a 400x400 square PNG in a follow-up PR.
+logo_path: assets/champions.jpg
+
+# Bundled Claude Code skills — paths relative to this repo's root. These
+# are NOT separate MCPs; they're consumer-facing /slash commands the
+# EAD Factory MCP ships so installers get usable workflows out of the
+# box (see package.json#files: .claude/commands/**/*.md).
+bundled_skills:
+  - .claude/commands/create-internal-evidence.md  # consumes Evidence Manager API
+  - .claude/commands/create-signature-request.md  # consumes Signature Manager API
+
+# Static tool inventory shipped to the Docker MCP Catalog
+# (servers/<mcp_name>/tools.json). The pipeline's Layer 2 gate
+# cross-checks this list against the server's actual tools/list output —
+# add/remove tools here whenever src/server.ts changes.
+tools:
+  - name: generate_evidence
+    description: "Full workflow: authenticate with Okta, SHA-256 hash the file, register the evidence, upload to S3, and poll until COMPLETED or ERROR."
+  - name: get_evidence
+    description: "Retrieve full evidence details by ID (status, timestamps, custody, metadata)."
+  - name: create_signature_request
+    description: "Create a new signature request in DRAFT state. Supports fullFlow=true to complete the entire flow with preconfigured participants in a single call."
+  - name: add_document_to_signature_request
+    description: "Add a document to a DRAFT signature request and upload the file to S3."
+  - name: add_signatory_to_document
+    description: "Add a signatory to a document within a signature request."
+  - name: add_validator_to_signatory
+    description: "Add a validator to a signatory; the validator must approve before the signatory can sign."
+  - name: add_observer_to_document
+    description: "Add an observer to a document; observers receive notifications but do not sign."
+  - name: activate_signature_request
+    description: "Activate a signature request (DRAFT → ACTIVE), triggering notifications to signatories."
+  - name: get_signature_request
+    description: "Retrieve full details of a signature request by ID (status, documents, participants, history)."
