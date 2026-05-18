@@ -57,9 +57,9 @@ git_tag_prefix: v
 # Logo asset path — relative to this repo's root. Shipped in the npm
 # tarball (see package.json#files: assets/) and surfaced via unpkg.com
 # in marketplace submission bodies and the Docker MCP Catalog server.yaml.
-# Marketplaces typically expect 400x400 PNG; champions.jpg is 275x183
-# JPEG. To-do: replace with a 400x400 square PNG in a follow-up PR.
-logo_path: assets/champions.jpg
+# 400x400 PNG, the size every v1 marketplace (Cline / mcp.so / Docker MCP
+# Catalog) expects.
+logo_path: assets/logo-400x400.png
 
 # Bundled Claude Code skills — paths relative to this repo's root. These
 # are NOT separate MCPs; they're consumer-facing /slash commands the
