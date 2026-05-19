@@ -21,6 +21,15 @@ FROM node:22-alpine AS runner
 # index out of the layer (smaller image, no stale state).
 RUN apk update && apk upgrade --no-cache
 
+# Update the bundled npm to the latest published version so its own
+# transitive deps (notably picomatch — vulnerable to CVE-2026-33671 ReDoS
+# via extglob quantifiers in versions <2.3.2 / <3.0.2 / <4.0.4) are at
+# the patched releases. node:22-alpine ships with npm 10.x which still
+# pulls in vulnerable picomatch; npm @ latest pulls picomatch >= 4.0.4.
+# Without this step Docker Scout flags the final image HIGH even though
+# none of OUR direct prod deps reference picomatch.
+RUN npm install -g npm@latest && npm cache clean --force
+
 ENV NODE_ENV=production
 ENV TRANSPORT=http
 ENV HTTP_PORT=3000
