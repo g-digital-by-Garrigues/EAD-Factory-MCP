@@ -4,7 +4,7 @@
 # (https://github.com/g-digital-by-Garrigues/MCP_Market_Distribution) when
 # this MCP is built and published to the 7 v1 stores: npm, Docker Hub,
 # the MCP Official Registry, the Docker MCP Catalog, Cline marketplace,
-# mcp.so, and Smithery (deferred).
+# mcp.so, and Smithery.
 #
 # Schema validated by src/schemas/distribution-config.schema.ts in the
 # pipeline repo. To change publishing behavior for this MCP, edit this
@@ -12,8 +12,8 @@
 # new values automatically.
 #
 # Anything that doesn't belong here (BOT_PAT, NPM_TOKEN, DOCKERHUB_TOKEN,
-# OKTA_CLIENT_SECRET, etc.) is held by the pipeline as GitHub Actions
-# secrets and is never exposed to this public repo.
+# OKTA_CLIENT_SECRET, SMITHERY_TOKEN, etc.) is held by the pipeline as
+# GitHub Actions secrets and is never exposed to this public repo.
 
 distribution_schema_version: 1
 
@@ -38,12 +38,12 @@ target_overrides: {}
 # Track A targets — 7 v1 stores or 'default' for full coverage.
 track_a_targets: default
 
-# Per-MCP list of target ids the pipeline must SKIP. Smithery is deferred
-# to v1.1 (its 2026 model requires MCPB bundles or self-hosted URL —
-# neither of which the pipeline implements yet). Remove 'smithery' from
-# this list once the MCPB generator/publisher lands.
-skip_targets:
-  - smithery
+# skip_targets removed on 2026-05-19 (Story 5.13). Smithery is now
+# active — the pipeline's Track C (MCPB bundle generator + validator +
+# publisher, shipped in MCP_Market_Distribution PRs #99–#104) supports
+# Smithery's 2026 model. The first run with run_smithery=true publishes
+# `.mcpb` via `smithery mcp publish` under the
+# `g-digital-by-Garrigues/ead-factory` namespace.
 
 # Track B (Epic 5 of the PRD) targets.
 track_b_targets:
