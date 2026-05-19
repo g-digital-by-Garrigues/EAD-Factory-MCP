@@ -23,9 +23,6 @@ This MCP is published to every major MCP distribution channel by the [g-digital 
 | **npm** | `npx -y @g-digital/mcp-ead-factory` — [npmjs.com/package/@g-digital/mcp-ead-factory](https://www.npmjs.com/package/@g-digital/mcp-ead-factory) |
 | **Docker Hub** | `docker pull gdigital/ead-factory:latest` — [hub.docker.com/r/gdigital/ead-factory](https://hub.docker.com/r/gdigital/ead-factory) |
 | **MCP Official Registry** | Auto-discovered as `io.github.g-digital-by-Garrigues/ead-factory` by any client that reads the registry — [registry.modelcontextprotocol.io](https://registry.modelcontextprotocol.io/v0/servers/io.github.g-digital-by-Garrigues/ead-factory) |
-| **Cline marketplace** | Install from the Cline UI → search "EAD Factory" — [cline/mcp-marketplace#1566](https://github.com/cline/mcp-marketplace/issues/1566) |
-| **mcp.so** | [mcp.so directory listing](https://mcp.so/server/ead-factory/g-digital-by-Garrigues) |
-| **Docker MCP Catalog** | Install via the Docker MCP plugin — [docker/mcp-registry#3646](https://github.com/docker/mcp-registry/pull/3646) |
 | **n8n community node** | In n8n Settings → Community Nodes → install `@g-digital/n8n-nodes-ead-factory` (works with the AI Agent node via `usableAsTool`) — [npmjs.com/package/@g-digital/n8n-nodes-ead-factory](https://www.npmjs.com/package/@g-digital/n8n-nodes-ead-factory) |
 | **Smithery** | `smithery mcp install g-digital-by-garrigues/ead-factory` (from v1.0.7) — [smithery.ai/server/g-digital-by-garrigues/ead-factory](https://smithery.ai/server/g-digital-by-garrigues/ead-factory) |
 
