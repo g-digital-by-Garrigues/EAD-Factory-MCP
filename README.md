@@ -14,6 +14,23 @@ npx -y @g-digital/mcp-ead-factory
 
 You will need Okta credentials (`OKTA_CLIENT_ID` + `OKTA_CLIENT_SECRET`) and at least the Evidence Manager + Signature Manager base URLs for the environment you target (see [Environment URLs](#environment-urls)).
 
+## Where to install
+
+This MCP is published to every major MCP distribution channel by the [g-digital MCP distribution pipeline](https://github.com/g-digital-by-Garrigues/MCP_Market_Distribution). Pick whichever fits your stack:
+
+| Channel | Install command / URL |
+|---|---|
+| **npm** | `npx -y @g-digital/mcp-ead-factory` — [npmjs.com/package/@g-digital/mcp-ead-factory](https://www.npmjs.com/package/@g-digital/mcp-ead-factory) |
+| **Docker Hub** | `docker pull gdigital/ead-factory:latest` — [hub.docker.com/r/gdigital/ead-factory](https://hub.docker.com/r/gdigital/ead-factory) |
+| **MCP Official Registry** | Auto-discovered as `io.github.g-digital-by-Garrigues/ead-factory` by any client that reads the registry — [registry.modelcontextprotocol.io](https://registry.modelcontextprotocol.io/v0/servers/io.github.g-digital-by-Garrigues/ead-factory) |
+| **Cline marketplace** | Install from the Cline UI → search "EAD Factory" — [cline/mcp-marketplace#1566](https://github.com/cline/mcp-marketplace/issues/1566) |
+| **mcp.so** | [mcp.so directory listing](https://mcp.so/server/ead-factory/g-digital-by-Garrigues) |
+| **Docker MCP Catalog** | Install via the Docker MCP plugin — [docker/mcp-registry#3646](https://github.com/docker/mcp-registry/pull/3646) |
+| **n8n community node** | In n8n Settings → Community Nodes → install `@g-digital/n8n-nodes-ead-factory` (works with the AI Agent node via `usableAsTool`) — [npmjs.com/package/@g-digital/n8n-nodes-ead-factory](https://www.npmjs.com/package/@g-digital/n8n-nodes-ead-factory) |
+| **Smithery** | `smithery mcp install g-digital-by-garrigues/ead-factory` (from v1.0.7) — [smithery.ai/server/g-digital-by-garrigues/ead-factory](https://smithery.ai/server/g-digital-by-garrigues/ead-factory) |
+
+Every channel ships the same MCP server contract; the tools and env-var configuration below apply regardless of which install path you choose.
+
 ## Tools
 
 ### Evidence Manager
@@ -95,6 +112,66 @@ Add the block below to your client's MCP configuration file (path varies by clie
         "OKTA_CLIENT_SECRET": "<PASTE_OKTA_CLIENT_SECRET_HERE>",
         "OKTA_SCOPE": "",
         "TRANSPORT": "stdio"
+      }
+    }
+  }
+}
+```
+
+### Docker (HTTP transport)
+
+For containerised deployments (Cloud Run, Fargate, fly.io, on-prem Kubernetes), pull the image from Docker Hub and run with `TRANSPORT=http`:
+
+```bash
+docker run -d --name ead-factory \
+  -p 3000:3000 \
+  -e API_BASE_URL=https://api.pre.gcloudfactory.com/digital-trust \
+  -e SIGNATURE_API_BASE_URL=https://api.pre.gcloudfactory.com/digital-trust \
+  -e OKTA_TOKEN_URL=https://sso.garrigues.io.builders/oauth2/aus653dgdgTFL2mhw417/v1/token \
+  -e OKTA_CLIENT_ID=<your-client-id> \
+  -e OKTA_CLIENT_SECRET=<your-client-secret> \
+  -e OKTA_SCOPE=token \
+  -e TRANSPORT=http \
+  -e HTTP_PORT=3000 \
+  gdigital/ead-factory:latest
+```
+
+The container exposes `/mcp` (Okta Bearer auth required) and `/health` (unauthenticated) on port 3000. See [Remote deployment](#remote-deployment-http--bearer-auth) for the auth contract.
+
+**Behind a corporate TLS-inspection proxy** (PaloAlto, Netskope, Zscaler, etc.): mount your corporate CA bundle and set `NODE_EXTRA_CA_CERTS`, otherwise outbound HTTPS to Okta / EAD APIs fails with `self-signed certificate in certificate chain`:
+
+```bash
+-v /path/to/corp-ca-bundle.pem:/etc/ssl/certs/corp-ca-bundle.pem:ro \
+-e NODE_EXTRA_CA_CERTS=/etc/ssl/certs/corp-ca-bundle.pem
+```
+
+### Docker (stdio, spawned by an MCP client)
+
+For local desktop clients that want to spawn the MCP inside a container rather than via `npx`:
+
+```json
+{
+  "mcpServers": {
+    "ead-factory": {
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm",
+        "-e", "API_BASE_URL",
+        "-e", "SIGNATURE_API_BASE_URL",
+        "-e", "OKTA_TOKEN_URL",
+        "-e", "OKTA_CLIENT_ID",
+        "-e", "OKTA_CLIENT_SECRET",
+        "-e", "OKTA_SCOPE",
+        "-e", "TRANSPORT=stdio",
+        "gdigital/ead-factory:latest"
+      ],
+      "env": {
+        "API_BASE_URL": "",
+        "SIGNATURE_API_BASE_URL": "",
+        "OKTA_TOKEN_URL": "",
+        "OKTA_CLIENT_ID": "",
+        "OKTA_CLIENT_SECRET": "<PASTE_OKTA_CLIENT_SECRET_HERE>",
+        "OKTA_SCOPE": "token"
       }
     }
   }
