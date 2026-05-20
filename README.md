@@ -24,7 +24,7 @@ This MCP is published to every major MCP distribution channel by the [g-digital 
 | **Docker Hub** | `docker pull gdigital/ead-factory:latest` — [hub.docker.com/r/gdigital/ead-factory](https://hub.docker.com/r/gdigital/ead-factory) |
 | **MCP Official Registry** | Auto-discovered as `io.github.g-digital-by-Garrigues/ead-factory` by any client that reads the registry — [registry.modelcontextprotocol.io](https://registry.modelcontextprotocol.io/v0/servers/io.github.g-digital-by-Garrigues/ead-factory) |
 | **n8n community node** | In n8n Settings → Community Nodes → install `@g-digital/n8n-nodes-ead-factory` (works with the AI Agent node via `usableAsTool`) — [npmjs.com/package/@g-digital/n8n-nodes-ead-factory](https://www.npmjs.com/package/@g-digital/n8n-nodes-ead-factory) |
-| **Smithery** | `smithery mcp install g-digital-by-garrigues/ead-factory` (from v1.0.7) — [smithery.ai/server/g-digital-by-garrigues/ead-factory](https://smithery.ai/server/g-digital-by-garrigues/ead-factory) |
+| **Smithery** | `smithery mcp install g-digital/ead-factory` (from v1.0.7) — [[smithery.ai/server/g-digital/ead-factory](https://smithery.ai/servers/g-digital/ead-factory)](https://smithery.ai/server/g-digital/ead-factory) |
 
 Every channel ships the same MCP server contract; the tools and env-var configuration below apply regardless of which install path you choose.
 
