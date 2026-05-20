@@ -2,7 +2,7 @@
 
 **EAD Factory MCP — Digital Trust services APIs for your agents.**
 
-This MCP server bridges any MCP-compatible agent (Claude Code, Claude Desktop, Cursor, Windsurf, Cline, VS Code, JetBrains, Zed) to Garrigues' Digital Trust services: Evidence Manager (qualified digital evidence + timestamping) and Signature Manager (electronic signature workflows).
+This MCP server bridges any MCP-compatible agent (Claude Code, Claude Desktop, Cursor, Windsurf, Cline, VS Code, JetBrains, Zed) to EADTrust's Digital Trust services: Evidence Manager (qualified digital evidence + timestamping) and Signature Manager (electronic signature workflows).
 
 > Need credentials? See: [Get your testing credentials here!!](https://webforms.pipedrive.com/f/bYUKJVgt3TZ0QiINtf0mimlgL3BJw79kQaN3i7nXnqoPYabRqYPI5KX9ohhp7T5TTt)
 
