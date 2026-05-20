@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 npm install        # Install dependencies
 npm run build      # Compile TypeScript → dist/
 npm run dev        # Run with ts-node (no build needed, for development)
-npm start          # Run compiled dist/server.js
+npm start          # Run compiled dist/cli.js (CLI bootstrap, spawns stdio/HTTP transport)
 ```
 
 No linting or test commands are configured.
@@ -32,7 +32,8 @@ This is an **MCP (Model Context Protocol) server** that bridges Claude Code to a
 ### Service layer (`src/`)
 
 ```
-server.ts           — MCP tool registration + transport setup
+cli.ts              — CLI bootstrap: selects stdio vs HTTP transport, calls createServer()
+server.ts           — exports createServer() factory that builds and registers all 9 tools
 workflow.service.ts — Orchestrates the full generate_evidence flow (async generator)
 auth.service.ts     — Okta client_credentials OAuth with in-memory token cache
 evidence.service.ts — API calls: POST /evidences, GET /evidences/{id}
