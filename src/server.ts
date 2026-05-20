@@ -1,7 +1,9 @@
-#!/usr/bin/env node
+// Module entry: exports `createServer()` so consumers can run the MCP
+// either as a stand-alone CLI (see src/cli.ts) or in-process via an
+// in-memory transport (e.g. inside the n8n adapter's bundled node —
+// required to keep its `dependencies` empty for n8n's Verified
+// Community Node program).
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { z } from 'zod/v3';
 import { generateEvidence, GenerateEvidenceInput } from './workflow.service';
 import { getToken } from './auth.service';
@@ -11,12 +13,12 @@ import { uploadFileToS3 } from './s3-upload.service';
 import { calculateSha256FromFile, sha256HexToBase64 } from './hash.service';
 import * as path from 'path';
 import { config } from './config';
-import { createHttpApp } from './http';
 
-const server = new McpServer({
-  name: 'evidence-manager-mcp-server',
-  version: '1.0.0',
-});
+export function createServer(): McpServer {
+  const server = new McpServer({
+    name: 'evidence-manager-mcp-server',
+    version: '1.0.0',
+  });
 
 // ─── generate_evidence ───────────────────────────────────────────────────────
 
@@ -591,6 +593,9 @@ server.tool(
   },
 );
 
+  return server;
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function extractErrorMessage(error: unknown): string {
@@ -629,25 +634,6 @@ async function drainGenerator<T>(gen: AsyncGenerator<string, T>, log: string[]):
   return next.value;
 }
 
-// ─── Bootstrap ───────────────────────────────────────────────────────────────
-
-async function main() {
-  const transportMode = config.transport;
-
-  if (transportMode === 'http') {
-    const app = createHttpApp(server);
-    const port = config.httpPort;
-    app.listen(port, () => {
-      console.error(`Evidence Manager MCP Server listening on http://0.0.0.0:${port}/mcp`);
-    });
-  } else {
-    const transport = new StdioServerTransport();
-    await server.connect(transport);
-    console.error('Evidence Manager MCP Server running on stdio');
-  }
-}
-
-main().catch((err) => {
-  console.error('Fatal error:', err);
-  process.exit(1);
-});
+// Bootstrap moved to src/cli.ts so importing this module does not
+// side-effect-start the server. The CLI imports createServer() and
+// wires it to stdio or HTTP transport.
