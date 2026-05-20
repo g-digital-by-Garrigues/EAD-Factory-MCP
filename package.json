@@ -1,6 +1,6 @@
 {
   "bin": {
-    "mcp-ead-factory": "dist/server.js"
+    "mcp-ead-factory": "dist/cli.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
@@ -49,8 +49,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "dev": "ts-node src/server.ts",
-    "start": "node dist/server.js"
+    "dev": "ts-node src/cli.ts",
+    "start": "node dist/cli.js"
   },
   "version": "1.0.8"
 }
