@@ -52,5 +52,5 @@
     "dev": "ts-node src/cli.ts",
     "start": "node dist/cli.js"
   },
-  "version": "1.0.10"
+  "version": "1.0.11"
 }
