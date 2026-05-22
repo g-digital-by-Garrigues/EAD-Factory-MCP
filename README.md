@@ -1,5 +1,11 @@
 # EAD Factory MCP
 
+[![npm version](https://img.shields.io/npm/v/@g-digital/mcp-ead-factory)](https://www.npmjs.com/package/@g-digital/mcp-ead-factory)
+[![npm downloads](https://img.shields.io/npm/dm/@g-digital/mcp-ead-factory)](https://www.npmjs.com/package/@g-digital/mcp-ead-factory)
+[![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![provenance](https://img.shields.io/badge/npm-provenance-green)](https://www.npmjs.com/package/@g-digital/mcp-ead-factory)
+[![smithery badge](https://smithery.ai/badge/g-digital/ead-factory)](https://smithery.ai/servers/g-digital/ead-factory)
+
 **EAD Factory MCP — Digital Trust services APIs for your agents.**
 
 This MCP server bridges any MCP-compatible agent (Claude Code, Claude Desktop, Cursor, Windsurf, Cline, VS Code, JetBrains, Zed) to EADTrust's Digital Trust services: Evidence Manager (qualified digital evidence + timestamping) and Signature Manager (electronic signature workflows).
@@ -276,7 +282,3 @@ Client (Claude Code / MCP client)
 ## License
 
 MIT
-
-## Badges
-
-[![smithery badge](https://smithery.ai/badge/g-digital/ead-factory)](https://smithery.ai/servers/g-digital/ead-factory)
