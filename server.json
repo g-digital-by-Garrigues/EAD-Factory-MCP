@@ -83,12 +83,12 @@
       "transport": {
         "type": "stdio"
       },
-      "version": "1.0.11"
+      "version": "1.0.12"
     }
   ],
   "repository": {
     "source": "github",
     "url": "https://github.com/g-digital-by-Garrigues/EAD-Factory-MCP"
   },
-  "version": "1.0.11"
+  "version": "1.0.12"
 }
