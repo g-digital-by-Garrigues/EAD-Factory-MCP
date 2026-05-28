@@ -92,3 +92,11 @@ tools:
     description: "Activate a signature request (DRAFT → ACTIVE), triggering notifications to signatories."
   - name: get_signature_request
     description: "Retrieve full details of a signature request by ID (status, documents, participants, history)."
+
+# n8n Verified Community Node connector branding (Epic 11 Story 11.3).
+# Overrides the auto-derived TitleCase displayName ("Ead Factory") and
+# the default fallback description ("n8n community node for ... MCP") so
+# the generated @g-digital/n8n-nodes-ead-factory package uses connector
+# framing instead of MCP-proxy framing — required for n8n verified review.
+n8n_connector_display_name: "EAD Factory"
+n8n_connector_description: "EAD Factory connector for n8n — Digital Trust services from EAD Trust for your n8n automations. Generate certified evidence (SHA-256 hashing, S3 upload, qualified TSP/DLT timestamping) and run full signature-request workflows. 9 operations. Maintained by g-digital by Garrigues — an eIDAS-qualified trust services provider."
