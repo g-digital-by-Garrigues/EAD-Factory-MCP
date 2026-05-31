@@ -57,47 +57,165 @@ Every channel ships the same MCP server contract; the tools and env-var configur
 
 ## Register the MCP in your client
 
-### Claude Code (CLI, recommended)
-
-```bash
-claude mcp add --scope user ead-factory -- npx -y @g-digital/mcp-ead-factory
-```
-
-You can then export the required env vars in your shell, or set them per-invocation. To inspect or remove:
-
-```bash
-claude mcp list
-claude mcp remove ead-factory
-```
-
-### Claude Desktop / Cursor / Windsurf / Cline / JetBrains / Zed
-
-Add the block below to your client's MCP configuration file (path varies by client and OS — see your client's documentation).
+### Claude Desktop
 
 ```json
 {
   "mcpServers": {
     "ead-factory": {
+      "args": [
+        "-y",
+        "@g-digital/mcp-ead-factory"
+      ],
       "command": "npx",
-      "args": ["-y", "@g-digital/mcp-ead-factory"],
       "env": {
         "API_BASE_URL": "",
-        "SIGNATURE_API_BASE_URL": "",
-        "OKTA_TOKEN_URL": "",
+        "FULL_FLOW_EMAIL_BASE": "",
+        "FULL_FLOW_FILE_PATH": "",
+        "HTTP_PORT": "",
         "OKTA_CLIENT_ID": "",
         "OKTA_CLIENT_SECRET": "<PASTE_OKTA_CLIENT_SECRET_HERE>",
         "OKTA_SCOPE": "",
-        "HTTP_PORT": "3000",
-        "POLL_INTERVAL_MS": "3000",
-        "POLL_MAX_ATTEMPTS": "20",
-        "TRANSPORT": "stdio",
-        "FULL_FLOW_EMAIL_BASE": "",
-        "FULL_FLOW_FILE_PATH": ""
+        "OKTA_TOKEN_URL": "",
+        "POLL_INTERVAL_MS": "",
+        "POLL_MAX_ATTEMPTS": "",
+        "SIGNATURE_API_BASE_URL": "",
+        "TRANSPORT": ""
       }
     }
   }
 }
 ```
+
+> Need credentials? See: https://eadtrust.example.com/onboarding
+
+### Claude Code (CLI)
+
+```json
+{
+  "mcpServers": {
+    "ead-factory": {
+      "args": [
+        "-y",
+        "@g-digital/mcp-ead-factory"
+      ],
+      "command": "npx",
+      "env": {
+        "API_BASE_URL": "",
+        "FULL_FLOW_EMAIL_BASE": "",
+        "FULL_FLOW_FILE_PATH": "",
+        "HTTP_PORT": "",
+        "OKTA_CLIENT_ID": "",
+        "OKTA_CLIENT_SECRET": "<PASTE_OKTA_CLIENT_SECRET_HERE>",
+        "OKTA_SCOPE": "",
+        "OKTA_TOKEN_URL": "",
+        "POLL_INTERVAL_MS": "",
+        "POLL_MAX_ATTEMPTS": "",
+        "SIGNATURE_API_BASE_URL": "",
+        "TRANSPORT": ""
+      }
+    }
+  }
+}
+```
+
+> Need credentials? See: https://eadtrust.example.com/onboarding
+
+### Cursor
+
+```json
+{
+  "mcpServers": {
+    "ead-factory": {
+      "args": [
+        "-y",
+        "@g-digital/mcp-ead-factory"
+      ],
+      "command": "npx",
+      "env": {
+        "API_BASE_URL": "",
+        "FULL_FLOW_EMAIL_BASE": "",
+        "FULL_FLOW_FILE_PATH": "",
+        "HTTP_PORT": "",
+        "OKTA_CLIENT_ID": "",
+        "OKTA_CLIENT_SECRET": "<PASTE_OKTA_CLIENT_SECRET_HERE>",
+        "OKTA_SCOPE": "",
+        "OKTA_TOKEN_URL": "",
+        "POLL_INTERVAL_MS": "",
+        "POLL_MAX_ATTEMPTS": "",
+        "SIGNATURE_API_BASE_URL": "",
+        "TRANSPORT": ""
+      }
+    }
+  }
+}
+```
+
+> Need credentials? See: https://eadtrust.example.com/onboarding
+
+### Windsurf
+
+```json
+{
+  "mcpServers": {
+    "ead-factory": {
+      "args": [
+        "-y",
+        "@g-digital/mcp-ead-factory"
+      ],
+      "command": "npx",
+      "env": {
+        "API_BASE_URL": "",
+        "FULL_FLOW_EMAIL_BASE": "",
+        "FULL_FLOW_FILE_PATH": "",
+        "HTTP_PORT": "",
+        "OKTA_CLIENT_ID": "",
+        "OKTA_CLIENT_SECRET": "<PASTE_OKTA_CLIENT_SECRET_HERE>",
+        "OKTA_SCOPE": "",
+        "OKTA_TOKEN_URL": "",
+        "POLL_INTERVAL_MS": "",
+        "POLL_MAX_ATTEMPTS": "",
+        "SIGNATURE_API_BASE_URL": "",
+        "TRANSPORT": ""
+      }
+    }
+  }
+}
+```
+
+> Need credentials? See: https://eadtrust.example.com/onboarding
+
+### Cline
+
+```json
+{
+  "mcpServers": {
+    "ead-factory": {
+      "args": [
+        "-y",
+        "@g-digital/mcp-ead-factory"
+      ],
+      "command": "npx",
+      "env": {
+        "API_BASE_URL": "",
+        "FULL_FLOW_EMAIL_BASE": "",
+        "FULL_FLOW_FILE_PATH": "",
+        "HTTP_PORT": "",
+        "OKTA_CLIENT_ID": "",
+        "OKTA_CLIENT_SECRET": "<PASTE_OKTA_CLIENT_SECRET_HERE>",
+        "OKTA_SCOPE": "",
+        "OKTA_TOKEN_URL": "",
+        "POLL_INTERVAL_MS": "",
+        "POLL_MAX_ATTEMPTS": "",
+        "SIGNATURE_API_BASE_URL": "",
+        "TRANSPORT": ""
+      }
+    }
+  }
+}
+```
+
+> Need credentials? See: https://eadtrust.example.com/onboarding
 
 ### VS Code
 
@@ -105,117 +223,112 @@ Add the block below to your client's MCP configuration file (path varies by clie
 {
   "servers": {
     "ead-factory": {
+      "args": [
+        "-y",
+        "@g-digital/mcp-ead-factory"
+      ],
       "command": "npx",
-      "args": ["-y", "@g-digital/mcp-ead-factory"],
       "env": {
         "API_BASE_URL": "",
-        "SIGNATURE_API_BASE_URL": "",
-        "OKTA_TOKEN_URL": "",
+        "FULL_FLOW_EMAIL_BASE": "",
+        "FULL_FLOW_FILE_PATH": "",
+        "HTTP_PORT": "",
         "OKTA_CLIENT_ID": "",
         "OKTA_CLIENT_SECRET": "<PASTE_OKTA_CLIENT_SECRET_HERE>",
         "OKTA_SCOPE": "",
-        "TRANSPORT": "stdio"
+        "OKTA_TOKEN_URL": "",
+        "POLL_INTERVAL_MS": "",
+        "POLL_MAX_ATTEMPTS": "",
+        "SIGNATURE_API_BASE_URL": "",
+        "TRANSPORT": ""
       }
     }
   }
 }
 ```
 
-### Docker (HTTP transport)
+> Need credentials? See: https://eadtrust.example.com/onboarding
 
-For containerised deployments (Cloud Run, Fargate, fly.io, on-prem Kubernetes), pull the image from Docker Hub and run with `TRANSPORT=http`:
-
-```bash
-docker run -d --name ead-factory \
-  -p 3000:3000 \
-  -e API_BASE_URL=https://api.pre.gcloudfactory.com/digital-trust \
-  -e SIGNATURE_API_BASE_URL=https://api.pre.gcloudfactory.com/digital-trust \
-  -e OKTA_TOKEN_URL=https://sso.garrigues.io.builders/oauth2/aus653dgdgTFL2mhw417/v1/token \
-  -e OKTA_CLIENT_ID=<your-client-id> \
-  -e OKTA_CLIENT_SECRET=<your-client-secret> \
-  -e OKTA_SCOPE=token \
-  -e TRANSPORT=http \
-  -e HTTP_PORT=3000 \
-  gdigital/ead-factory:latest
-```
-
-The container exposes `/mcp` (Okta Bearer auth required) and `/health` (unauthenticated) on port 3000. See [Remote deployment](#remote-deployment-http--bearer-auth) for the auth contract.
-
-**Behind a corporate TLS-inspection proxy** (PaloAlto, Netskope, Zscaler, etc.): mount your corporate CA bundle and set `NODE_EXTRA_CA_CERTS`, otherwise outbound HTTPS to Okta / EAD APIs fails with `self-signed certificate in certificate chain`:
-
-```bash
--v /path/to/corp-ca-bundle.pem:/etc/ssl/certs/corp-ca-bundle.pem:ro \
--e NODE_EXTRA_CA_CERTS=/etc/ssl/certs/corp-ca-bundle.pem
-```
-
-### Docker (stdio, spawned by an MCP client)
-
-For local desktop clients that want to spawn the MCP inside a container rather than via `npx`:
+### JetBrains
 
 ```json
 {
   "mcpServers": {
     "ead-factory": {
-      "command": "docker",
       "args": [
-        "run", "-i", "--rm",
-        "-e", "API_BASE_URL",
-        "-e", "SIGNATURE_API_BASE_URL",
-        "-e", "OKTA_TOKEN_URL",
-        "-e", "OKTA_CLIENT_ID",
-        "-e", "OKTA_CLIENT_SECRET",
-        "-e", "OKTA_SCOPE",
-        "-e", "TRANSPORT=stdio",
-        "gdigital/ead-factory:latest"
+        "-y",
+        "@g-digital/mcp-ead-factory"
       ],
+      "command": "npx",
       "env": {
         "API_BASE_URL": "",
-        "SIGNATURE_API_BASE_URL": "",
-        "OKTA_TOKEN_URL": "",
+        "FULL_FLOW_EMAIL_BASE": "",
+        "FULL_FLOW_FILE_PATH": "",
+        "HTTP_PORT": "",
         "OKTA_CLIENT_ID": "",
         "OKTA_CLIENT_SECRET": "<PASTE_OKTA_CLIENT_SECRET_HERE>",
-        "OKTA_SCOPE": "token"
+        "OKTA_SCOPE": "",
+        "OKTA_TOKEN_URL": "",
+        "POLL_INTERVAL_MS": "",
+        "POLL_MAX_ATTEMPTS": "",
+        "SIGNATURE_API_BASE_URL": "",
+        "TRANSPORT": ""
       }
     }
   }
 }
 ```
 
-## Bundled skills (Claude Code)
+> Need credentials? See: https://eadtrust.example.com/onboarding
 
-This package ships with two `/slash` commands for Claude Code under `.claude/commands/`:
+### Zed
 
-- `/create-internal-evidence` — guides the full evidence-creation flow (interactive or fast mode)
-- `/create-signature-request` — guides signature-request creation (guided, fast, or full-flow mode)
-
-To enable them, copy the markdown files from the installed package into your Claude Code commands directory:
-
-```bash
-# Global — available in all projects
-npm pack @g-digital/mcp-ead-factory --pack-destination /tmp
-mkdir -p ~/.claude/commands && tar -xzf /tmp/g-digital-mcp-ead-factory-*.tgz -C /tmp \
-  && cp /tmp/package/.claude/commands/*.md ~/.claude/commands/
+```json
+{
+  "mcpServers": {
+    "ead-factory": {
+      "args": [
+        "-y",
+        "@g-digital/mcp-ead-factory"
+      ],
+      "command": "npx",
+      "env": {
+        "API_BASE_URL": "",
+        "FULL_FLOW_EMAIL_BASE": "",
+        "FULL_FLOW_FILE_PATH": "",
+        "HTTP_PORT": "",
+        "OKTA_CLIENT_ID": "",
+        "OKTA_CLIENT_SECRET": "<PASTE_OKTA_CLIENT_SECRET_HERE>",
+        "OKTA_SCOPE": "",
+        "OKTA_TOKEN_URL": "",
+        "POLL_INTERVAL_MS": "",
+        "POLL_MAX_ATTEMPTS": "",
+        "SIGNATURE_API_BASE_URL": "",
+        "TRANSPORT": ""
+      }
+    }
+  }
+}
 ```
 
-Then restart Claude Code so the new commands are picked up.
+> Need credentials? See: https://eadtrust.example.com/onboarding
 
 ## Configuration
 
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `API_BASE_URL` | Yes | — | Evidence Manager API base URL |
-| `SIGNATURE_API_BASE_URL` | Yes | — | Signature Manager API base URL |
-| `OKTA_TOKEN_URL` | Yes | — | Okta token endpoint (client_credentials grant); used both for outbound API calls and for verifying inbound Bearer tokens in HTTP mode |
-| `OKTA_CLIENT_ID` | Yes | — | Okta client ID |
-| `OKTA_CLIENT_SECRET` | Yes | — | Okta client secret (treat as secret) |
-| `OKTA_SCOPE` | No | `token` | OAuth scope |
-| `TRANSPORT` | No | `stdio` | `stdio` for local clients, `http` for remote deployment with Bearer auth |
-| `HTTP_PORT` | No | `3000` | Port when `TRANSPORT=http` |
-| `POLL_INTERVAL_MS` | No | `3000` | Polling interval for evidence-status checks |
-| `POLL_MAX_ATTEMPTS` | No | `20` | Maximum polling attempts before timeout |
-| `FULL_FLOW_EMAIL_BASE` | Yes* | — | Base email used to derive participant emails (`user+signatory@domain`, etc.). *Only required for `create_signature_request` with `fullFlow=true` |
-| `FULL_FLOW_FILE_PATH` | Yes* | — | Default file path for full-flow demos. *Only required for `fullFlow=true` |
-
+| Name | Required | Secret | Description |
+| --- | --- | --- | --- |
+| `API_BASE_URL` | Yes | No | Evidence Manager API base URL |
+| `FULL_FLOW_EMAIL_BASE` | Yes | No | Full flow base email — used to compose participant emails (user+signatory@domain, etc.) |
+| `FULL_FLOW_FILE_PATH` | Yes | No | Full flow default file path |
+| `HTTP_PORT` | Yes | No | HTTP_PORT |
+| `OKTA_CLIENT_ID` | Yes | No | OKTA_CLIENT_ID |
+| `OKTA_CLIENT_SECRET` | Yes | Yes | OKTA_CLIENT_SECRET (See https://eadtrust.example.com/onboarding for credential acquisition.) |
+| `OKTA_SCOPE` | Yes | No | OKTA_SCOPE |
+| `OKTA_TOKEN_URL` | Yes | No | OAuth credentials (Okta client_credentials flow) Used both for calling Evidence Manager API and for verifying incoming Bearer tokens (HTTP mode) |
+| `POLL_INTERVAL_MS` | Yes | No | Polling configuration for evidence status |
+| `POLL_MAX_ATTEMPTS` | Yes | No | POLL_MAX_ATTEMPTS |
+| `SIGNATURE_API_BASE_URL` | Yes | No | Signature Manager API base URL |
+| `TRANSPORT` | Yes | No | Transport: "stdio" for local Claude Code, "http" for remote deployment with auth |
 ### Environment URLs
 
 #### AWS
