@@ -1,6 +1,6 @@
 # EAD Factory — n8n connector
 
-> Connect to EAD Factory to generate certified digital evidence and manage qualified signature request workflows.
+> Connect to EAD Factory to generate certified digital evidence and manage signature request workflows.
 
 Install this connector and use EAD Factory operations as steps inside any n8n workflow. Each operation maps to one capability of the underlying EAD Factory platform.
 
@@ -35,15 +35,15 @@ See the full lifecycle guide at: https://github.com/g-digital-by-Garrigues/MCP_M
 
 | Operation | Description |
 |---|---|
-| `generate_evidence` | Hashes a local file, registers it as certified evidence, uploads it to S3, and returns the completed evidence details. |
-| `get_evidence` | Retrieves full details of an evidence record by its ID, including status, timestamps, and custody information. |
-| `create_signature_request` | Creates a new signature request, optionally running the full flow to add participants and activate it automatically. |
-| `add_document_to_signature_request` | Attaches a document to an existing signature request and uploads the file content via a secure presigned URL. |
-| `add_signatory_to_document` | Adds a signatory to a document inside a draft signature request and returns the new signatory ID. |
-| `add_observer_to_document` | Adds an observer to a document inside a draft signature request and returns the new observer ID. |
-| `add_validator_to_signatory` | Assigns a validator to a signatory within a document and returns the created validator details. |
-| `activate_signature_request` | Moves a signature request from draft to active, triggering notification emails to all signatories. |
-| `get_signature_request` | Retrieves full details of a signature request by ID, including status, documents, and all participants. |
+| `generate_evidence` | Hash a local file, register it as certified evidence, upload it to S3, and wait until processing completes. |
+| `get_evidence` | Retrieve full details of an evidence record by its ID, including status, timestamps, and custody info. |
+| `create_signature_request` | Create a new signature request, optionally running the full setup flow with document, signatory, and activation. |
+| `add_document_to_signature_request` | Attach a document to an existing signature request and upload its file content to secure storage. |
+| `add_signatory_to_document` | Add a signatory to a document within a draft signature request and return the created signatory ID. |
+| `add_observer_to_document` | Add an observer to a document within a draft signature request and return the created observer ID. |
+| `add_validator_to_signatory` | Add a validator to a signatory on a document and return the created validator ID. |
+| `activate_signature_request` | Activate a draft signature request, triggering status change to ACTIVE and notifying all signatories. |
+| `get_signature_request` | Retrieve full details of a signature request by ID, including status, documents, and participants. |
 
 ## Credentials
 
@@ -52,18 +52,18 @@ This node requires a "EAD Factory API" credential with the following fields:
 | Field | Description | Secret? |
 |---|---|---|
 | `API Base URL` | Base URL of the EAD Factory REST API. Leave blank only if you know your environment uses a different endpoint. | no |
-| `API_BASE_URL` | The base URL of your EAD Factory Evidence Manager API endpoint. | no |
-| `FULL_FLOW_EMAIL_BASE` | The base email address used to generate participant addresses in full-flow signature requests. | no |
-| `FULL_FLOW_FILE_PATH` | The default local file path used when running a full-flow signature request automatically. | no |
-| `HTTP_PORT` | The port number the MCP server listens on when running in HTTP transport mode. | no |
-| `OKTA_CLIENT_ID` | The client ID of your Okta application, obtained from your EAD Factory onboarding credentials. | no |
-| `OKTA_CLIENT_SECRET` | The client secret of your Okta application, obtained from your EAD Factory onboarding credentials. | yes |
-| `OKTA_SCOPE` | The OAuth scope string required by your Okta application for EAD Factory API access. | no |
-| `OKTA_TOKEN_URL` | The Okta token endpoint URL used to obtain access tokens via the client credentials flow. | no |
+| `API_BASE_URL` | The base URL for the Evidence Manager API provided by EAD Factory. | no |
+| `FULL_FLOW_EMAIL_BASE` | Base email address used to generate participant addresses in the full signature flow. | no |
+| `FULL_FLOW_FILE_PATH` | Default local file path used when running the full signature flow. | no |
+| `HTTP_PORT` | Port number the MCP server listens on when running in HTTP transport mode. | no |
+| `OKTA_CLIENT_ID` | Client ID for your Okta application, obtained from your EAD Factory onboarding credentials. | no |
+| `OKTA_CLIENT_SECRET` | Client secret for your Okta application, obtained from your EAD Factory onboarding credentials. | yes |
+| `OKTA_SCOPE` | OAuth scope(s) requested when authenticating with Okta for EAD Factory API access. | no |
+| `OKTA_TOKEN_URL` | Okta token endpoint URL used to obtain access tokens via the client credentials flow. | no |
 | `POLL_INTERVAL_MS` | Milliseconds to wait between status checks when polling for evidence completion. | no |
-| `POLL_MAX_ATTEMPTS` | Maximum number of polling attempts before giving up on an evidence status check. | no |
-| `SIGNATURE_API_BASE_URL` | The base URL of your EAD Factory Signature Manager API endpoint. | no |
-| `TRANSPORT` | Set to stdio for local use or http for remote deployment with bearer token authentication. | no |
+| `POLL_MAX_ATTEMPTS` | Maximum number of status polling attempts before the evidence operation times out. | no |
+| `SIGNATURE_API_BASE_URL` | The base URL for the Signature Manager API provided by EAD Factory. | no |
+| `TRANSPORT` | Set to stdio for local use or http for remote deployment with Bearer token authentication. | no |
 > **Need credentials?** Sign up or log in at [https://eadtrust.example.com/onboarding](https://eadtrust.example.com/onboarding).
 
 ## Use as an AI Agent tool
