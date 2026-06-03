@@ -1,0 +1,49 @@
+{
+  "name": "@g-digital/n8n-nodes-ead-factory",
+  "version": "1.0.14",
+  "description": "Connect to EAD Factory to generate certified digital evidence and manage qualified signature request workflows.",
+  "license": "MIT",
+  "homepage": "https://github.com/g-digital-by-Garrigues/EAD-Factory-MCP",
+  "author": { "name": "g-digital by Garrigues", "email": "g-digital@garrigues.com" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/g-digital-by-Garrigues/EAD-Factory-MCP",
+    "directory": "n8n-node"
+  },
+  "keywords": [
+    "n8n",
+    "n8n-community-node-package",
+    "digital-trust",
+    "ead-factory"
+  ],
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsup && copyfiles -u 0 \"nodes/**/*.png\" \"nodes/**/*.json\" dist",
+    "lint": "eslint nodes credentials --ext .ts",
+    "prepublishOnly": "npm run build"
+  },
+  "files": [
+    "dist"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "strict": true,
+    "credentials": [
+      "dist/credentials/EadFactoryApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/EadFactory/EadFactory.node.js"
+    ]
+  },
+  "dependencies": {},
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "copyfiles": "^2.4.1",
+    "n8n-workflow": "^1.79.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  }
+}
