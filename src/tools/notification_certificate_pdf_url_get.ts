@@ -32,7 +32,7 @@ export const notification_certificate_pdf_url_get = defineTool({
     const token = ctx.auth?.token ?? "";
     const sdkClient = createClient(
       createConfig({
-        baseUrl: process.env.MCP_API_BASE_URL ?? "https://api.gcloudfactory.com",
+        baseUrl: process.env.MCP_API_BASE_URL_NOTIFICATION ?? process.env.MCP_API_BASE_URL ?? "https://api.gcloudfactory.com/notifications",
         headers: {
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),

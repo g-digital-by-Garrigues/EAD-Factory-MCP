@@ -34,7 +34,7 @@ export const add_observer_to_document = defineTool({
     const token = ctx.auth?.token ?? "";
     const sdkClient = createClient(
       createConfig({
-        baseUrl: process.env.MCP_API_BASE_URL ?? "https://api.gcloudfactory.com",
+        baseUrl: process.env.MCP_API_BASE_URL_SIGNATURE ?? process.env.MCP_API_BASE_URL ?? "https://api.gcloudfactory.com/signature-manager",
         headers: {
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),
