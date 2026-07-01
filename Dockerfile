@@ -1,53 +1,44 @@
-# ─── Build stage ──────────────────────────────────────────────────────────────
-FROM node:22-alpine AS builder
-
+FROM node:22-slim AS base
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci
+FROM base AS deps
+COPY package.json package-lock.json* ./
+RUN npm ci --omit=dev
 
-COPY tsconfig.json ./
-COPY src/ ./src/
+FROM base AS build
+COPY . .
+RUN npm ci
 RUN npm run build
 
-# ─── Production stage ─────────────────────────────────────────────────────────
-FROM node:22-alpine AS runner
-
-# Refresh the Alpine package index and upgrade ALL OS packages to the latest
-# available version. Without this, the cached node:22-alpine layer pulls in
-# whatever packages were current at image-build time on the upstream side,
-# which Docker Scout flags as "Fixable critical or high vulnerabilities
-# found" once new CVEs are disclosed and patched. --no-cache keeps the
-# index out of the layer (smaller image, no stale state).
-RUN apk update && apk upgrade --no-cache
-
-# Update the bundled npm to the latest published version so its own
-# transitive deps (notably picomatch — vulnerable to CVE-2026-33671 ReDoS
-# via extglob quantifiers in versions <2.3.2 / <3.0.2 / <4.0.4) are at
-# the patched releases. node:22-alpine ships with npm 10.x which still
-# pulls in vulnerable picomatch; npm @ latest pulls picomatch >= 4.0.4.
-# Without this step Docker Scout flags the final image HIGH even though
-# none of OUR direct prod deps reference picomatch.
-RUN npm install -g npm@latest && npm cache clean --force
-
-ENV NODE_ENV=production
-ENV TRANSPORT=http
-ENV HTTP_PORT=3000
-
+FROM node:22-slim AS runner
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci --omit=dev && npm cache clean --force
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 mcpuser
 
-COPY --from=builder /app/dist ./dist
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/package.json ./package.json
 
-# Non-root user for security
-RUN addgroup -S mcp && adduser -S mcp -G mcp
-USER mcp
+USER mcpuser
 
-EXPOSE 3000
+# Force HTTP transport inside the container so the HEALTHCHECK below
+# (which probes http://localhost:8080/healthz) can actually reach a listener.
+# src/core/transport/select.ts defaults to stdio when MCP_TRANSPORT is unset,
+# and stdio never binds any port — making the HEALTHCHECK impossible to
+# satisfy. The MCP_Market_Distribution pipeline's Track A Layer 3 gate
+# expects the container to reach HEALTHCHECK=healthy within 60s.
+ENV MCP_TRANSPORT=http
+ENV PORT=8080
+# Bind all interfaces inside the container (host default is 127.0.0.1); the
+# container runtime provides network isolation. Required so EXPOSE/HEALTHCHECK work.
+ENV MCP_HTTP_HOST=0.0.0.0
+ENV NODE_ENV=production
+
+EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD wget -qO- http://localhost:3000/health || exit 1
+  CMD node -e "fetch('http://localhost:' + (process.env.PORT || 8080) + '/healthz').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
 
-CMD ["node", "dist/cli.js"]
+CMD ["node", "dist/server.js"]

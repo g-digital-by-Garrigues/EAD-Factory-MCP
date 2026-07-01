@@ -1,0 +1,664 @@
+{
+  "schema_status": "provisional-pending-OQ-G",
+  "resources": [
+    "evidence",
+    "signature",
+    "notification"
+  ],
+  "tools": [
+    {
+      "name": "evidence_case_file_delete_bulk",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "case_file_delete_bulk",
+          "displayName": "Case File Delete Bulk"
+        }
+      }
+    },
+    {
+      "name": "evidence_case_file_search",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "case_file_search",
+          "displayName": "Case File Search"
+        }
+      }
+    },
+    {
+      "name": "evidence_case_file_create",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "case_file_create",
+          "displayName": "Case File Create"
+        }
+      }
+    },
+    {
+      "name": "evidence_case_file_update_bulk",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "case_file_update_bulk",
+          "displayName": "Case File Update Bulk"
+        }
+      }
+    },
+    {
+      "name": "evidence_case_file_get",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "case_file_get",
+          "displayName": "Case File Get"
+        }
+      }
+    },
+    {
+      "name": "evidence_case_file_update",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "case_file_update",
+          "displayName": "Case File Update"
+        }
+      }
+    },
+    {
+      "name": "evidence_case_file_relationship_assign",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "case_file_relationship_assign",
+          "displayName": "Case File Relationship Assign"
+        }
+      }
+    },
+    {
+      "name": "evidence_case_file_report_preview",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "case_file_report_preview",
+          "displayName": "Case File Report Preview"
+        }
+      }
+    },
+    {
+      "name": "evidence_case_file_report_generate",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "case_file_report_generate",
+          "displayName": "Case File Report Generate"
+        }
+      }
+    },
+    {
+      "name": "evidence_case_file_report_update",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "case_file_report_update",
+          "displayName": "Case File Report Update"
+        }
+      }
+    },
+    {
+      "name": "evidence_case_file_report_pdf_url_get",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "case_file_report_pdf_url_get",
+          "displayName": "Case File Report Pdf Url Get"
+        }
+      }
+    },
+    {
+      "name": "evidence_case_file_report_zip_url_get",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "case_file_report_zip_url_get",
+          "displayName": "Case File Report Zip Url Get"
+        }
+      }
+    },
+    {
+      "name": "evidence_case_file_status_update",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "case_file_status_update",
+          "displayName": "Case File Status Update"
+        }
+      }
+    },
+    {
+      "name": "evidence_report_delete",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "report_delete",
+          "displayName": "Report Delete"
+        }
+      }
+    },
+    {
+      "name": "evidence_group_evidence_register",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "group_evidence_register",
+          "displayName": "Group Evidence Register"
+        }
+      }
+    },
+    {
+      "name": "evidence_group_evidence_get",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "group_evidence_get",
+          "displayName": "Group Evidence Get"
+        }
+      }
+    },
+    {
+      "name": "evidence_group_evidence_delete",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "group_evidence_delete",
+          "displayName": "Group Evidence Delete"
+        }
+      }
+    },
+    {
+      "name": "evidence_group_evidence_download_url_create",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "group_evidence_download_url_create",
+          "displayName": "Group Evidence Download Url Create"
+        }
+      }
+    },
+    {
+      "name": "evidence_group_evidence_upload_url_create",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "group_evidence_upload_url_create",
+          "displayName": "Group Evidence Upload Url Create"
+        }
+      }
+    },
+    {
+      "name": "evidence_thumbnail_url_get",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "thumbnail_url_get",
+          "displayName": "Thumbnail Url Get"
+        }
+      }
+    },
+    {
+      "name": "evidence_search",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "search",
+          "displayName": "Search"
+        }
+      }
+    },
+    {
+      "name": "generate_evidence",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "generate_evidence",
+          "displayName": "Generate Evidence"
+        }
+      }
+    },
+    {
+      "name": "evidence_update_bulk",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "update_bulk",
+          "displayName": "Update Bulk"
+        }
+      }
+    },
+    {
+      "name": "get_evidence",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "get_evidence",
+          "displayName": "Get Evidence"
+        }
+      }
+    },
+    {
+      "name": "evidence_delete",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "delete",
+          "displayName": "Delete"
+        }
+      }
+    },
+    {
+      "name": "evidence_update",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "update",
+          "displayName": "Update"
+        }
+      }
+    },
+    {
+      "name": "evidence_download_url_create",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "download_url_create",
+          "displayName": "Download Url Create"
+        }
+      }
+    },
+    {
+      "name": "evidence_upload_url_create",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "upload_url_create",
+          "displayName": "Upload Url Create"
+        }
+      }
+    },
+    {
+      "name": "evidence_temp_file_upload_url_create",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "temp_file_upload_url_create",
+          "displayName": "Temp File Upload Url Create"
+        }
+      }
+    },
+    {
+      "name": "evidence_multipart_upload_start",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "multipart_upload_start",
+          "displayName": "Multipart Upload Start"
+        }
+      }
+    },
+    {
+      "name": "evidence_group_delete_bulk",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "group_delete_bulk",
+          "displayName": "Group Delete Bulk"
+        }
+      }
+    },
+    {
+      "name": "evidence_group_create",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "group_create",
+          "displayName": "Group Create"
+        }
+      }
+    },
+    {
+      "name": "evidence_group_get",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "group_get",
+          "displayName": "Group Get"
+        }
+      }
+    },
+    {
+      "name": "evidence_group_discard",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "group_discard",
+          "displayName": "Group Discard"
+        }
+      }
+    },
+    {
+      "name": "evidence_group_update",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "group_update",
+          "displayName": "Group Update"
+        }
+      }
+    },
+    {
+      "name": "evidence_group_close",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "group_close",
+          "displayName": "Group Close"
+        }
+      }
+    },
+    {
+      "name": "evidence_group_search",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "group_search",
+          "displayName": "Group Search"
+        }
+      }
+    },
+    {
+      "name": "evidence_group_update_bulk",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "group_update_bulk",
+          "displayName": "Group Update Bulk"
+        }
+      }
+    },
+    {
+      "name": "evidence_report_pdf_url_get",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "report_pdf_url_get",
+          "displayName": "Report Pdf Url Get"
+        }
+      }
+    },
+    {
+      "name": "evidence_report_zip_url_get",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "report_zip_url_get",
+          "displayName": "Report Zip Url Get"
+        }
+      }
+    },
+    {
+      "name": "create_signature_request",
+      "n8n": {
+        "resource": "signature",
+        "operation": {
+          "value": "create_signature_request",
+          "displayName": "Create Signature Request"
+        }
+      }
+    },
+    {
+      "name": "add_document_to_signature_request",
+      "n8n": {
+        "resource": "signature",
+        "operation": {
+          "value": "add_document_to_signature_request",
+          "displayName": "Add Document To Signature Request"
+        }
+      }
+    },
+    {
+      "name": "add_signatory_to_document",
+      "n8n": {
+        "resource": "signature",
+        "operation": {
+          "value": "add_signatory_to_document",
+          "displayName": "Add Signatory To Document"
+        }
+      }
+    },
+    {
+      "name": "add_validator_to_signatory",
+      "n8n": {
+        "resource": "signature",
+        "operation": {
+          "value": "add_validator_to_signatory",
+          "displayName": "Add Validator To Signatory"
+        }
+      }
+    },
+    {
+      "name": "add_observer_to_document",
+      "n8n": {
+        "resource": "signature",
+        "operation": {
+          "value": "add_observer_to_document",
+          "displayName": "Add Observer To Document"
+        }
+      }
+    },
+    {
+      "name": "activate_signature_request",
+      "n8n": {
+        "resource": "signature",
+        "operation": {
+          "value": "activate_signature_request",
+          "displayName": "Activate Signature Request"
+        }
+      }
+    },
+    {
+      "name": "get_signature_request",
+      "n8n": {
+        "resource": "signature",
+        "operation": {
+          "value": "get_signature_request",
+          "displayName": "Get Signature Request"
+        }
+      }
+    },
+    {
+      "name": "signature_request_list",
+      "n8n": {
+        "resource": "signature",
+        "operation": {
+          "value": "request_list",
+          "displayName": "Request List"
+        }
+      }
+    },
+    {
+      "name": "signature_request_cancel",
+      "n8n": {
+        "resource": "signature",
+        "operation": {
+          "value": "request_cancel",
+          "displayName": "Request Cancel"
+        }
+      }
+    },
+    {
+      "name": "signature_certificate_generate",
+      "n8n": {
+        "resource": "signature",
+        "operation": {
+          "value": "certificate_generate",
+          "displayName": "Certificate Generate"
+        }
+      }
+    },
+    {
+      "name": "signature_coordinate_set",
+      "n8n": {
+        "resource": "signature",
+        "operation": {
+          "value": "coordinate_set",
+          "displayName": "Coordinate Set"
+        }
+      }
+    },
+    {
+      "name": "notification_request_create",
+      "n8n": {
+        "resource": "notification",
+        "operation": {
+          "value": "request_create",
+          "displayName": "Request Create"
+        }
+      }
+    },
+    {
+      "name": "notification_request_send",
+      "n8n": {
+        "resource": "notification",
+        "operation": {
+          "value": "request_send",
+          "displayName": "Request Send"
+        }
+      }
+    },
+    {
+      "name": "notification_request_status",
+      "n8n": {
+        "resource": "notification",
+        "operation": {
+          "value": "request_status",
+          "displayName": "Request Status"
+        }
+      }
+    },
+    {
+      "name": "notification_receiver_add",
+      "n8n": {
+        "resource": "notification",
+        "operation": {
+          "value": "receiver_add",
+          "displayName": "Receiver Add"
+        }
+      }
+    },
+    {
+      "name": "notification_document_add",
+      "n8n": {
+        "resource": "notification",
+        "operation": {
+          "value": "document_add",
+          "displayName": "Document Add"
+        }
+      }
+    },
+    {
+      "name": "notification_document_upload_url_create",
+      "n8n": {
+        "resource": "notification",
+        "operation": {
+          "value": "document_upload_url_create",
+          "displayName": "Document Upload Url Create"
+        }
+      }
+    },
+    {
+      "name": "notification_document_download_url_create",
+      "n8n": {
+        "resource": "notification",
+        "operation": {
+          "value": "document_download_url_create",
+          "displayName": "Document Download Url Create"
+        }
+      }
+    },
+    {
+      "name": "notification_certificate_generate",
+      "n8n": {
+        "resource": "notification",
+        "operation": {
+          "value": "certificate_generate",
+          "displayName": "Certificate Generate"
+        }
+      }
+    },
+    {
+      "name": "notification_certificate_pdf_url_get",
+      "n8n": {
+        "resource": "notification",
+        "operation": {
+          "value": "certificate_pdf_url_get",
+          "displayName": "Certificate Pdf Url Get"
+        }
+      }
+    },
+    {
+      "name": "evidence_create_sealed",
+      "n8n": {
+        "resource": "evidence",
+        "operation": {
+          "value": "evidence_create_sealed",
+          "displayName": "Evidence Create Sealed"
+        }
+      }
+    },
+    {
+      "name": "signature_request_full",
+      "n8n": {
+        "resource": "signature",
+        "operation": {
+          "value": "signature_request_full",
+          "displayName": "Signature Request Full"
+        }
+      }
+    },
+    {
+      "name": "ead_factory_help",
+      "n8n": {
+        "exclude": true
+      }
+    }
+  ],
+  "fields": [
+    {
+      "path": "evidence_create_sealed.evidences[].file",
+      "n8n": {
+        "binary": "property"
+      }
+    },
+    {
+      "path": "signature_request_full.documents[].file",
+      "n8n": {
+        "binary": "property"
+      }
+    }
+  ],
+  "mcpOnlyConcepts": {
+    "tasks": {
+      "treatment": "adapter-blocks-internally",
+      "note": "MCP Tasks (pollable tools) have no n8n async-task equivalent. The adapter calls the tool and polls to completion internally before returning to the node — the same behavior the SDK's own taskSupport:'optional' path already gives a non-task-aware client. Pollable tools still resolve to a normal resource+operation (Story 8.1), never excluded for this reason alone."
+    },
+    "authFailSoft": {
+      "treatment": "no-n8n-equivalent",
+      "note": "MCP's missing-credential fail-soft (boot + tools/list, clear error only on call) has no n8n equivalent — n8n's own credential system requires credentials configured before a node can execute at all. The adapter's native credential validation supersedes fail-soft entirely; no adapter-side accommodation is needed."
+    },
+    "toolAnnotations": {
+      "treatment": "pass-through",
+      "note": "Spec-compliant tool annotations (destructiveHint/readOnlyHint/idempotentHint, Epic 4) are informational, not exclusionary — the adapter may use them for its own UI treatment (e.g. a confirmation prompt on a destructive operation), but this project makes no assumption about how; they are not a reason to n8nExclude a tool."
+    }
+  }
+}
