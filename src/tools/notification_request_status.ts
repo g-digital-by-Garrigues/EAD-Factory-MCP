@@ -16,7 +16,7 @@ const inputSchema = applyFieldGlosses(rawInputSchema, {"caseFileId":"MANDATORY. 
 
 export const notification_request_status = defineTool({
   name: "notification_request_status",
-  description: "Searches notifications, optionally filtered by requestId and/or delivery state — the closest equivalent to "checking a request's status": a request fans out into one notification per receiver, each with its own state history, so this returns every notification matching the filter with its current state. Omit requestId to search across every request. Requires: notification_request_create → requestId (if filtering to one request).",
+  description: "Searches notifications, optionally filtered by requestId and/or delivery state — the closest equivalent to \"checking a request's status\": a request fans out into one notification per receiver, each with its own state history, so this returns every notification matching the filter with its current state. Omit requestId to search across every request. Requires: notification_request_create → requestId (if filtering to one request).",
   inputSchema,
   outputSchema: zNotificationSearchResponse,
   annotations: {
