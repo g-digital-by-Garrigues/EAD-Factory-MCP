@@ -45,7 +45,7 @@ export type { SafeDownloadOptions } from "./safe-fetch.js";
 export { safeDownload } from "./safe-fetch.js";
 export type { ServerConfig } from "./server.js";
 // Server wiring
-export { createServer } from "./server.js";
+export { createServer, NON_OBJECT_SCHEMA_WRAPPER_KEY } from "./server.js";
 export type { TaskState, TaskStatus } from "./tasks/index.js";
 // Tasks
 export { generateTaskId, InMemoryTaskStore, taskStore } from "./tasks/index.js";

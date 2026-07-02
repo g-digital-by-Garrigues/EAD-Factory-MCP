@@ -675,9 +675,25 @@ function isMcpError(val: unknown): boolean {
   );
 }
 
-function extractZodShape(schema: ToolSpec["inputSchema"]): ZodRawShape {
+/**
+ * Every generated tool's `inputSchema` is always a `z.object({...})` (`tool.ts.hbs:13`),
+ * but `outputSchema` can legitimately be a bare `z.array`/`z.record`/`z.intersection` at
+ * the top level — Hey API infers these for several real EAD Factory response shapes
+ * (list/search endpoints, free-form report responses, discriminated-union collections).
+ * The MCP protocol's own `structuredContent` type is object-shaped (`Record<string,
+ * unknown>` — never a bare array), so any non-`ZodObject` schema must be wrapped under a
+ * named key for both what's advertised in `tools/list` AND the runtime value actually
+ * returned — `buildMcpResult`'s `structuredContent: result` must be wrapped with the
+ * SAME key the tool's `execute()` return value uses (see `tool.ts.hbs`'s
+ * `outputSchemaIsObject`-gated return statement) or the SDK's `validateToolOutput`
+ * throws `expected <inner>, received undefined` at the wrapper key, 100% of the time
+ * (found via live EAD Factory testing, Story 10.1).
+ */
+export const NON_OBJECT_SCHEMA_WRAPPER_KEY = "data";
+
+export function extractZodShape(schema: ToolSpec["inputSchema"]): ZodRawShape {
   if (schema instanceof z.ZodObject) {
     return schema.shape as ZodRawShape;
   }
-  return { _input: schema } as ZodRawShape;
+  return { [NON_OBJECT_SCHEMA_WRAPPER_KEY]: schema } as ZodRawShape;
 }
