@@ -19,11 +19,38 @@ import {
 import { zSignatureSigningObjectConfigurationSigningTypes } from "../api/zod.gen.js";
 import { defineTool, FileInput } from "../core/index.js";
 
+// Matches zSignatureAddSignatoryCoordinatesRequestModel exactly (dist-repos/ead-factory/
+// src/api/zod.gen.ts): x/y/page are all REQUIRED within each coordinate entry, but the
+// coordinates array itself is optional on the signatory (Story 10.3 — previously this
+// tool had no way to set placement at all, forcing a separate signature_coordinate_set
+// call after every add for any PDF requiring explicit placement).
+const coordinateInput = z.object({
+  x: z.number().describe("Horizontal position on the page, in points from the left edge."),
+  y: z.number().describe("Vertical position on the page, in points from the bottom edge."),
+  page: z.number().int().describe("1-indexed page number the signature appears on."),
+});
+
 const signatoryInput = z.object({
   name: z.string().min(1),
   surnames: z.string().optional(),
   email: z.string().email(),
   phone: z.string().optional(),
+  coordinates: z
+    .array(coordinateInput)
+    .optional()
+    .describe(
+      "On-page signature placement(s). Omit to let EAD Factory auto-position the signature; " +
+        "provide when the document requires explicit placement (matches signature_coordinate_set's " +
+        "shape — setting this here avoids a separate follow-up call).",
+    ),
+  sequence: z
+    .number()
+    .int()
+    .optional()
+    .describe(
+      "Signing order among this document's signatories, if sequential signing is required.",
+    ),
+  uniqueValidator: z.boolean().optional(),
 });
 
 const documentInput = z.object({
@@ -165,6 +192,11 @@ export const signature_request_full = defineTool({
             email: signatory.email,
             ...(signatory.surnames ? { surnames: signatory.surnames } : {}),
             ...(signatory.phone ? { phone: signatory.phone } : {}),
+            ...(signatory.coordinates ? { coordinates: signatory.coordinates } : {}),
+            ...(signatory.sequence !== undefined ? { sequence: signatory.sequence } : {}),
+            ...(signatory.uniqueValidator !== undefined
+              ? { uniqueValidator: signatory.uniqueValidator }
+              : {}),
             // biome-ignore lint/suspicious/noExplicitAny: generated SDK body type — shape validated by zod at generation time
           } as any,
         });
@@ -191,8 +223,13 @@ export const signature_request_full = defineTool({
         path: { signatureRequestId },
       });
       if (activateResponse.error !== undefined) {
+        // Story 10.3: include the already-created resource ids — documents/signatories
+        // (and the signature request itself) were successfully created before this
+        // failure; without these ids the caller has to re-discover them via
+        // signature_request_list to resume or clean up.
         throw new Error(
-          `signature_request_full: activate failed — ${JSON.stringify(activateResponse.error)}`,
+          `signature_request_full: activate failed for signatureRequestId '${signatureRequestId}' ` +
+            `(documents already created: ${JSON.stringify(documentResults)}) — ${JSON.stringify(activateResponse.error)}`,
         );
       }
     }

@@ -31,7 +31,7 @@ bundled_skills:
   - create-internal-evidence.md
   - create-signature-request.md
   - create-notification-request.md
-# Static tool inventory (63 tools — must equal toolsAllowList.length)
+# Static tool inventory (64 tools — must equal toolsAllowList.length)
 tools:
   - name: evidence_case_file_delete_bulk
     description: "Delete bulk case files"
@@ -135,6 +135,8 @@ tools:
     description: "Generates the well-signed appearance certificate document for a signature request. Use once every signatory has signed (check with get_signature_request). Requires: create_signature_request → signatureRequestId. Unlike EAD Enterprise's equivalent tool (a GET that polls an already-generated URL), this triggers generation and returns the result in the same call."
   - name: signature_coordinate_set
     description: "Sets the on-page (x, y, page) coordinates where a signatory's signature appears on a document. Use after add_signatory_to_document if the signature placement needs to be explicit rather than auto-positioned. Requires: create_signature_request → signatureRequestId, add_document_to_signature_request → documentId, add_signatory_to_document → signatoryId."
+  - name: signature_document_download_url_get
+    description: "Retrieves the download link for the FINAL, well-signed version of a document — the actual signed file, once every signatory has signed. Requires: create_signature_request → signatureRequestId, add_document_to_signature_request → documentId. Use get_signature_request first to confirm signing is complete before calling this. Not to be confused with signature_certificate_generate, which produces a separate appearance certificate document, not the signed document itself."
   - name: notification_request_create
     description: "Creates a new notification request (draft) — the top-level container for receivers and attachments in a certified-notification flow. Use this first, before any other Notification-manager tool. No prerequisites. Set `autosend: true` to also send immediately on activation of the first receiver batch, or leave it false to add receivers/documents over several calls before calling notification_request_send yourself. Returns requestId and one notificationId per receiver already on the request (if any were included inline)."
   - name: notification_request_send
