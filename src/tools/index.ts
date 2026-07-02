@@ -50,6 +50,7 @@ export { signature_request_list } from "./signature_request_list.js";
 export { signature_request_cancel } from "./signature_request_cancel.js";
 export { signature_certificate_generate } from "./signature_certificate_generate.js";
 export { signature_coordinate_set } from "./signature_coordinate_set.js";
+export { signature_document_download_url_get } from "./signature_document_download_url_get.js";
 export { notification_request_create } from "./notification_request_create.js";
 export { notification_request_send } from "./notification_request_send.js";
 export { notification_request_status } from "./notification_request_status.js";

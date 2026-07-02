@@ -223,10 +223,25 @@ export class UpstreamHttpError extends Error {
     } catch {
       body = null;
     }
+    return UpstreamHttpError.fromParsedError(res.status, body, operation);
+  }
 
+  /**
+   * Story 10.2: `fromResponse` above requires an UNCONSUMED `Response` (it calls
+   * `res.json()` itself). But by the time a generated tool's error branch runs
+   * (`tool.ts.hbs`), Hey API's `@hey-api/client-fetch` has ALREADY consumed the
+   * response body to populate `response.error` — the SDK function's return value is
+   * `{ data, error, request, response }` where `response: Response`'s body stream is
+   * spent, but `response.response.status` (no body read needed) and `response.error`
+   * (the pre-parsed body) are both still available. This variant accepts an
+   * ALREADY-PARSED body instead of a raw `Response` to parse itself — same field-error/
+   * message/code extraction logic, just skipping the redundant (and impossible, on an
+   * already-consumed stream) `res.json()` call.
+   */
+  static fromParsedError(status: number, body: unknown, operation: string): UpstreamHttpError {
     let fieldErrors: Record<string, string> | undefined;
     if (
-      res.status === 422 &&
+      status === 422 &&
       body !== null &&
       typeof body === "object" &&
       "errors" in (body as object)
@@ -243,13 +258,13 @@ export class UpstreamHttpError extends Error {
     const message =
       typeof body === "object" && body !== null && "message" in (body as object)
         ? String((body as { message: unknown }).message)
-        : `${operation} returned HTTP ${res.status}`;
+        : `${operation} returned HTTP ${status}`;
 
     const code =
       typeof body === "object" && body !== null && "code" in (body as object)
         ? String((body as { code: unknown }).code)
         : undefined;
 
-    return new UpstreamHttpError(res.status, message, fieldErrors, code);
+    return new UpstreamHttpError(status, message, fieldErrors, code);
   }
 }

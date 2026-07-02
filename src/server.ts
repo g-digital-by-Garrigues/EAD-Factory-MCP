@@ -53,6 +53,7 @@ import { signature_request_list } from "./tools/signature_request_list.js";
 import { signature_request_cancel } from "./tools/signature_request_cancel.js";
 import { signature_certificate_generate } from "./tools/signature_certificate_generate.js";
 import { signature_coordinate_set } from "./tools/signature_coordinate_set.js";
+import { signature_document_download_url_get } from "./tools/signature_document_download_url_get.js";
 import { notification_request_create } from "./tools/notification_request_create.js";
 import { notification_request_send } from "./tools/notification_request_send.js";
 import { notification_request_status } from "./tools/notification_request_status.js";
@@ -121,6 +122,7 @@ signature_request_list,
 signature_request_cancel,
 signature_certificate_generate,
 signature_coordinate_set,
+signature_document_download_url_get,
 notification_request_create,
 notification_request_send,
 notification_request_status,
