@@ -16,7 +16,7 @@ const inputSchema = applyFieldGlosses(rawInputSchema, {"caseFileId":"MANDATORY. 
 
 export const evidence_case_file_create = defineTool({
   name: "evidence_case_file_create",
-  description: "Creates a new case file — the top-level container for evidence groups, evidence, and reports. Use this first, before any other Evidence-manager tool. No prerequisites. Example: evidence_case_file_create({ name: 'Q1 2026 audit' }) returns { id, ... } — use the returned id as caseFileId in evidence_group_create.",
+  description: "Creates a new case file — the top-level container for evidence groups, evidence, and reports. Use this first, before any other Evidence-manager tool. No prerequisites. Unlike most create tools, `id` is CALLER-SUPPLIED (generate a fresh UUID v4 yourself, this API does not assign one) — there is no `name` field, use `title` instead. Example: evidence_case_file_create({ id: '<generate a UUID v4>', title: 'Q1 2026 audit' }) — use that same id as caseFileId in evidence_group_create.",
   inputSchema,
   outputSchema: zEvidenceCreateCaseFileResponse,
   annotations: {

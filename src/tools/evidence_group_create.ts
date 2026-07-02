@@ -18,7 +18,7 @@ const inputSchema = applyFieldGlosses(rawInputSchema, {"caseFileId":"MANDATORY. 
 
 export const evidence_group_create = defineTool({
   name: "evidence_group_create",
-  description: "Creates an evidence group inside a case file — evidence records are always registered inside a group, never standalone (except via the legacy generate_evidence tool). Use when starting a new batch of related evidence (e.g. all files for one incident). Requires: evidence_case_file_create → caseFileId. Example: evidence_group_create({ caseFileId, type: 'FILE' }) returns { id, status: 'OPEN' } — use the returned id as evidenceGroupId in evidence_group_evidence_register, then evidence_group_close once every evidence in the group has been uploaded.",
+  description: "Creates an evidence group inside a case file — evidence records are always registered inside a group, never standalone (except via the legacy generate_evidence tool). Use when starting a new batch of related evidence (e.g. all files for one incident). Like evidence_case_file_create, `id` is CALLER-SUPPLIED (generate a fresh UUID v4 yourself). Requires: evidence_case_file_create → caseFileId. Example: evidence_group_create({ id: '<generate a UUID v4>', caseFileId, type: 'FILE' }) returns { status: 'OPEN', ... } — use that same id as evidenceGroupId in evidence_group_evidence_register, then evidence_group_close once every evidence in the group has been uploaded.",
   inputSchema,
   outputSchema: zEvidenceCreateEvidenceGroupResponse,
   annotations: {

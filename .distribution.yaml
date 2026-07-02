@@ -38,7 +38,7 @@ tools:
   - name: evidence_case_file_search
     description: "Search case file with filters"
   - name: evidence_case_file_create
-    description: "Creates a new case file — the top-level container for evidence groups, evidence, and reports. Use this first, before any other Evidence-manager tool. No prerequisites. Example: evidence_case_file_create({ name: 'Q1 2026 audit' }) returns { id, ... } — use the returned id as caseFileId in evidence_group_create."
+    description: "Creates a new case file — the top-level container for evidence groups, evidence, and reports. Use this first, before any other Evidence-manager tool. No prerequisites. Unlike most create tools, `id` is CALLER-SUPPLIED (generate a fresh UUID v4 yourself, this API does not assign one) — there is no `name` field, use `title` instead. Example: evidence_case_file_create({ id: '<generate a UUID v4>', title: 'Q1 2026 audit' }) — use that same id as caseFileId in evidence_group_create."
   - name: evidence_case_file_update_bulk
     description: "Update a case files"
   - name: evidence_case_file_get
@@ -96,7 +96,7 @@ tools:
   - name: evidence_group_delete_bulk
     description: "Delete bulk evidence groups"
   - name: evidence_group_create
-    description: "Creates an evidence group inside a case file — evidence records are always registered inside a group, never standalone (except via the legacy generate_evidence tool). Use when starting a new batch of related evidence (e.g. all files for one incident). Requires: evidence_case_file_create → caseFileId. Example: evidence_group_create({ caseFileId, type: 'FILE' }) returns { id, status: 'OPEN' } — use the returned id as evidenceGroupId in evidence_group_evidence_register, then evidence_group_close once every evidence in the group has been uploaded."
+    description: "Creates an evidence group inside a case file — evidence records are always registered inside a group, never standalone (except via the legacy generate_evidence tool). Use when starting a new batch of related evidence (e.g. all files for one incident). Like evidence_case_file_create, `id` is CALLER-SUPPLIED (generate a fresh UUID v4 yourself). Requires: evidence_case_file_create → caseFileId. Example: evidence_group_create({ id: '<generate a UUID v4>', caseFileId, type: 'FILE' }) returns { status: 'OPEN', ... } — use that same id as evidenceGroupId in evidence_group_evidence_register, then evidence_group_close once every evidence in the group has been uploaded."
   - name: evidence_group_get
     description: "Get evidence group details"
   - name: evidence_group_discard

@@ -620,7 +620,7 @@ export const zEvidenceSearchEvidenceRequestModel = z.object({
     testimonyMode: z.array(zEvidenceTestimonyMode).nullish(),
     status: z.array(zEvidenceEvidenceStatus).nullish(),
     fileName: z.string().nullish(),
-    fileSize: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).nullish(),
+    fileSize: z.int().nullish(),
     metadata: z.record(z.string(), z.string()).and(z.unknown()).nullish(),
     capturedFrom: z.iso.datetime().nullish(),
     capturedUntil: z.iso.datetime().nullish(),
@@ -895,10 +895,10 @@ export const zNotificationNotificationAttachmentDownloadUrlViewModel = zNotifica
 export const zNotificationAbstractSetDownloadUrlViewModel = zNotificationAbstractCollectionDownloadUrlViewModel;
 
 export const zEvidenceMetadata = z.object({
-    currentPage: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    totalPages: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    pageSize: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    totalRecords: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional()
+    currentPage: z.int().optional(),
+    totalPages: z.int().optional(),
+    pageSize: z.int().optional(),
+    totalRecords: z.int().optional()
 });
 
 export const zEvidenceBaseCollectionViewModelSearchEvidenceGroupViewModel = z.object({
@@ -968,7 +968,7 @@ export const zEvidenceGetEvidenceViewModel = z.object({
     status: zEvidenceGetEvidenceStatusViewModel.optional(),
     capturedAt: z.iso.datetime().optional(),
     fileName: z.string().optional(),
-    fileSize: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    fileSize: z.int().optional(),
     hash: z.string().optional(),
     timestamps: zEvidenceGetEvidenceTimestampsViewModel.optional(),
     createdBy: z.string().optional(),
@@ -995,7 +995,7 @@ export const zEvidenceSearchEvidenceViewModel = z.object({
     title: z.string().optional(),
     type: z.string().optional(),
     hash: z.string().optional(),
-    fileSize: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    fileSize: z.int().optional(),
     custodyType: z.string().optional(),
     createdBy: z.string().optional(),
     capturedAt: z.iso.datetime().optional(),
@@ -1182,16 +1182,16 @@ export const zSignatureGetDocumentsViewModel = z.object({
     status: zSignatureDocumentSignatureStatus.optional(),
     signatories: z.array(zSignatureSignatoryViewModel).optional(),
     observers: z.array(zSignatureObserverViewModel).optional(),
-    fileSize: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    fileSize: z.int().optional(),
     sequence: z.int().optional(),
     legalEntitySigners: z.array(zSignatureLegalEntitySignerViewModel).optional()
 });
 
 export const zSignatureMetadata = z.object({
-    currentPage: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    totalPages: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    pageSize: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    totalRecords: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional()
+    currentPage: z.int().optional(),
+    totalPages: z.int().optional(),
+    pageSize: z.int().optional(),
+    totalRecords: z.int().optional()
 });
 
 export const zSignatureBaseCollectionViewModelValidatorViewModel = z.object({
@@ -1204,10 +1204,10 @@ export const zSignatureListValidatorsViewModel = zSignatureBaseCollectionViewMod
 }));
 
 export const zNotificationMetadata = z.object({
-    currentPage: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    totalPages: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    pageSize: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    totalRecords: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional()
+    currentPage: z.int().optional(),
+    totalPages: z.int().optional(),
+    pageSize: z.int().optional(),
+    totalRecords: z.int().optional()
 });
 
 export const zNotificationNotificationType1 = z.enum([
@@ -1302,7 +1302,7 @@ export const zNotificationNotificationAttachmentViewModel = z.object({
     hash: z.string().optional(),
     fileType: zNotificationFileTypeViewModel.optional(),
     attachmentStatus: zNotificationNotificationAttachmentStatusViewModel.optional(),
-    fileSize: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    fileSize: z.int().optional(),
     reviewedAt: z.iso.datetime().optional()
 });
 
@@ -1504,7 +1504,7 @@ export const zSignatureGetEvidenceViewModel = z.object({
     status: zSignatureGetEvidenceStatusViewModel.optional(),
     capturedAt: z.iso.datetime().optional(),
     fileName: z.string().optional(),
-    fileSize: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    fileSize: z.int().optional(),
     hash: z.string().optional(),
     timestamps: zSignatureGetEvidenceTimestampsViewModel.optional(),
     createdBy: z.string().optional(),
@@ -1524,9 +1524,9 @@ export const zSignatureDocumentDetailViewModel = z.object({
     observers: z.array(zSignatureObserverViewModel).optional(),
     signatories: z.array(zSignatureSignatoryViewModel).optional(),
     evidence: zSignatureGetEvidenceViewModel.optional(),
-    countSignatories: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    countObservers: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    fileSize: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    countSignatories: z.int().optional(),
+    countObservers: z.int().optional(),
+    fileSize: z.int().optional(),
     language: z.string().optional(),
     original: z.boolean().optional(),
     signed: z.boolean().optional(),
@@ -1610,7 +1610,7 @@ export const zNotificationNotificationAttachment = z.object({
     attachmentStatus: zNotificationNotificationAttachmentStatus.optional(),
     reviewedAt: z.iso.datetime().optional(),
     mimeType: z.string().optional(),
-    fileSize: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional()
+    fileSize: z.int().optional()
 });
 
 export const zNotificationNotificationStateType = z.enum([
