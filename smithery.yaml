@@ -3,68 +3,91 @@
 configSchema:
   $schema: https://json-schema.org/draft/2020-12/schema
   properties:
-    API_BASE_URL:
-      description: Evidence Manager API base URL
+    MCP_ALLOWED_HOSTS:
+      description: Comma-separated allowed Host headers. Empty = Host validation disabled (default). When set, requests with a Host outside the list are rejected.
       type: string
-    FULL_FLOW_EMAIL_BASE:
-      description: Full flow base email — used to compose participant emails (user+signatory@domain, etc.)
+    MCP_ALLOWED_ORIGINS:
+      description: Comma-separated allowed browser Origins (DNS-rebinding defense). Empty = reject any request carrying an Origin header; non-browser clients (CLI/SDK) send no Origin and are always allowed. Use '*' to allow all.
       type: string
-    FULL_FLOW_FILE_PATH:
-      description: Full flow default file path
+    MCP_ALLOW_INSECURE_FILE_URL:
+      description: Set to "true" to allow plain http:// fileUrl downloads in evidence_create (default https-only). Private/internal addresses are always rejected regardless.
       type: string
-    HTTP_PORT:
-      description: HTTP_PORT
+    MCP_API_BASE_URL:
+      description: Overrides the default upstream API host for every tool
       type: string
-    OKTA_CLIENT_ID:
-      description: OKTA_CLIENT_ID
+    MCP_API_BASE_URL_CHAT:
+      description: "chat manager base URL (default: https://api.gcloudfactory.com/chat-bot-manager)"
       type: string
-    OKTA_CLIENT_SECRET:
-      description: OKTA_CLIENT_SECRET (See https://eadtrust.example.com/onboarding for credential acquisition.)
+    MCP_API_BASE_URL_EVIDENCE:
+      description: "evidence manager base URL (default: https://api.gcloudfactory.com/digital-trust)"
+      type: string
+    MCP_API_BASE_URL_NOTIFICATION:
+      description: "notification manager base URL (default: https://api.gcloudfactory.com/notifications)"
+      type: string
+    MCP_API_BASE_URL_SIGNATURE:
+      description: "signature manager base URL (default: https://api.gcloudfactory.com/signature-manager)"
+      type: string
+    MCP_AUTH_EMAIL:
+      description: Your EAD Factory account email (Flow 1). Configure exactly one of Flow 1, 2, or 3.
+      type: string
+    MCP_AUTH_PASSWORD:
+      description: Your EAD Factory account password (Flow 1, email/password accounts) (See https://digitaltrust.gcloudfactory.com for credential acquisition.)
       format: password
       type: string
-    OKTA_SCOPE:
-      description: OKTA_SCOPE
+    MCP_HTTP_HOST:
+      description: Interface the HTTP transport binds to. Default 127.0.0.1 (localhost only). Set 0.0.0.0 to expose on all interfaces (containers do this automatically).
       type: string
-    OKTA_TOKEN_URL:
-      description: OAuth credentials (Okta client_credentials flow) Used both for calling Evidence Manager API and for verifying incoming Bearer tokens (HTTP mode)
+    MCP_HTTP_PUBLIC:
+      description: Set to "true" for public/multi-tenant deployments. Activates Host validation and refuses to start unless MCP_ALLOWED_ORIGINS or MCP_ALLOWED_HOSTS is set (fail-closed).
       type: string
-    POLL_INTERVAL_MS:
-      description: Polling configuration for evidence status
+    MCP_OPENID_CLIENT_ID:
+      description: OpenID Connect client ID (Flow 2)
       type: string
-    POLL_MAX_ATTEMPTS:
-      description: POLL_MAX_ATTEMPTS
+    MCP_OPENID_ISSUER:
+      description: OpenID Connect issuer URL (Flow 2)
       type: string
-    SIGNATURE_API_BASE_URL:
-      description: Signature Manager API base URL
+    MCP_OPENID_REFRESH_TOKEN:
+      description: OpenID Connect refresh token (Flow 2) (See https://digitaltrust.gcloudfactory.com for credential acquisition.)
+      format: password
       type: string
-    TRANSPORT:
-      description: "Transport: \"stdio\" for local Claude Code, \"http\" for remote deployment with auth"
+    MCP_SVC_CLIENT_ID:
+      description: OAuth2 client_credentials client ID (Flow 3)
       type: string
-  required:
-    - API_BASE_URL
-    - FULL_FLOW_EMAIL_BASE
-    - FULL_FLOW_FILE_PATH
-    - HTTP_PORT
-    - OKTA_CLIENT_ID
-    - OKTA_CLIENT_SECRET
-    - OKTA_SCOPE
-    - OKTA_TOKEN_URL
-    - POLL_INTERVAL_MS
-    - POLL_MAX_ATTEMPTS
-    - SIGNATURE_API_BASE_URL
-    - TRANSPORT
+    MCP_SVC_CLIENT_SECRET:
+      description: OAuth2 client_credentials client secret (Flow 3) (See https://digitaltrust.gcloudfactory.com for credential acquisition.)
+      format: password
+      type: string
+    MCP_SVC_INTROSPECT_URL:
+      description: RFC 7662 token introspection URL for inbound Bearer verification in HTTP mode. Opt-in — reuses the Flow 3 client id/secret above as the resource-server credentials.
+      type: string
+    MCP_SVC_SCOPE:
+      description: Optional OAuth2 scope for the service-account token request (Flow 3)
+      type: string
+    MCP_SVC_TOKEN_URL:
+      description: Token endpoint URL for the OAuth2 client_credentials flow (Flow 3)
+      type: string
+    PORT:
+      description: HTTP port when running in hosted (HTTP) mode; ignored in stdio mode
+      type: string
   type: object
 env:
-  API_BASE_URL: ""
-  FULL_FLOW_EMAIL_BASE: ""
-  FULL_FLOW_FILE_PATH: ""
-  HTTP_PORT: ""
-  OKTA_CLIENT_ID: ""
-  OKTA_SCOPE: ""
-  OKTA_TOKEN_URL: ""
-  POLL_INTERVAL_MS: ""
-  POLL_MAX_ATTEMPTS: ""
-  SIGNATURE_API_BASE_URL: ""
-  TRANSPORT: ""
+  MCP_ALLOWED_HOSTS: ""
+  MCP_ALLOWED_ORIGINS: ""
+  MCP_ALLOW_INSECURE_FILE_URL: ""
+  MCP_API_BASE_URL: ""
+  MCP_API_BASE_URL_CHAT: ""
+  MCP_API_BASE_URL_EVIDENCE: ""
+  MCP_API_BASE_URL_NOTIFICATION: ""
+  MCP_API_BASE_URL_SIGNATURE: ""
+  MCP_AUTH_EMAIL: ""
+  MCP_HTTP_HOST: ""
+  MCP_HTTP_PUBLIC: ""
+  MCP_OPENID_CLIENT_ID: ""
+  MCP_OPENID_ISSUER: ""
+  MCP_SVC_CLIENT_ID: ""
+  MCP_SVC_INTROSPECT_URL: ""
+  MCP_SVC_SCOPE: ""
+  MCP_SVC_TOKEN_URL: ""
+  PORT: ""
 runtime: typescript
 
