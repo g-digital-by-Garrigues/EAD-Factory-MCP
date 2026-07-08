@@ -34,7 +34,7 @@ export const notification_receiver_add = defineTool({
     const token = ctx.auth?.token ?? "";
     const sdkClient = createClient(
       createConfig({
-        baseUrl: process.env.MCP_API_BASE_URL_NOTIFICATION ?? process.env.MCP_API_BASE_URL ?? "https://api.gcloudfactory.com/notifications",
+        baseUrl: process.env.MCP_API_BASE_URL_NOTIFICATION ?? (process.env.MCP_API_BASE_URL ? `${process.env.MCP_API_BASE_URL.replace(/\/+$/, "")}/notifications` : "https://api.gcloudfactory.com/notifications"),
         headers: {
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),

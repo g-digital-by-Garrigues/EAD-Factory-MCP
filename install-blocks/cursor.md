@@ -8,22 +8,13 @@
       ],
       "command": "npx",
       "env": {
-        "API_BASE_URL": "",
-        "FULL_FLOW_EMAIL_BASE": "",
-        "FULL_FLOW_FILE_PATH": "",
-        "HTTP_PORT": "",
-        "OKTA_CLIENT_ID": "",
-        "OKTA_CLIENT_SECRET": "<PASTE_OKTA_CLIENT_SECRET_HERE>",
-        "OKTA_SCOPE": "",
-        "OKTA_TOKEN_URL": "",
-        "POLL_INTERVAL_MS": "",
-        "POLL_MAX_ATTEMPTS": "",
-        "SIGNATURE_API_BASE_URL": "",
-        "TRANSPORT": ""
+        "MCP_SVC_CLIENT_ID": "",
+        "MCP_SVC_CLIENT_SECRET": "<PASTE_MCP_SVC_CLIENT_SECRET_HERE>",
+        "MCP_SVC_TOKEN_URL": ""
       }
     }
   }
 }
 ```
 
-> Need credentials? See: https://eadtrust.example.com/onboarding
+> Need credentials? See: https://digitaltrust.gcloudfactory.com

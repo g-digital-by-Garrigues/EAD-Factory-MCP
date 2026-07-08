@@ -17,7 +17,7 @@ const inputSchema = applyFieldGlosses(rawInputSchema, {"caseFileId":"MANDATORY. 
 
 export const evidence_case_file_update = defineTool({
   name: "evidence_case_file_update",
-  description: "Update a case file",
+  description: "Updates a single case file's editable metadata (e.g. name, description). Requires: evidence_case_file_create or evidence_case_file_search → caseFileId. To change its OPEN/CLOSE lifecycle state use evidence_case_file_status_update instead.",
   inputSchema,
   annotations: {
     title: "Evidence Case File Update",
@@ -32,7 +32,7 @@ export const evidence_case_file_update = defineTool({
     const token = ctx.auth?.token ?? "";
     const sdkClient = createClient(
       createConfig({
-        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? process.env.MCP_API_BASE_URL ?? "https://api.gcloudfactory.com/digital-trust",
+        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? (process.env.MCP_API_BASE_URL ? `${process.env.MCP_API_BASE_URL.replace(/\/+$/, "")}/digital-trust` : "https://api.gcloudfactory.com/digital-trust"),
         headers: {
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),

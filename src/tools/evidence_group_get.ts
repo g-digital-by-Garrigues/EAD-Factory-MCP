@@ -16,7 +16,7 @@ const inputSchema = applyFieldGlosses(rawInputSchema, {"caseFileId":"MANDATORY. 
 
 export const evidence_group_get = defineTool({
   name: "evidence_group_get",
-  description: "Get evidence group details",
+  description: "Gets one evidence group's details — status (OPEN/CLOSED), seal information, and its evidences with their upload states. Use to verify every file was uploaded before evidence_group_close, or to check the seal after closing. Requires: caseFileId + evidence_group_create → evidenceGroupId.",
   inputSchema,
   outputSchema: zEvidenceGetEvidenceGroupResponse,
   annotations: {
@@ -32,7 +32,7 @@ export const evidence_group_get = defineTool({
     const token = ctx.auth?.token ?? "";
     const sdkClient = createClient(
       createConfig({
-        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? process.env.MCP_API_BASE_URL ?? "https://api.gcloudfactory.com/digital-trust",
+        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? (process.env.MCP_API_BASE_URL ? `${process.env.MCP_API_BASE_URL.replace(/\/+$/, "")}/digital-trust` : "https://api.gcloudfactory.com/digital-trust"),
         headers: {
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),

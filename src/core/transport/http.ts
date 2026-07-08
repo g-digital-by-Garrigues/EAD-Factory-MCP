@@ -88,6 +88,52 @@ function send403(res: ServerResponse, correlationId: string, error: string): voi
   res.end(body);
 }
 
+/**
+ * Default POST /mcp body cap (Story 3.2, audit S2): 16 MiB. Sized so the
+ * documented tool contracts keep working out of the box (code review
+ * 2026-07-07, D1): evidence_upload's "~10 MB max" contentBase64 becomes
+ * ~13.4 MiB of base64 plus JSON envelope — a 5 MiB cap broke it in HTTP mode.
+ * The DoS vector stays closed; the ceiling is just contract-compatible.
+ * Interacts with MCP_FILE_MAX_BYTES (files layer, default 1 GiB): base64
+ * sources are ALWAYS additionally capped by this transport limit.
+ */
+const DEFAULT_MAX_BODY_BYTES = 16 * 1024 * 1024;
+
+/** Body cap from MCP_HTTP_MAX_BODY_BYTES; invalid or non-positive values fall back to the default. Read per request (test-friendly, same style as the allow-list env reads). */
+function maxBodyBytes(): number {
+  const parsed = Number(process.env.MCP_HTTP_MAX_BODY_BYTES);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_MAX_BODY_BYTES;
+}
+
+/**
+ * 413 with a JSON-RPC error body (Story 3.2): the request itself is
+ * unacceptable → -32600 Invalid Request. `onFlushed` (code review 2026-07-07,
+ * P1) runs once the response bytes are handed to the socket — the caller
+ * destroys the request THERE, not before, so the queued 413 isn't lost to a
+ * TCP RST when tearing down a socket with unread inbound data.
+ */
+function send413(
+  res: ServerResponse,
+  correlationId: string,
+  limit: number,
+  onFlushed?: () => void,
+): void {
+  const body = JSON.stringify({
+    jsonrpc: "2.0",
+    error: {
+      code: -32600,
+      message: `Request body exceeds MCP_HTTP_MAX_BODY_BYTES (${limit} bytes)`,
+    },
+    id: null,
+  });
+  res.writeHead(413, {
+    "Content-Type": "application/json",
+    "Content-Length": Buffer.byteLength(body),
+    "X-Correlation-Id": correlationId,
+  });
+  res.end(body, onFlushed);
+}
+
 /** Stateless mode: GET/DELETE have no session to stream to or delete (matches the SDK's own reference example). */
 function send405MethodNotAllowed(res: ServerResponse, correlationId: string): void {
   const body = JSON.stringify({
@@ -167,7 +213,13 @@ export class HttpTransport {
     this.requestHandlerFactory = factory;
   }
 
-  /** Opt-in inbound-Bearer verifier (RFC 7662 introspection, Story 2.3). */
+  /**
+   * Opt-in inbound-Bearer verifier (RFC 7662 introspection, Story 2.3).
+   * CONTRACT: must be called BEFORE start() — the public-mode fail-closed gate
+   * (Story 3.1) reads the effective verifier at start() time; wiring it later
+   * would make a correctly-configured public deployment refuse to boot.
+   * server.ts honors this order (verifier at ~:160, start at ~:211).
+   */
   setBearerVerifier(verifier: (jwt: string) => Promise<boolean>): void {
     this.bearerVerifier = verifier;
   }
@@ -187,6 +239,18 @@ export class HttpTransport {
   }
 
   async start(): Promise<void> {
+    // Foot-gun guard (code review 2026-07-07, P2): the public-mode flag only
+    // recognizes the exact string "true" — TRUE/1/yes silently leave EVERY
+    // public protection inactive. Warn (don't throw: "false"/"0"/"" are
+    // legitimate offs) so a typo'd deployment manifest is visible at boot.
+    const publicFlag = process.env.MCP_HTTP_PUBLIC;
+    if (publicFlag && publicFlag !== "true" && publicFlag !== "false" && publicFlag !== "0") {
+      log.warn(
+        { transport: "http" },
+        `MCP_HTTP_PUBLIC="${publicFlag}" is not the exact string "true" — public-mode protections are INACTIVE`,
+      );
+    }
+
     // Fail-closed: refuse to start in public mode without an explicit allow-list.
     if (
       process.env.MCP_HTTP_PUBLIC === "true" &&
@@ -196,6 +260,28 @@ export class HttpTransport {
       throw new Error(
         "MCP_HTTP_PUBLIC=true requires MCP_ALLOWED_ORIGINS or MCP_ALLOWED_HOSTS to be set — refusing to start fail-open",
       );
+    }
+
+    // Fail-closed (Story 3.1, audit S1): public mode must never silently forward
+    // unverified Bearer tokens upstream. Checks the EFFECTIVE verifier — not the
+    // env var — so server.ts's fail-soft wiring (MCP_SVC_INTROSPECT_URL set but
+    // client credentials missing → boots without a verifier) is caught here too.
+    // Non-public mode is untouched: introspection stays opt-in (NFR3, local DX).
+    if (process.env.MCP_HTTP_PUBLIC === "true" && !this.bearerVerifier) {
+      if (process.env.MCP_ALLOW_UNVERIFIED_BEARER === "true") {
+        log.warn(
+          { transport: "http" },
+          "MCP_ALLOW_UNVERIFIED_BEARER=true — inbound Bearer tokens will be forwarded upstream " +
+            "WITHOUT verification. Only acceptable when an upstream gateway already verifies them.",
+        );
+      } else {
+        throw new Error(
+          "MCP_HTTP_PUBLIC=true requires inbound-token introspection: set MCP_SVC_INTROSPECT_URL " +
+            "plus MCP_SVC_CLIENT_ID/MCP_SVC_CLIENT_SECRET (RFC 7662). If an upstream gateway " +
+            "already verifies tokens, set MCP_ALLOW_UNVERIFIED_BEARER=true explicitly — refusing " +
+            "to start fail-open",
+        );
+      }
     }
 
     const server = createServer((req: IncomingMessage, res: ServerResponse) => {
@@ -274,9 +360,58 @@ export class HttpTransport {
           return;
         }
 
+        // Body cap (Story 3.2, audit S2). Content-Length is rejected before any
+        // body is read; chunked bodies are cut off the moment the accumulated
+        // size crosses the limit. req.destroy() runs from the 413's flush
+        // callback (review P1) so the response reaches the client before the
+        // socket goes down; `rejected` guards the already-queued data/end
+        // events after destruction.
+        const bodyLimit = maxBodyBytes();
+        // Strict digit parse (review P3): Number() accepts "1e3"/"0x10"/padded
+        // forms, and a proxy-merged duplicate header ("100, 100") yields NaN —
+        // which would silently skip this pre-check. Node's llhttp rejects those
+        // shapes today, but this code must not depend on the parser upstream.
+        const clHeader = req.headers["content-length"];
+        const declaredLength =
+          typeof clHeader === "string" && /^\d+$/.test(clHeader.trim())
+            ? Number(clHeader.trim())
+            : undefined;
+        if (clHeader !== undefined && declaredLength === undefined) {
+          log.warn(
+            { correlationId, transport: "http" },
+            "Non-numeric Content-Length — pre-check skipped, streaming guard still applies",
+          );
+        }
+        if (declaredLength !== undefined && declaredLength > bodyLimit) {
+          log.warn(
+            { correlationId, transport: "http", declaredLength, bodyLimit },
+            "Request body over limit (Content-Length) — rejected before read",
+          );
+          // Uniform teardown with the streaming path: destroy once flushed.
+          send413(res, correlationId, bodyLimit, () => req.destroy());
+          return;
+        }
+
         const chunks: Buffer[] = [];
-        req.on("data", (chunk: Buffer) => chunks.push(chunk));
+        let receivedBytes = 0;
+        let rejected = false;
+        req.on("data", (chunk: Buffer) => {
+          if (rejected) return;
+          receivedBytes += chunk.length;
+          if (receivedBytes > bodyLimit) {
+            rejected = true;
+            chunks.length = 0; // release what was buffered
+            log.warn(
+              { correlationId, transport: "http", receivedBytes, bodyLimit },
+              "Request body over limit (streaming) — rejected mid-read",
+            );
+            send413(res, correlationId, bodyLimit, () => req.destroy());
+            return;
+          }
+          chunks.push(chunk);
+        });
         req.on("end", () => {
+          if (rejected) return;
           void (async () => {
             let parsedBody: unknown = null;
             try {

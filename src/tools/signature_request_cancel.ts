@@ -32,7 +32,7 @@ export const signature_request_cancel = defineTool({
     const token = ctx.auth?.token ?? "";
     const sdkClient = createClient(
       createConfig({
-        baseUrl: process.env.MCP_API_BASE_URL_SIGNATURE ?? process.env.MCP_API_BASE_URL ?? "https://api.gcloudfactory.com/signature-manager",
+        baseUrl: process.env.MCP_API_BASE_URL_SIGNATURE ?? (process.env.MCP_API_BASE_URL ? `${process.env.MCP_API_BASE_URL.replace(/\/+$/, "")}/signature-manager` : "https://api.gcloudfactory.com/signature-manager"),
         headers: {
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),

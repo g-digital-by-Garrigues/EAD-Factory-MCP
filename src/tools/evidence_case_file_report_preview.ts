@@ -18,7 +18,7 @@ const inputSchema = applyFieldGlosses(rawInputSchema, {"caseFileId":"MANDATORY. 
 
 export const evidence_case_file_report_preview = defineTool({
   name: "evidence_case_file_report_preview",
-  description: "Generate Case File ReportPreview",
+  description: "Generates an UNSIGNED preview of a case file's evidentiary report so you can check its content before producing the signed version with evidence_case_file_report_generate. Requires: evidence_case_file_create → caseFileId, with sealed evidence groups inside.",
   inputSchema,
   outputSchema: zEvidenceObtainReportPreviewResponse,
   annotations: {
@@ -34,7 +34,7 @@ export const evidence_case_file_report_preview = defineTool({
     const token = ctx.auth?.token ?? "";
     const sdkClient = createClient(
       createConfig({
-        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? process.env.MCP_API_BASE_URL ?? "https://api.gcloudfactory.com/digital-trust",
+        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? (process.env.MCP_API_BASE_URL ? `${process.env.MCP_API_BASE_URL.replace(/\/+$/, "")}/digital-trust` : "https://api.gcloudfactory.com/digital-trust"),
         headers: {
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),

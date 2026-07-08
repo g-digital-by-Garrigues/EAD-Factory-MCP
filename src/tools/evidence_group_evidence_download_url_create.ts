@@ -15,7 +15,7 @@ const inputSchema = applyFieldGlosses(rawInputSchema, {"caseFileId":"MANDATORY. 
 
 export const evidence_group_evidence_download_url_create = defineTool({
   name: "evidence_group_evidence_download_url_create",
-  description: "Create download url",
+  description: "Creates a temporary download URL for an evidence file stored in a group (INTERNAL custody). Use to retrieve the original bytes after upload. Requires: caseFileId + evidenceGroupId + evidence_group_evidence_register → evidenceId.",
   inputSchema,
   annotations: {
     title: "Evidence Group Evidence Download Url Create",
@@ -30,7 +30,7 @@ export const evidence_group_evidence_download_url_create = defineTool({
     const token = ctx.auth?.token ?? "";
     const sdkClient = createClient(
       createConfig({
-        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? process.env.MCP_API_BASE_URL ?? "https://api.gcloudfactory.com/digital-trust",
+        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? (process.env.MCP_API_BASE_URL ? `${process.env.MCP_API_BASE_URL.replace(/\/+$/, "")}/digital-trust` : "https://api.gcloudfactory.com/digital-trust"),
         headers: {
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),

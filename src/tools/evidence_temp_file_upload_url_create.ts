@@ -15,7 +15,7 @@ const inputSchema = applyFieldGlosses(rawInputSchema, {"caseFileId":"MANDATORY. 
 
 export const evidence_temp_file_upload_url_create = defineTool({
   name: "evidence_temp_file_upload_url_create",
-  description: "Create upload url temporary file",
+  description: "Creates a presigned upload URL for a TEMPORARY file not yet registered as evidence. Use for staging content that another operation will reference; for real evidence prefer the register-then-upload flow (evidence_group_evidence_register) or the evidence_create_sealed composite, which handle registration and upload together.",
   inputSchema,
   annotations: {
     title: "Evidence Temp File Upload Url Create",
@@ -30,7 +30,7 @@ export const evidence_temp_file_upload_url_create = defineTool({
     const token = ctx.auth?.token ?? "";
     const sdkClient = createClient(
       createConfig({
-        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? process.env.MCP_API_BASE_URL ?? "https://api.gcloudfactory.com/digital-trust",
+        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? (process.env.MCP_API_BASE_URL ? `${process.env.MCP_API_BASE_URL.replace(/\/+$/, "")}/digital-trust` : "https://api.gcloudfactory.com/digital-trust"),
         headers: {
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),

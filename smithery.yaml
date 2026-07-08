@@ -3,68 +3,83 @@
 configSchema:
   $schema: https://json-schema.org/draft/2020-12/schema
   properties:
-    API_BASE_URL:
-      description: Evidence Manager API base URL
+    MCP_ALLOWED_HOSTS:
+      description: Comma-separated allowed Host headers. Empty = Host validation disabled (default). When set, requests with a Host outside the list are rejected.
       type: string
-    FULL_FLOW_EMAIL_BASE:
-      description: Full flow base email — used to compose participant emails (user+signatory@domain, etc.)
+    MCP_ALLOWED_ORIGINS:
+      description: Comma-separated allowed browser Origins (DNS-rebinding defense). Empty = reject any request carrying an Origin header; non-browser clients (CLI/SDK) send no Origin and are always allowed. Use '*' to allow all.
       type: string
-    FULL_FLOW_FILE_PATH:
-      description: Full flow default file path
+    MCP_ALLOW_INSECURE_FILE_URL:
+      description: Set to "true" to allow plain http:// fileUrl downloads in evidence_create (default https-only). Private/internal addresses are rejected regardless (resolution-time check; see the documented DNS TOCTOU limitation in the hosted-deployment runbook).
       type: string
-    HTTP_PORT:
-      description: HTTP_PORT
+    MCP_ALLOW_UNVERIFIED_BEARER:
+      description: "Escape hatch for MCP_HTTP_PUBLIC=true WITHOUT inbound-token introspection: set to \"true\" ONLY when an upstream gateway already verifies Bearer tokens. The server logs a prominent warning and forwards tokens upstream unverified."
       type: string
-    OKTA_CLIENT_ID:
-      description: OKTA_CLIENT_ID
+    MCP_API_BASE_URL:
+      description: Gateway ROOT URL (e.g. https://api.int.gcloudfactory.com) — each manager's path prefix is appended automatically; do NOT include a manager path here
       type: string
-    OKTA_CLIENT_SECRET:
-      description: OKTA_CLIENT_SECRET (See https://eadtrust.example.com/onboarding for credential acquisition.)
+    MCP_API_BASE_URL_CHAT:
+      description: "Full base URL override for the chat manager, used as-is (default: https://api.gcloudfactory.com/chat-bot-manager)"
+      type: string
+    MCP_API_BASE_URL_EVIDENCE:
+      description: "Full base URL override for the evidence manager, used as-is (default: https://api.gcloudfactory.com/digital-trust)"
+      type: string
+    MCP_API_BASE_URL_NOTIFICATION:
+      description: "Full base URL override for the notification manager, used as-is (default: https://api.gcloudfactory.com/notifications)"
+      type: string
+    MCP_API_BASE_URL_SIGNATURE:
+      description: "Full base URL override for the signature manager, used as-is (default: https://api.gcloudfactory.com/signature-manager)"
+      type: string
+    MCP_HTTP_HOST:
+      description: Interface the HTTP transport binds to. Default 127.0.0.1 (localhost only). Set 0.0.0.0 to expose on all interfaces (containers do this automatically).
+      type: string
+    MCP_HTTP_MAX_BODY_BYTES:
+      description: "Maximum accepted POST /mcp request-body size in bytes (default 16777216 = 16 MiB — sized so base64 file uploads within the documented tool limits fit). Oversized requests get a 413 JSON-RPC error before/while reading — closes a memory-exhaustion DoS vector in public deployments. Note: base64 file sources are capped by this limit BEFORE MCP_FILE_MAX_BYTES applies."
+      type: string
+    MCP_HTTP_PUBLIC:
+      description: Set to "true" for public/multi-tenant deployments. Activates Host validation and refuses to start unless (1) MCP_ALLOWED_ORIGINS or MCP_ALLOWED_HOSTS is set AND (2) inbound Bearer introspection is configured (MCP_SVC_INTROSPECT_URL + MCP_SVC_CLIENT_ID/SECRET) or MCP_ALLOW_UNVERIFIED_BEARER=true is set explicitly (fail-closed).
+      type: string
+    MCP_SVC_CLIENT_ID:
+      description: OAuth2 client_credentials client ID
+      type: string
+    MCP_SVC_CLIENT_SECRET:
+      description: OAuth2 client_credentials client secret (See https://digitaltrust.gcloudfactory.com for credential acquisition.)
       format: password
       type: string
-    OKTA_SCOPE:
-      description: OKTA_SCOPE
+    MCP_SVC_INTROSPECT_URL:
+      description: RFC 7662 token introspection URL for inbound Bearer verification in HTTP mode. Opt-in — reuses the service-account client id/secret above as the resource-server credentials.
       type: string
-    OKTA_TOKEN_URL:
-      description: OAuth credentials (Okta client_credentials flow) Used both for calling Evidence Manager API and for verifying incoming Bearer tokens (HTTP mode)
+    MCP_SVC_SCOPE:
+      description: Optional OAuth2 scope for the service-account token request
       type: string
-    POLL_INTERVAL_MS:
-      description: Polling configuration for evidence status
+    MCP_SVC_TOKEN_URL:
+      description: Token endpoint URL for the OAuth2 client_credentials flow
       type: string
-    POLL_MAX_ATTEMPTS:
-      description: POLL_MAX_ATTEMPTS
-      type: string
-    SIGNATURE_API_BASE_URL:
-      description: Signature Manager API base URL
-      type: string
-    TRANSPORT:
-      description: "Transport: \"stdio\" for local Claude Code, \"http\" for remote deployment with auth"
+    PORT:
+      description: HTTP port when running in hosted (HTTP) mode; ignored in stdio mode
       type: string
   required:
-    - API_BASE_URL
-    - FULL_FLOW_EMAIL_BASE
-    - FULL_FLOW_FILE_PATH
-    - HTTP_PORT
-    - OKTA_CLIENT_ID
-    - OKTA_CLIENT_SECRET
-    - OKTA_SCOPE
-    - OKTA_TOKEN_URL
-    - POLL_INTERVAL_MS
-    - POLL_MAX_ATTEMPTS
-    - SIGNATURE_API_BASE_URL
-    - TRANSPORT
+    - MCP_SVC_CLIENT_ID
+    - MCP_SVC_CLIENT_SECRET
+    - MCP_SVC_TOKEN_URL
   type: object
 env:
-  API_BASE_URL: ""
-  FULL_FLOW_EMAIL_BASE: ""
-  FULL_FLOW_FILE_PATH: ""
-  HTTP_PORT: ""
-  OKTA_CLIENT_ID: ""
-  OKTA_SCOPE: ""
-  OKTA_TOKEN_URL: ""
-  POLL_INTERVAL_MS: ""
-  POLL_MAX_ATTEMPTS: ""
-  SIGNATURE_API_BASE_URL: ""
-  TRANSPORT: ""
+  MCP_ALLOWED_HOSTS: ""
+  MCP_ALLOWED_ORIGINS: ""
+  MCP_ALLOW_INSECURE_FILE_URL: ""
+  MCP_ALLOW_UNVERIFIED_BEARER: ""
+  MCP_API_BASE_URL: ""
+  MCP_API_BASE_URL_CHAT: ""
+  MCP_API_BASE_URL_EVIDENCE: ""
+  MCP_API_BASE_URL_NOTIFICATION: ""
+  MCP_API_BASE_URL_SIGNATURE: ""
+  MCP_HTTP_HOST: ""
+  MCP_HTTP_MAX_BODY_BYTES: ""
+  MCP_HTTP_PUBLIC: ""
+  MCP_SVC_CLIENT_ID: ""
+  MCP_SVC_INTROSPECT_URL: ""
+  MCP_SVC_SCOPE: ""
+  MCP_SVC_TOKEN_URL: ""
+  PORT: ""
 runtime: typescript
 

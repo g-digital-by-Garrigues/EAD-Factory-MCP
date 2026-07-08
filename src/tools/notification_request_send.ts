@@ -51,7 +51,10 @@ export const notification_request_send = defineTool({
     "no events for this transition). Requires: notification_request_create -> requestId, at least " +
     "one receiver added via notification_receiver_add. On completion, returns each notification's " +
     "id and final delivery state (per-receiver failures are reported in the result, not treated as " +
-    "a Task failure). Use notification_request_status to check progress without waiting.",
+    "a Task failure). REQUIRES an MCP client with Tasks support — from a client without it this " +
+    "call fails; in that case create the request with autosend: true (notification_request_create) " +
+    "and poll notification_request_status yourself. " +
+    "Use notification_request_status to check progress without waiting.",
   inputSchema,
   annotations: {
     title: "Notification Request Send",
@@ -70,8 +73,10 @@ export const notification_request_send = defineTool({
       createConfig({
         baseUrl:
           process.env.MCP_API_BASE_URL_NOTIFICATION ??
-          process.env.MCP_API_BASE_URL ??
-          "https://api.gcloudfactory.com/notifications",
+          // Story 1.2 (audit G1): global var = gateway ROOT, manager prefix appended
+          (process.env.MCP_API_BASE_URL
+            ? `${process.env.MCP_API_BASE_URL.replace(/\/+$/, "")}/notifications`
+            : "https://api.gcloudfactory.com/notifications"),
         headers: {
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),
@@ -102,8 +107,10 @@ export const notification_request_send = defineTool({
           createConfig({
             baseUrl:
               process.env.MCP_API_BASE_URL_NOTIFICATION ??
-              process.env.MCP_API_BASE_URL ??
-              "https://api.gcloudfactory.com/notifications",
+              // Story 1.2 (audit G1): global var = gateway ROOT, manager prefix appended
+              (process.env.MCP_API_BASE_URL
+                ? `${process.env.MCP_API_BASE_URL.replace(/\/+$/, "")}/notifications`
+                : "https://api.gcloudfactory.com/notifications"),
             headers: { Authorization: `Bearer ${token}` },
           }),
         );

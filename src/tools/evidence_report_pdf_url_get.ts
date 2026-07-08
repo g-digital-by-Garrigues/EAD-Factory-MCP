@@ -16,7 +16,7 @@ const inputSchema = applyFieldGlosses(rawInputSchema, {"caseFileId":"MANDATORY. 
 
 export const evidence_report_pdf_url_get = defineTool({
   name: "evidence_report_pdf_url_get",
-  description: "Get the report PDF document",
+  description: "Retrieves a download URL for a report's signed PDF when you only hold the reportId (no caseFileId path needed — same document evidence_case_file_report_pdf_url_get returns). Requires: evidence_case_file_report_generate → reportId.",
   inputSchema,
   outputSchema: zEvidenceGetReportPdfResponse,
   annotations: {
@@ -32,7 +32,7 @@ export const evidence_report_pdf_url_get = defineTool({
     const token = ctx.auth?.token ?? "";
     const sdkClient = createClient(
       createConfig({
-        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? process.env.MCP_API_BASE_URL ?? "https://api.gcloudfactory.com/digital-trust",
+        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? (process.env.MCP_API_BASE_URL ? `${process.env.MCP_API_BASE_URL.replace(/\/+$/, "")}/digital-trust` : "https://api.gcloudfactory.com/digital-trust"),
         headers: {
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),

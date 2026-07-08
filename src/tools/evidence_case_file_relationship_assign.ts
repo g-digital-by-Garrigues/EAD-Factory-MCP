@@ -17,7 +17,7 @@ const inputSchema = applyFieldGlosses(rawInputSchema, {"caseFileId":"MANDATORY. 
 
 export const evidence_case_file_relationship_assign = defineTool({
   name: "evidence_case_file_relationship_assign",
-  description: "Create a new relationship assigned to a case file in the system",
+  description: "Assigns a relationship on a case file, linking it to an external/related entity reference for traceability. Use after creating the case file when your workflow tracks which matter, client, or system record it belongs to. Requires: evidence_case_file_create → caseFileId.",
   inputSchema,
   annotations: {
     title: "Evidence Case File Relationship Assign",
@@ -32,7 +32,7 @@ export const evidence_case_file_relationship_assign = defineTool({
     const token = ctx.auth?.token ?? "";
     const sdkClient = createClient(
       createConfig({
-        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? process.env.MCP_API_BASE_URL ?? "https://api.gcloudfactory.com/digital-trust",
+        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? (process.env.MCP_API_BASE_URL ? `${process.env.MCP_API_BASE_URL.replace(/\/+$/, "")}/digital-trust` : "https://api.gcloudfactory.com/digital-trust"),
         headers: {
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),

@@ -1,7 +1,7 @@
 {
   "name": "@g-digital/n8n-nodes-ead-factory",
-  "version": "1.0.15",
-  "description": "Connect to EAD Factory to generate certified digital evidence and manage signature request workflows.",
+  "version": "1.1.0",
+  "description": "EAD Factory connector for n8n — Digital Trust services from EAD Trust for your n8n automations. Generate certified evidence (SHA-256 hashing, S3 upload, qualified TSP/DLT timestamping), run full signature-request workflows, and send certified notifications. Maintained by g-digital by Garrigues — an eIDAS-qualified trust services provider.",
   "license": "MIT",
   "homepage": "https://github.com/g-digital-by-Garrigues/EAD-Factory-MCP",
   "author": { "name": "g-digital by Garrigues", "email": "g-digital@garrigues.com" },

@@ -15,7 +15,7 @@ const inputSchema = applyFieldGlosses(rawInputSchema, {"caseFileId":"MANDATORY. 
 
 export const evidence_group_discard = defineTool({
   name: "evidence_group_discard",
-  description: "Discard an evidence group",
+  description: "Discards (deletes) an OPEN evidence group and its registered evidences — use to abandon a group you no longer intend to seal. Destructive; sealed (CLOSED) groups are immutable evidence and should not be discarded. Requires: caseFileId + evidence_group_create → evidenceGroupId.",
   inputSchema,
   annotations: {
     title: "Evidence Group Discard",
@@ -30,7 +30,7 @@ export const evidence_group_discard = defineTool({
     const token = ctx.auth?.token ?? "";
     const sdkClient = createClient(
       createConfig({
-        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? process.env.MCP_API_BASE_URL ?? "https://api.gcloudfactory.com/digital-trust",
+        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? (process.env.MCP_API_BASE_URL ? `${process.env.MCP_API_BASE_URL.replace(/\/+$/, "")}/digital-trust` : "https://api.gcloudfactory.com/digital-trust"),
         headers: {
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),

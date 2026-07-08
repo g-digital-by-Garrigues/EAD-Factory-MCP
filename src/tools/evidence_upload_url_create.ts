@@ -17,7 +17,7 @@ const inputSchema = applyFieldGlosses(rawInputSchema, {"caseFileId":"MANDATORY. 
 
 export const evidence_upload_url_create = defineTool({
   name: "evidence_upload_url_create",
-  description: "Create upload url",
+  description: "Creates a fresh presigned upload URL for an already-registered evidence by evidenceId — step 2 of the register-then-upload flow (PUT the file bytes to the returned URL). Pairs with generate_evidence the way evidence_group_evidence_upload_url_create pairs with evidence_group_evidence_register. Requires: generate_evidence → evidenceId.",
   inputSchema,
   annotations: {
     title: "Evidence Upload Url Create",
@@ -32,7 +32,7 @@ export const evidence_upload_url_create = defineTool({
     const token = ctx.auth?.token ?? "";
     const sdkClient = createClient(
       createConfig({
-        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? process.env.MCP_API_BASE_URL ?? "https://api.gcloudfactory.com/digital-trust",
+        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? (process.env.MCP_API_BASE_URL ? `${process.env.MCP_API_BASE_URL.replace(/\/+$/, "")}/digital-trust` : "https://api.gcloudfactory.com/digital-trust"),
         headers: {
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),

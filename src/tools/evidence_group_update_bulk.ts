@@ -15,7 +15,7 @@ const inputSchema = applyFieldGlosses(rawInputSchema, {"caseFileId":"MANDATORY. 
 
 export const evidence_group_update_bulk = defineTool({
   name: "evidence_group_update_bulk",
-  description: "Update evidence groups",
+  description: "Updates the editable metadata of SEVERAL evidence groups in one call (each entry carries its own evidenceGroupId and changes). Prefer evidence_group_update for a single group. Requires: the evidenceGroupIds to update (evidence_group_search to find them).",
   inputSchema,
   annotations: {
     title: "Evidence Group Update Bulk",
@@ -30,7 +30,7 @@ export const evidence_group_update_bulk = defineTool({
     const token = ctx.auth?.token ?? "";
     const sdkClient = createClient(
       createConfig({
-        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? process.env.MCP_API_BASE_URL ?? "https://api.gcloudfactory.com/digital-trust",
+        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? (process.env.MCP_API_BASE_URL ? `${process.env.MCP_API_BASE_URL.replace(/\/+$/, "")}/digital-trust` : "https://api.gcloudfactory.com/digital-trust"),
         headers: {
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),

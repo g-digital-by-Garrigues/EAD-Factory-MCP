@@ -47,8 +47,9 @@ Add to your `~/.claude.json` or `claude_desktop_config.json`:
       "command": "npx",
       "args": ["-y", "@g-digital/mcp-ead-factory"],
       "env": {
-        "MCP_AUTH_EMAIL": "your-email@example.com",
-        "MCP_AUTH_PASSWORD": "your-password"
+        "MCP_SVC_TOKEN_URL": "https://your-idp.example.com/oauth2/v1/token",
+        "MCP_SVC_CLIENT_ID": "your-client-id",
+        "MCP_SVC_CLIENT_SECRET": "your-client-secret"
       }
     }
   }
@@ -59,8 +60,9 @@ Add to your `~/.claude.json` or `claude_desktop_config.json`:
 
 ```bash
 docker run --rm -i \
-  -e MCP_AUTH_EMAIL=your-email@example.com \
-  -e MCP_AUTH_PASSWORD=your-password \
+  -e MCP_SVC_TOKEN_URL=https://your-idp.example.com/oauth2/v1/token \
+  -e MCP_SVC_CLIENT_ID=your-client-id \
+  -e MCP_SVC_CLIENT_SECRET=your-client-secret \
   gdigital/ead-factory:latest
 ```
 
@@ -70,14 +72,13 @@ docker run --rm -i \
 
 | Variable | Required | Description |
 |---|---|---|
-| `MCP_AUTH_EMAIL` | One of flow 1 or 2 | Your account email |
-| `MCP_AUTH_PASSWORD` | One of flow 1 or 2 | Your account password |
-| `MCP_OPENID_ISSUER` | One of flow 1 or 2 | OpenID Connect issuer URL |
-| `MCP_OPENID_CLIENT_ID` | One of flow 1 or 2 | OpenID Connect client ID |
-| `MCP_OPENID_REFRESH_TOKEN` | One of flow 1 or 2 | OpenID Connect refresh token |
+| `MCP_SVC_TOKEN_URL` | Required | OAuth2 client_credentials token endpoint URL |
+| `MCP_SVC_CLIENT_ID` | Required | OAuth2 client ID |
+| `MCP_SVC_CLIENT_SECRET` | Required | OAuth2 client secret |
+| `MCP_SVC_SCOPE` | Optional | OAuth2 scope for the token request |
 | `MCP_AUTH_JWT` | Optional | Pre-seeded JWT (skips interactive login) |
 | `MCP_OTEL_ENABLED` | Optional | Set to `true` to enable OpenTelemetry tracing |
-| `MCP_API_BASE_URL` | Optional | Override upstream API base URL |
+| `MCP_API_BASE_URL` | Optional | Gateway root URL — each manager's path prefix is appended automatically; use `MCP_API_BASE_URL_<MANAGER>` for a full per-manager override (used as-is) |
 
 ## Bundled Skills
 
@@ -91,61 +92,62 @@ See [docs/agent-prompts.md](docs/agent-prompts.md) for end-to-end prompt example
 
 ## Available Tools
 
-This server exposes **63 tools**:
+This server exposes **64 tools**:
 
 | Tool | Description |
 |------|-------------|
-| `evidence_case_file_delete_bulk` | Delete bulk case files |
-| `evidence_case_file_search` | Search case file with filters |
-| `evidence_case_file_create` | Creates a new case file — the top-level container for evidence groups, evidence, and reports. Use this first, before any other Evidence-manager tool. No prerequisites. Example: evidence_case_file_create({ name: 'Q1 2026 audit' }) returns { id, ... } — use the returned id as caseFileId in evidence_group_create. |
-| `evidence_case_file_update_bulk` | Update a case files |
+| `evidence_case_file_delete_bulk` | Permanently deletes SEVERAL case files in one call. Destructive and not reversible — confirm the caseFileIds first (evidence_case_file_search) and prefer closing a case file via evidence_case_file_status_update when you only need to end work on it. |
+| `evidence_case_file_search` | Searches case files with optional filters (name, status, dates, pagination). Use to find a caseFileId when you don't have it, or to list what exists before creating a new case file with evidence_case_file_create. |
+| `evidence_case_file_create` | Creates a new case file — the top-level container for evidence groups, evidence, and reports. Use this first, before any other Evidence-manager tool. No prerequisites. Unlike most create tools, `id` is CALLER-SUPPLIED (generate a fresh UUID v4 yourself, this API does not assign one) — there is no `name` field, use `title` instead. Example: evidence_case_file_create({ id: '<generate a UUID v4>', title: 'Q1 2026 audit' }) — use that same id as caseFileId in evidence_group_create. |
+| `evidence_case_file_update_bulk` | Updates the editable metadata of SEVERAL case files in one call (each entry carries its own caseFileId and changes). Prefer evidence_case_file_update for a single case file. Requires: the caseFileIds of every case file to update (evidence_case_file_search to find them). |
 | `evidence_case_file_get` | Retrieves a case file's details by id. Use to confirm a case file exists, or to check its status before creating evidence groups or reports under it. Requires: evidence_case_file_create → caseFileId. |
-| `evidence_case_file_update` | Update a case file |
-| `evidence_case_file_relationship_assign` | Create a new relationship assigned to a case file in the system |
-| `evidence_case_file_report_preview` | Generate Case File ReportPreview |
-| `evidence_case_file_report_generate` | Generate Case File signed report |
-| `evidence_case_file_report_update` | Update case file report |
-| `evidence_case_file_report_pdf_url_get` | Get report PDF URL |
-| `evidence_case_file_report_zip_url_get` | Get report ZIP URL |
-| `evidence_case_file_status_update` | Update case file status |
-| `evidence_report_delete` | Delete report |
+| `evidence_case_file_update` | Updates a single case file's editable metadata (e.g. name, description). Requires: evidence_case_file_create or evidence_case_file_search → caseFileId. To change its OPEN/CLOSE lifecycle state use evidence_case_file_status_update instead. |
+| `evidence_case_file_relationship_assign` | Assigns a relationship on a case file, linking it to an external/related entity reference for traceability. Use after creating the case file when your workflow tracks which matter, client, or system record it belongs to. Requires: evidence_case_file_create → caseFileId. |
+| `evidence_case_file_report_preview` | Generates an UNSIGNED preview of a case file's evidentiary report so you can check its content before producing the signed version with evidence_case_file_report_generate. Requires: evidence_case_file_create → caseFileId, with sealed evidence groups inside. |
+| `evidence_case_file_report_generate` | Generates the SIGNED evidentiary report of a case file (the certified document covering its sealed evidence). Returns a reportId — then call evidence_case_file_report_pdf_url_get (PDF) or evidence_case_file_report_zip_url_get (full package) to download. Requires: evidence_case_file_create → caseFileId; preview first with evidence_case_file_report_preview. |
+| `evidence_case_file_report_update` | Updates a previously generated case-file report's metadata. Requires: evidence_case_file_report_generate → reportId (and the caseFileId it belongs to). Does not re-generate the report content — generate a new report for updated evidence. |
+| `evidence_case_file_report_pdf_url_get` | Retrieves a download URL for the signed PDF document of a case-file report. Requires: evidence_case_file_report_generate → reportId (plus caseFileId). For the full evidence package (PDF + files + verification data) use evidence_case_file_report_zip_url_get. |
+| `evidence_case_file_report_zip_url_get` | Retrieves a download URL for the complete ZIP package of a case-file report (signed PDF plus evidence files and verification material). Requires: evidence_case_file_report_generate → reportId (plus caseFileId). |
+| `evidence_case_file_status_update` | Changes a case file's lifecycle status (OPEN or CLOSE). Use CLOSE when work on the case file is finished and it should no longer accept new evidence groups; reopen with OPEN. Requires: evidence_case_file_create or evidence_case_file_search → caseFileId. |
+| `evidence_report_delete` | Permanently deletes a generated report by its reportId. Destructive — the signed document and its package stop being downloadable. Requires: evidence_case_file_report_generate → reportId. The underlying case file and its evidence are NOT touched. |
 | `evidence_group_evidence_register` | Register a new evidence in a group — the first step of a 2-step upload (register, then PUT the file bytes to the returned upload URL). Use for each file you want to add to an OPEN evidence group. Requires: evidence_group_create → evidenceGroupId, evidence_case_file_create → caseFileId, and the file's SHA-256 hash (compute it before calling, or use the evidence_create_sealed composite tool which does this for you). Do not call evidence_group_close until every registered evidence's bytes have been uploaded. Custody type: INTERNAL = EAD Factory stores and custodies the file itself. | EXTERNAL = The file lives outside EAD Factory — you attest to its hash only, EAD Factory never stores the bytes. Testimony (qualified proof) provider family: TSP = Trusted Service Provider — eIDAS-qualified electronic timestamp; the legally strongest proof tier. | DLT = Distributed Ledger Technology — blockchain-anchored proof; immutable and independently verifiable. |
-| `evidence_group_evidence_get` | Get evidence in group details |
-| `evidence_group_evidence_delete` | Delete evidence |
-| `evidence_group_evidence_download_url_create` | Create download url |
-| `evidence_group_evidence_upload_url_create` | Create upload url |
-| `evidence_thumbnail_url_get` | Get the evidence image thumbnail URL |
-| `evidence_search` | Search evidences |
+| `evidence_group_evidence_get` | Gets one evidence's details (metadata, hash, custody, upload state) inside a specific evidence group. Requires: evidence_case_file_create → caseFileId, evidence_group_create → evidenceGroupId, evidence_group_evidence_register → evidenceId. |
+| `evidence_group_evidence_delete` | Permanently deletes one evidence from an evidence group. Only makes sense while the group is still OPEN (sealed groups are immutable). Requires: caseFileId + evidenceGroupId + evidence_group_evidence_register → evidenceId. |
+| `evidence_group_evidence_download_url_create` | Creates a temporary download URL for an evidence file stored in a group (INTERNAL custody). Use to retrieve the original bytes after upload. Requires: caseFileId + evidenceGroupId + evidence_group_evidence_register → evidenceId. |
+| `evidence_group_evidence_upload_url_create` | Creates a fresh presigned upload URL for an ALREADY-REGISTERED evidence in a group — step 2 of the register-then-upload flow (PUT the file bytes to the returned URL). Use when the URL from evidence_group_evidence_register expired or was lost. Requires: caseFileId + evidenceGroupId + evidenceId. evidence_create_sealed does all of this automatically. |
+| `evidence_thumbnail_url_get` | Retrieves a temporary URL for an image evidence's thumbnail at the requested size — use for quick visual verification without downloading the original file. Requires: caseFileId + evidenceGroupId + evidenceId (image-type evidence only) and a thumbnailSize path value. |
+| `evidence_search` | Searches evidences across the tenant with optional filters (state, dates, pagination) — not scoped to one group. Use to find an evidenceId or audit what exists; for one group's content use evidence_group_get instead. |
 | `generate_evidence` | Register a new evidence (legacy top-level name; not scoped to a specific evidence group at creation time, unlike evidence_group_evidence_register). Use for standalone evidence outside the group-based flow, or for continuity with the legacy EAD-Factory-MCP integration. Requires the file's SHA-256 hash. Prefer evidence_create_sealed for a new, complete evidence group + evidence + seal flow. Custody type: INTERNAL = EAD Factory stores and custodies the file itself. | EXTERNAL = The file lives outside EAD Factory — you attest to its hash only, EAD Factory never stores the bytes. Testimony (qualified proof) provider family: TSP = Trusted Service Provider — eIDAS-qualified electronic timestamp; the legally strongest proof tier. | DLT = Distributed Ledger Technology — blockchain-anchored proof; immutable and independently verifiable. |
-| `evidence_update_bulk` | Update evidences |
+| `evidence_update_bulk` | Updates the editable metadata of SEVERAL evidences in one call (each entry carries its own evidenceId and changes). Prefer evidence_update for a single evidence. Requires: the evidenceIds to update (evidence_search to find them). |
 | `get_evidence` | Retrieves an evidence record's details and status by id (legacy top-level name). Use to check an evidence's timestamping status (IN_PROCESS / COMPLETED / ERROR) after registration. Requires: generate_evidence or evidence_group_evidence_register → evidenceId. |
-| `evidence_delete` | Delete evidence |
-| `evidence_update` | Update evidence |
-| `evidence_download_url_create` | Create download url |
-| `evidence_upload_url_create` | Create upload url |
-| `evidence_temp_file_upload_url_create` | Create upload url temporary file |
-| `evidence_multipart_upload_start` | Create upload url temporary file |
-| `evidence_group_delete_bulk` | Delete bulk evidence groups |
-| `evidence_group_create` | Creates an evidence group inside a case file — evidence records are always registered inside a group, never standalone (except via the legacy generate_evidence tool). Use when starting a new batch of related evidence (e.g. all files for one incident). Requires: evidence_case_file_create → caseFileId. Example: evidence_group_create({ caseFileId, type: 'FILE' }) returns { id, status: 'OPEN' } — use the returned id as evidenceGroupId in evidence_group_evidence_register, then evidence_group_close once every evidence in the group has been uploaded. |
-| `evidence_group_get` | Get evidence group details |
-| `evidence_group_discard` | Discard an evidence group |
-| `evidence_group_update` | Update evidence group |
+| `evidence_delete` | Permanently deletes one evidence by evidenceId (no group path needed). Destructive; sealed content should not be deleted — use only for drafts or mis-registered evidence. Requires: evidence_group_evidence_register or generate_evidence → evidenceId. |
+| `evidence_update` | Updates a single evidence's editable metadata (e.g. name, description) by evidenceId. The file content and hash are immutable — re-register a new evidence for changed files. Requires: evidence_group_evidence_register or generate_evidence → evidenceId. |
+| `evidence_download_url_create` | Creates a temporary download URL for an evidence's stored file when you only hold the evidenceId (no group path needed — same bytes as evidence_group_evidence_download_url_create). Requires: generate_evidence or evidence_group_evidence_register → evidenceId. |
+| `evidence_upload_url_create` | Creates a fresh presigned upload URL for an already-registered evidence by evidenceId — step 2 of the register-then-upload flow (PUT the file bytes to the returned URL). Pairs with generate_evidence the way evidence_group_evidence_upload_url_create pairs with evidence_group_evidence_register. Requires: generate_evidence → evidenceId. |
+| `evidence_temp_file_upload_url_create` | Creates a presigned upload URL for a TEMPORARY file not yet registered as evidence. Use for staging content that another operation will reference; for real evidence prefer the register-then-upload flow (evidence_group_evidence_register) or the evidence_create_sealed composite, which handle registration and upload together. |
+| `evidence_multipart_upload_start` | Starts a MULTIPART upload session for a large evidence file (returns the upload coordinates for uploading the file in parts). Use when a single presigned PUT is not enough for the file size. Requires: an already-registered evidence (evidence_group_evidence_register or generate_evidence → evidenceId) and the file name. |
+| `evidence_group_delete_bulk` | Permanently deletes SEVERAL evidence groups of one case file in one call. Destructive — prefer evidence_group_discard for a single group, and never delete sealed groups that back issued reports. Requires: caseFileId + the evidenceGroupIds to delete (evidence_group_search to find them). |
+| `evidence_group_create` | Creates an evidence group inside a case file — evidence records are always registered inside a group, never standalone (except via the legacy generate_evidence tool). Use when starting a new batch of related evidence (e.g. all files for one incident). Like evidence_case_file_create, `id` is CALLER-SUPPLIED (generate a fresh UUID v4 yourself). Requires: evidence_case_file_create → caseFileId. Example: evidence_group_create({ id: '<generate a UUID v4>', caseFileId, type: 'FILE' }) returns { status: 'OPEN', ... } — use that same id as evidenceGroupId in evidence_group_evidence_register, then evidence_group_close once every evidence in the group has been uploaded. |
+| `evidence_group_get` | Gets one evidence group's details — status (OPEN/CLOSED), seal information, and its evidences with their upload states. Use to verify every file was uploaded before evidence_group_close, or to check the seal after closing. Requires: caseFileId + evidence_group_create → evidenceGroupId. |
+| `evidence_group_discard` | Discards (deletes) an OPEN evidence group and its registered evidences — use to abandon a group you no longer intend to seal. Destructive; sealed (CLOSED) groups are immutable evidence and should not be discarded. Requires: caseFileId + evidence_group_create → evidenceGroupId. |
+| `evidence_group_update` | Updates an evidence group's editable metadata (e.g. name, description). Only meaningful while the group is OPEN — sealed groups are immutable. Requires: caseFileId + evidence_group_create → evidenceGroupId. |
 | `evidence_group_close` | Seals (closes) an evidence group, triggering qualified timestamping — after this, no more evidence can be added. Use only after every evidence registered in the group has had its file bytes uploaded to the presigned URL from evidence_group_evidence_register. Requires: evidence_group_create → evidenceGroupId, evidence_case_file_create → caseFileId, and the current evidencesCount. ASYNC: the group transitions OPEN → CLOSING → CLOSED; poll evidence_group_get until status is CLOSED before generating a report. Prefer the evidence_create_sealed composite tool for a new group — it registers, uploads, closes, and waits for CLOSED in one call. |
-| `evidence_group_search` | Search evidence group |
-| `evidence_group_update_bulk` | Update evidence groups |
-| `evidence_report_pdf_url_get` | Get the report PDF document |
-| `evidence_report_zip_url_get` | Get the report ZIP package document |
+| `evidence_group_search` | Searches evidence groups across case files with optional filters (status, dates, pagination). Use to find an evidenceGroupId or list groups pending sealing; for one group's full detail use evidence_group_get. |
+| `evidence_group_update_bulk` | Updates the editable metadata of SEVERAL evidence groups in one call (each entry carries its own evidenceGroupId and changes). Prefer evidence_group_update for a single group. Requires: the evidenceGroupIds to update (evidence_group_search to find them). |
+| `evidence_report_pdf_url_get` | Retrieves a download URL for a report's signed PDF when you only hold the reportId (no caseFileId path needed — same document evidence_case_file_report_pdf_url_get returns). Requires: evidence_case_file_report_generate → reportId. |
+| `evidence_report_zip_url_get` | Retrieves a download URL for a report's complete ZIP package when you only hold the reportId (same package evidence_case_file_report_zip_url_get returns). Requires: evidence_case_file_report_generate → reportId. |
 | `create_signature_request` | Creates a new signature request — the top-level container for documents and signatories in a signing flow. Use this first, before add_document_to_signature_request. No prerequisites. Example: create_signature_request({ name: 'NDA — Acme Corp', createdBy: 'jane@company.com' }) returns { id, ... } — use the returned id as signatureRequestId in subsequent calls. |
 | `add_document_to_signature_request` | Adds a document to a signature request — the first step of a 2-step upload (add, then PUT the file bytes to the returned upload URL). Use once per document that needs signing. Requires: create_signature_request → signatureRequestId, and the document's SHA-256 hash (compute it before calling, or use the signature_request_full composite tool). Add signatories with add_signatory_to_document before activating. Signature type: INTERPOSITION = EAD Factory mediates the signing act on the signatory's behalf (e.g. an OTP sent via WhatsApp/SMS) — the signatory needs no software or certificate. | ADVANCED = Advanced electronic signature — the signatory signs directly (signing pad or certificate); a stronger legal tier than INTERPOSITION. | OTHER = A signature type not covered by INTERPOSITION or ADVANCED. |
 | `add_signatory_to_document` | Adds a signatory (by name + email) to a document within a signature request. Use once per person who needs to sign that specific document. Requires: create_signature_request → signatureRequestId, add_document_to_signature_request → documentId. Add all signatories before calling activate_signature_request — signatories cannot be added after activation. |
-| `add_validator_to_signatory` | Add validator for a signatory |
-| `add_observer_to_document` | Create observer |
+| `add_validator_to_signatory` | Adds a validator to a document's signatory: a person who must approve (validate) that signatory's identity or the document before the signature can proceed. Add validators BEFORE activate_signature_request. Requires: add_document_to_signature_request → documentId, add_signatory_to_document → signatoryId. The signature_request_full composite accepts validators inline. |
+| `add_observer_to_document` | Adds an observer to a signature request's document: a person who receives read-only visibility of the process and the signed result without signing. Add observers BEFORE activate_signature_request. Requires: create_signature_request → signatureRequestId, add_document_to_signature_request → documentId. |
 | `activate_signature_request` | Activates a signature request, sending signing notifications to every added signatory — after this, no more documents or signatories can be added (use add_validator_to_signatory / add_observer_to_document before activating if you need those roles). Requires: create_signature_request → signatureRequestId, at least one document (add_document_to_signature_request) with its bytes uploaded, and at least one signatory per document (add_signatory_to_document). Prefer signature_request_full for a new request — it creates, adds documents+signatories, and activates in one call. |
 | `get_signature_request` | Retrieves a signature request's details and status by id (legacy top-level name). Use to check signing progress after activation. Requires: create_signature_request → signatureRequestId. |
 | `signature_request_list` | List signature requests, optionally filtered by close condition among other criteria. Use to find a request when you don't have its id (e.g. by name or status). Signature-request close condition: ALL_REQUIRED = The request only closes once EVERY signatory has signed. | PARTIAL_ALLOWED = The request can close once the minimum required signatories have signed, even if others haven't yet. |
 | `signature_request_cancel` | Cancels an active signature request — no further signing can occur. Use when a request was activated in error or is no longer needed. Requires: create_signature_request → signatureRequestId. Cannot be undone. |
 | `signature_certificate_generate` | Generates the well-signed appearance certificate document for a signature request. Use once every signatory has signed (check with get_signature_request). Requires: create_signature_request → signatureRequestId. Unlike EAD Enterprise's equivalent tool (a GET that polls an already-generated URL), this triggers generation and returns the result in the same call. |
 | `signature_coordinate_set` | Sets the on-page (x, y, page) coordinates where a signatory's signature appears on a document. Use after add_signatory_to_document if the signature placement needs to be explicit rather than auto-positioned. Requires: create_signature_request → signatureRequestId, add_document_to_signature_request → documentId, add_signatory_to_document → signatoryId. |
+| `signature_document_download_url_get` | Retrieves the download link for the FINAL, well-signed version of a document — the actual signed file, once every signatory has signed. Requires: create_signature_request → signatureRequestId, add_document_to_signature_request → documentId. Use get_signature_request first to confirm signing is complete before calling this. Not to be confused with signature_certificate_generate, which produces a separate appearance certificate document, not the signed document itself. |
 | `notification_request_create` | Creates a new notification request (draft) — the top-level container for receivers and attachments in a certified-notification flow. Use this first, before any other Notification-manager tool. No prerequisites. Set `autosend: true` to also send immediately on activation of the first receiver batch, or leave it false to add receivers/documents over several calls before calling notification_request_send yourself. Returns requestId and one notificationId per receiver already on the request (if any were included inline). |
 | `notification_request_send` | Activates a notification request, triggering delivery to every added receiver across their configured channels. Runs as an MCP Task (bounded-polling until every receiver's notification leaves its in-flight state — EAD Factory's upstream emits no events for this transition). Requires: notification_request_create → requestId, at least one receiver (notification_receiver_add). Use notification_request_status to check progress without waiting for the Task to complete. |
 | `notification_request_status` | Searches notifications, optionally filtered by requestId and/or delivery state — the closest equivalent to "checking a request's status": a request fans out into one notification per receiver, each with its own state history, so this returns every notification matching the filter with its current state. Omit requestId to search across every request. Requires: notification_request_create → requestId (if filtering to one request). |
@@ -155,9 +157,15 @@ This server exposes **63 tools**:
 | `notification_document_download_url_create` | Creates a presigned download URL for a document attachment on a notification request. Requires: notification_request_create → requestId, notification_document_add → attachmentId. |
 | `notification_certificate_generate` | Generates a delivery-certificate report for one or more notifications on a request. Use once notification_request_status shows the relevant notifications have left their in-flight state. Requires: notification_request_create → requestId, notification_request_status → notificationIds. Returns a reportId — call notification_certificate_pdf_url_get with it to get the actual download URL (2-step, same shape as Evidence's report tools). |
 | `notification_certificate_pdf_url_get` | Retrieves the download URL for a previously generated notification delivery certificate. Requires: notification_certificate_generate → reportId. |
-| `evidence_create_sealed` | Evidence Create Sealed (custom tool). |
-| `signature_request_full` | Signature Request Full (custom tool). |
-| `ead_factory_help` | Ead Factory Help (custom tool). |
+| `evidence_create_sealed` | Creates (or reuses) an evidence group, registers and uploads one or more files as evidence, then seals (closes) the group — the full flagship evidence flow in one call instead of evidence_group_create + N x (evidence_group_evidence_register + upload) + evidence_group_close. Bounded-polls until the group reaches CLOSED (EAD Factory's upstream emits no events for this transition): task-aware MCP clients get an asynchronous Task; any other client simply receives the final result synchronously. Requires: case_file_create -> caseFileId. Provide `evidenceGroupId` to add to an existing OPEN group instead of creating one. Each evidence's file uses the shared FileInput contract (local path, base64, https URL, or n8n binary item) — never a bespoke file field. On success returns the group id, its final CLOSED status, and each evidence's id + sha256. Use the atomic evidence_group_create / evidence_group_evidence_register / evidence_group_close tools instead when you need to inspect or react to each intermediate step. |
+| `signature_request_full` | Creates a signature request, adds one or more documents (each with its own signatories), and activates it — the full flagship signature flow in one call instead of create_signature_request + N x (add_document_to_signature_request + add_signatory_to_document) + activate_signature_request. Each document's file uses the shared FileInput contract (local path, base64, https URL, or n8n binary item) — never a bespoke file field. Set `activate: false` to leave the request in draft so you can add validators/observers (add_validator_to_signatory, add_observer_to_document) before activating it yourself. On success returns the request id, each document's id, and each signatory's id. Use the atomic tools instead when you need to inspect or react to each intermediate step, or need validators/observers before activation. |
+| `ead_factory_help` | Returns an overview of EAD Factory's managers (Evidence, Signature, Notification, Chat), their key tools and starting points, and guidance on when to use a composite workflow tool (e.g. evidence_create_sealed) versus the atomic tools. Call this first if you're unsure which tool to use — no credentials needed. |
+
+## MCP Tasks support
+
+`notification_request_send` runs as an MCP Task and **requires a client with MCP Tasks support** — from other clients the call fails; instead, create the request with `autosend: true` (`notification_request_create`) and poll `notification_request_status` yourself.
+
+`evidence_create_sealed` works from **any** client: task-aware clients get an asynchronous Task; all others simply receive the final result synchronously.
 
 ## Coexistence
 

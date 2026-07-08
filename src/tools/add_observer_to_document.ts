@@ -18,7 +18,7 @@ const inputSchema = applyFieldGlosses(rawInputSchema, {"caseFileId":"MANDATORY. 
 
 export const add_observer_to_document = defineTool({
   name: "add_observer_to_document",
-  description: "Create observer",
+  description: "Adds an observer to a signature request's document: a person who receives read-only visibility of the process and the signed result without signing. Add observers BEFORE activate_signature_request. Requires: create_signature_request → signatureRequestId, add_document_to_signature_request → documentId.",
   inputSchema,
   outputSchema: zSignatureAddObserverResponse,
   annotations: {
@@ -34,7 +34,7 @@ export const add_observer_to_document = defineTool({
     const token = ctx.auth?.token ?? "";
     const sdkClient = createClient(
       createConfig({
-        baseUrl: process.env.MCP_API_BASE_URL_SIGNATURE ?? process.env.MCP_API_BASE_URL ?? "https://api.gcloudfactory.com/signature-manager",
+        baseUrl: process.env.MCP_API_BASE_URL_SIGNATURE ?? (process.env.MCP_API_BASE_URL ? `${process.env.MCP_API_BASE_URL.replace(/\/+$/, "")}/signature-manager` : "https://api.gcloudfactory.com/signature-manager"),
         headers: {
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),
