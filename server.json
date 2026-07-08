@@ -1,81 +1,117 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "description": "EAD Factory MCP — Digital Trust services APIs for your agents",
+  "description": "MCP server for EAD Factory: qualified evidence, signature, notifications and chat via AI agents.",
   "name": "io.github.g-digital-by-Garrigues/ead-factory",
   "packages": [
     {
       "environmentVariables": [
         {
-          "description": "Evidence Manager API base URL",
-          "isRequired": true,
+          "description": "Set to \"true\" to allow plain http:// fileUrl downloads in evidence_create (default https-only). Private/internal addresses are rejected regardless (resolution-time check; see the documented DNS TOCTOU limitation in the hosted-deployment runbook).",
+          "isRequired": false,
           "isSecret": false,
-          "name": "API_BASE_URL"
+          "name": "MCP_ALLOW_INSECURE_FILE_URL"
         },
         {
-          "description": "Full flow base email — used to compose participant emails (user+signatory@domain, etc.)",
-          "isRequired": true,
+          "description": "Escape hatch for MCP_HTTP_PUBLIC=true WITHOUT inbound-token introspection: set to \"true\" ONLY when an upstream gateway already verifies Bearer tokens. The server logs a prominent warning and forwards tokens upstream unverified.",
+          "isRequired": false,
           "isSecret": false,
-          "name": "FULL_FLOW_EMAIL_BASE"
+          "name": "MCP_ALLOW_UNVERIFIED_BEARER"
         },
         {
-          "description": "Full flow default file path",
-          "isRequired": true,
+          "description": "Comma-separated allowed Host headers. Empty = Host validation disabled (default). When set, requests with a Host outside the list are rejected.",
+          "isRequired": false,
           "isSecret": false,
-          "name": "FULL_FLOW_FILE_PATH"
+          "name": "MCP_ALLOWED_HOSTS"
         },
         {
-          "description": "HTTP_PORT",
-          "isRequired": true,
+          "description": "Comma-separated allowed browser Origins (DNS-rebinding defense). Empty = reject any request carrying an Origin header; non-browser clients (CLI/SDK) send no Origin and are always allowed. Use '*' to allow all.",
+          "isRequired": false,
           "isSecret": false,
-          "name": "HTTP_PORT"
+          "name": "MCP_ALLOWED_ORIGINS"
         },
         {
-          "description": "OKTA_CLIENT_ID",
-          "isRequired": true,
+          "description": "Gateway ROOT URL (e.g. https://api.int.gcloudfactory.com) — each manager's path prefix is appended automatically; do NOT include a manager path here",
+          "isRequired": false,
           "isSecret": false,
-          "name": "OKTA_CLIENT_ID"
+          "name": "MCP_API_BASE_URL"
         },
         {
-          "description": "OKTA_CLIENT_SECRET (See https://eadtrust.example.com/onboarding for credential acquisition.)",
+          "description": "Full base URL override for the chat manager, used as-is (default: https://api.gcloudfactory.com/chat-bot-manager)",
+          "isRequired": false,
+          "isSecret": false,
+          "name": "MCP_API_BASE_URL_CHAT"
+        },
+        {
+          "description": "Full base URL override for the evidence manager, used as-is (default: https://api.gcloudfactory.com/digital-trust)",
+          "isRequired": false,
+          "isSecret": false,
+          "name": "MCP_API_BASE_URL_EVIDENCE"
+        },
+        {
+          "description": "Full base URL override for the notification manager, used as-is (default: https://api.gcloudfactory.com/notifications)",
+          "isRequired": false,
+          "isSecret": false,
+          "name": "MCP_API_BASE_URL_NOTIFICATION"
+        },
+        {
+          "description": "Full base URL override for the signature manager, used as-is (default: https://api.gcloudfactory.com/signature-manager)",
+          "isRequired": false,
+          "isSecret": false,
+          "name": "MCP_API_BASE_URL_SIGNATURE"
+        },
+        {
+          "description": "Interface the HTTP transport binds to. Default 127.0.0.1 (localhost only). Set 0.0.0.0 to expose on all interfaces (containers do this automatically).",
+          "isRequired": false,
+          "isSecret": false,
+          "name": "MCP_HTTP_HOST"
+        },
+        {
+          "description": "Maximum accepted POST /mcp request-body size in bytes (default 16777216 = 16 MiB — sized so base64 file uploads within the documented tool limits fit). Oversized requests get a 413 JSON-RPC error before/while reading — closes a memory-exhaustion DoS vector in public deployments. Note: base64 file sources are capped by this limit BEFORE MCP_FILE_MAX_BYTES applies.",
+          "isRequired": false,
+          "isSecret": false,
+          "name": "MCP_HTTP_MAX_BODY_BYTES"
+        },
+        {
+          "description": "Set to \"true\" for public/multi-tenant deployments. Activates Host validation and refuses to start unless (1) MCP_ALLOWED_ORIGINS or MCP_ALLOWED_HOSTS is set AND (2) inbound Bearer introspection is configured (MCP_SVC_INTROSPECT_URL + MCP_SVC_CLIENT_ID/SECRET) or MCP_ALLOW_UNVERIFIED_BEARER=true is set explicitly (fail-closed).",
+          "isRequired": false,
+          "isSecret": false,
+          "name": "MCP_HTTP_PUBLIC"
+        },
+        {
+          "description": "OAuth2 client_credentials client ID",
+          "isRequired": true,
+          "isSecret": false,
+          "name": "MCP_SVC_CLIENT_ID"
+        },
+        {
+          "description": "OAuth2 client_credentials client secret (See https://digitaltrust.gcloudfactory.com for credential acquisition.)",
           "isRequired": true,
           "isSecret": true,
-          "name": "OKTA_CLIENT_SECRET"
+          "name": "MCP_SVC_CLIENT_SECRET"
         },
         {
-          "description": "OKTA_SCOPE",
-          "isRequired": true,
+          "description": "RFC 7662 token introspection URL for inbound Bearer verification in HTTP mode. Opt-in — reuses the service-account client id/secret above as the resource-server credentials.",
+          "isRequired": false,
           "isSecret": false,
-          "name": "OKTA_SCOPE"
+          "name": "MCP_SVC_INTROSPECT_URL"
         },
         {
-          "description": "OAuth credentials (Okta client_credentials flow) Used both for calling Evidence Manager API and for verifying incoming Bearer tokens (HTTP mode)",
-          "isRequired": true,
+          "description": "Optional OAuth2 scope for the service-account token request",
+          "isRequired": false,
           "isSecret": false,
-          "name": "OKTA_TOKEN_URL"
+          "name": "MCP_SVC_SCOPE"
         },
         {
-          "description": "Polling configuration for evidence status",
+          "description": "Token endpoint URL for the OAuth2 client_credentials flow",
           "isRequired": true,
           "isSecret": false,
-          "name": "POLL_INTERVAL_MS"
+          "name": "MCP_SVC_TOKEN_URL"
         },
         {
-          "description": "POLL_MAX_ATTEMPTS",
-          "isRequired": true,
+          "description": "HTTP port when running in hosted (HTTP) mode; ignored in stdio mode",
+          "isRequired": false,
           "isSecret": false,
-          "name": "POLL_MAX_ATTEMPTS"
-        },
-        {
-          "description": "Signature Manager API base URL",
-          "isRequired": true,
-          "isSecret": false,
-          "name": "SIGNATURE_API_BASE_URL"
-        },
-        {
-          "description": "Transport: \"stdio\" for local Claude Code, \"http\" for remote deployment with auth",
-          "isRequired": true,
-          "isSecret": false,
-          "name": "TRANSPORT"
+          "name": "PORT"
         }
       ],
       "identifier": "@g-digital/mcp-ead-factory",
@@ -83,12 +119,12 @@
       "transport": {
         "type": "stdio"
       },
-      "version": "1.0.15"
+      "version": "1.1.0"
     }
   ],
   "repository": {
     "source": "github",
     "url": "https://github.com/g-digital-by-Garrigues/EAD-Factory-MCP"
   },
-  "version": "1.0.15"
+  "version": "1.1.0"
 }

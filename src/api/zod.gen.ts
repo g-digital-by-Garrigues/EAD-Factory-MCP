@@ -2277,7 +2277,15 @@ export const zSignatureGetSignatureRequestsQuery = z.object({
 /**
  * Signature requests obtained successfully
  */
-export const zSignatureGetSignatureRequestsResponse = z.array(zSignatureSignatureRequestViewModel1);
+export const zSignatureGetSignatureRequestsResponse = z.object({
+    records: z.array(zSignatureSignatureRequestViewModel1).optional(),
+    _metadata: z.object({
+        currentPage: z.int().optional(),
+        totalPages: z.int().optional(),
+        pageSize: z.int().optional(),
+        totalRecords: z.int().optional()
+    }).optional()
+});
 
 export const zSignatureUpdateSignatureRequestsBody = zSignatureBulkPatchRequestModel;
 
@@ -2309,7 +2317,7 @@ export const zSignatureGetSignatureRequestPath = z.object({
 /**
  * Signature request obtained successfully
  */
-export const zSignatureGetSignatureRequestResponse = z.array(zSignatureSignatureRequestDetailViewModel);
+export const zSignatureGetSignatureRequestResponse = zSignatureSignatureRequestDetailViewModel;
 
 export const zSignatureUpdateBody = zSignatureUpdateSignatureRequestModel;
 

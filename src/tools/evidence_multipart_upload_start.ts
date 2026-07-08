@@ -17,7 +17,7 @@ const inputSchema = applyFieldGlosses(rawInputSchema, {"caseFileId":"MANDATORY. 
 
 export const evidence_multipart_upload_start = defineTool({
   name: "evidence_multipart_upload_start",
-  description: "Create upload url temporary file",
+  description: "Starts a MULTIPART upload session for a large evidence file (returns the upload coordinates for uploading the file in parts). Use when a single presigned PUT is not enough for the file size. Requires: an already-registered evidence (evidence_group_evidence_register or generate_evidence → evidenceId) and the file name.",
   inputSchema,
   annotations: {
     title: "Evidence Multipart Upload Start",
@@ -32,7 +32,7 @@ export const evidence_multipart_upload_start = defineTool({
     const token = ctx.auth?.token ?? "";
     const sdkClient = createClient(
       createConfig({
-        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? process.env.MCP_API_BASE_URL ?? "https://api.gcloudfactory.com/digital-trust",
+        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? (process.env.MCP_API_BASE_URL ? `${process.env.MCP_API_BASE_URL.replace(/\/+$/, "")}/digital-trust` : "https://api.gcloudfactory.com/digital-trust"),
         headers: {
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),

@@ -1,4 +1,5 @@
 {
+  "annotations_schema_version": 1,
   "schema_status": "provisional-pending-OQ-G",
   "resources": [
     "evidence",
@@ -513,6 +514,16 @@
         "operation": {
           "value": "coordinate_set",
           "displayName": "Coordinate Set"
+        }
+      }
+    },
+    {
+      "name": "signature_document_download_url_get",
+      "n8n": {
+        "resource": "signature",
+        "operation": {
+          "value": "document_download_url_get",
+          "displayName": "Document Download Url Get"
         }
       }
     },

@@ -16,7 +16,7 @@ const inputSchema = applyFieldGlosses(rawInputSchema, {"caseFileId":"MANDATORY. 
 
 export const evidence_case_file_search = defineTool({
   name: "evidence_case_file_search",
-  description: "Search case file with filters",
+  description: "Searches case files with optional filters (name, status, dates, pagination). Use to find a caseFileId when you don't have it, or to list what exists before creating a new case file with evidence_case_file_create.",
   inputSchema,
   outputSchema: zEvidenceSearchResponse,
   annotations: {
@@ -32,7 +32,7 @@ export const evidence_case_file_search = defineTool({
     const token = ctx.auth?.token ?? "";
     const sdkClient = createClient(
       createConfig({
-        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? process.env.MCP_API_BASE_URL ?? "https://api.gcloudfactory.com/digital-trust",
+        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? (process.env.MCP_API_BASE_URL ? `${process.env.MCP_API_BASE_URL.replace(/\/+$/, "")}/digital-trust` : "https://api.gcloudfactory.com/digital-trust"),
         headers: {
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),

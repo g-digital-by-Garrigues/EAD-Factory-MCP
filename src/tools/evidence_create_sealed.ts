@@ -70,8 +70,9 @@ export const evidence_create_sealed = defineTool({
     "Creates (or reuses) an evidence group, registers and uploads one or more files as evidence, " +
     "then seals (closes) the group — the full flagship evidence flow in one call instead of " +
     "evidence_group_create + N x (evidence_group_evidence_register + upload) + evidence_group_close. " +
-    "Runs as an MCP Task (bounded-polling until the group reaches CLOSED — EAD Factory's upstream " +
-    "emits no events for this transition). Requires: case_file_create -> caseFileId. " +
+    "Bounded-polls until the group reaches CLOSED (EAD Factory's upstream emits no events for " +
+    "this transition): task-aware MCP clients get an asynchronous Task; any other client simply " +
+    "receives the final result synchronously. Requires: case_file_create -> caseFileId. " +
     "Provide `evidenceGroupId` to add to an existing OPEN group instead of creating one. " +
     "Each evidence's file uses the shared FileInput contract (local path, base64, https URL, or " +
     "n8n binary item) — never a bespoke file field. " +
@@ -80,7 +81,13 @@ export const evidence_create_sealed = defineTool({
     "tools instead when you need to inspect or react to each intermediate step.",
   inputSchema,
   pollable: true,
-  taskSupport: "required",
+  // Story 1.3 (audit U1): "optional", NOT "required" — Story 5.1's guidance allows
+  // "optional" for bounded-duration ops, and this composite bounds its own
+  // completion via pollForCompletion (runBoundedPolling: 60 attempts x 5s, the task
+  // fails on timeout — the SDK's automatic polling loop for task-unaware clients
+  // therefore always terminates). Contrast notification_request_send, which keeps
+  // "required": its fan-out duration scales with receiver count and is unbounded.
+  taskSupport: "optional",
   idempotencyWindowSeconds: 86400,
   async execute(input, ctx) {
     const {
@@ -102,8 +109,10 @@ export const evidence_create_sealed = defineTool({
       createConfig({
         baseUrl:
           process.env.MCP_API_BASE_URL_EVIDENCE ??
-          process.env.MCP_API_BASE_URL ??
-          "https://api.gcloudfactory.com/digital-trust",
+          // Story 1.2 (audit G1): global var = gateway ROOT, manager prefix appended
+          (process.env.MCP_API_BASE_URL
+            ? `${process.env.MCP_API_BASE_URL.replace(/\/+$/, "")}/digital-trust`
+            : "https://api.gcloudfactory.com/digital-trust"),
         headers: {
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),
@@ -222,8 +231,10 @@ export const evidence_create_sealed = defineTool({
           createConfig({
             baseUrl:
               process.env.MCP_API_BASE_URL_EVIDENCE ??
-              process.env.MCP_API_BASE_URL ??
-              "https://api.gcloudfactory.com/digital-trust",
+              // Story 1.2 (audit G1): global var = gateway ROOT, manager prefix appended
+              (process.env.MCP_API_BASE_URL
+                ? `${process.env.MCP_API_BASE_URL.replace(/\/+$/, "")}/digital-trust`
+                : "https://api.gcloudfactory.com/digital-trust"),
             headers: { Authorization: `Bearer ${token}` },
           }),
         );

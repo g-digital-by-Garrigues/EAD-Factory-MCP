@@ -18,7 +18,7 @@ const inputSchema = applyFieldGlosses(rawInputSchema, {"caseFileId":"MANDATORY. 
 
 export const evidence_group_update = defineTool({
   name: "evidence_group_update",
-  description: "Update evidence group",
+  description: "Updates an evidence group's editable metadata (e.g. name, description). Only meaningful while the group is OPEN — sealed groups are immutable. Requires: caseFileId + evidence_group_create → evidenceGroupId.",
   inputSchema,
   outputSchema: zEvidenceUpdateEvidenceGroupResponse,
   annotations: {
@@ -34,7 +34,7 @@ export const evidence_group_update = defineTool({
     const token = ctx.auth?.token ?? "";
     const sdkClient = createClient(
       createConfig({
-        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? process.env.MCP_API_BASE_URL ?? "https://api.gcloudfactory.com/digital-trust",
+        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? (process.env.MCP_API_BASE_URL ? `${process.env.MCP_API_BASE_URL.replace(/\/+$/, "")}/digital-trust` : "https://api.gcloudfactory.com/digital-trust"),
         headers: {
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),

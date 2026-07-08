@@ -276,7 +276,7 @@ function registerSyncTool(
       description: tool.description,
       inputSchema: inputShape,
       ...(tool.annotations ? { annotations: tool.annotations } : {}),
-      ...(tool.outputSchema ? { outputSchema: extractZodShape(tool.outputSchema) } : {}),
+      ...(tool.outputSchema ? { outputSchema: outputSchemaForRegister(tool.outputSchema) } : {}),
     },
     // biome-ignore lint/suspicious/noExplicitAny: registerTool's return-type overload narrows once outputSchema is set; SDK validates the real shape at runtime
     (async (rawArgs: any, _extra: any) => {
@@ -345,7 +345,8 @@ function registerSyncTool(
 
 // ── Pollable tool (MCP Tasks, STR-E7-03) ─────────────────────────────────────
 
-function registerPollableTool(
+// Exported for test coverage of the pollable registration path (Story 1.3 review, D1).
+export function registerPollableTool(
   mcpServer: McpServer,
   tool: ToolSpec,
   authSession: AuthSession | null,
@@ -363,7 +364,7 @@ function registerPollableTool(
       description: tool.description,
       inputSchema: inputShape,
       ...(tool.annotations ? { annotations: tool.annotations } : {}),
-      ...(tool.outputSchema ? { outputSchema: extractZodShape(tool.outputSchema) } : {}),
+      ...(tool.outputSchema ? { outputSchema: outputSchemaForRegister(tool.outputSchema) } : {}),
       execution: { taskSupport: tool.taskSupport ?? "required" },
     },
     {
@@ -390,6 +391,25 @@ function registerPollableTool(
           throw new Error(missingCredentialsError(tool.name).content[0].text);
         }
 
+        // Pollable-path idempotency (Story 1.3 review, D1): a task-unaware client whose
+        // blocking tools/call timed out mid-poll (taskSupport "optional" holds the
+        // response open for the whole composite) will retry with identical input.
+        // Without this, every retry created a NEW task re-running the entire operation
+        // (duplicate uploads / sealed groups). Replay within the tool's window returns
+        // the SAME task — task-aware and task-unaware retries both converge on the
+        // original task, whose result the SDK then serves from the shared taskStore.
+        // Note: keyed by (tool, input) only — identity-agnostic, matching the sync
+        // path's existing cache semantics.
+        const replayKey = IdempotencyCache.computeKey(tool.name, input);
+        const replayedTask = idempotency.get(tool.name, replayKey);
+        if (replayedTask) {
+          log.info(
+            { tool: tool.name },
+            "Pollable replay within idempotency window — returning the original task",
+          );
+          return { task: replayedTask };
+        }
+
         // ADR-A4-shaped key exposed to tools via ctx.getIdempotencyKey() (Story 4.5).
         const ctx = buildToolContext(
           buildIdempotencyKeyHeader(pkg, version, tool.name, input),
@@ -403,6 +423,7 @@ function registerPollableTool(
         const ttl = tool.sseOnly ? 7 * 86_400_000 : 86_400_000;
         // biome-ignore lint/suspicious/noExplicitAny: RequestTaskStore not exported from public SDK surface
         const task = await (extra.taskStore as any).createTask({ ttl });
+        idempotency.set(tool.name, replayKey, task, tool.idempotencyWindowSeconds);
         // biome-ignore lint/suspicious/noExplicitAny: same as above
         const capturedStore: any = extra.taskStore;
         const taskId = task.taskId as string;
@@ -696,4 +717,86 @@ export function extractZodShape(schema: ToolSpec["inputSchema"]): ZodRawShape {
     return schema.shape as ZodRawShape;
   }
   return { [NON_OBJECT_SCHEMA_WRAPPER_KEY]: schema } as ZodRawShape;
+}
+
+/**
+ * Story 6.1 (Live-Test Remediation Wave 2): recursively RELAX a response schema so the MCP
+ * SDK's `validateToolOutput` accepts what the real upstream actually returns, while keeping
+ * the STRUCTURE (keys, nesting, base types) for client documentation. Live testing of the
+ * generated EAD Factory server against the INT gateway (2026-07-08) surfaced three ways the
+ * vendored specs drift from reality, each of which hard-fails structuredContent with -32602:
+ *   1. undeclared object keys — the generator injects `nextSteps` (FR-30) and the upstream
+ *      returns fields beyond the spec → every object is made LOOSE (additionalProperties ok);
+ *   2. strict string FORMATS — e.g. createdAt "2026-07-08T07:24:48.01275" (no timezone)
+ *      fails `z.iso.datetime()` → every string is relaxed to a plain `z.string()`
+ *      (datetime/uuid/email/regex constraints dropped);
+ *   3. enum drift — an API that adds a status value the spec doesn't list would fail →
+ *      string enums are relaxed to `z.string()`.
+ * Numbers keep only their base type (bounds dropped); unknown node kinds fall back to
+ * `z.unknown()`. This only touches OUTPUT schemas (inputs stay strict via `extractZodShape`),
+ * and only ead-factory sets `emitOutputSchema: true`, so the blast radius is contained.
+ */
+export function relaxOutputSchema(schema: z.ZodType): z.ZodType {
+  // biome-ignore lint/suspicious/noExplicitAny: Zod v4 internal def introspection
+  const def = (schema as any)?._zod?.def;
+  switch (def?.type) {
+    case "object": {
+      const shape = (schema as z.ZodObject).shape as Record<string, z.ZodType>;
+      const relaxed: Record<string, z.ZodType> = {};
+      for (const [key, value] of Object.entries(shape)) relaxed[key] = relaxOutputSchema(value);
+      return z.looseObject(relaxed);
+    }
+    case "array":
+      return z.array(relaxOutputSchema(def.element));
+    case "optional":
+      return z.optional(relaxOutputSchema(def.innerType));
+    case "nullable":
+      return z.nullable(relaxOutputSchema(def.innerType));
+    case "default":
+    case "catch":
+    case "readonly":
+      // Output side: unwrap the modifier and treat as optional (the field may be absent).
+      return z.optional(relaxOutputSchema(def.innerType));
+    case "union":
+      return z.union(
+        (def.options as z.ZodType[]).map((opt) => relaxOutputSchema(opt)) as [
+          z.ZodType,
+          z.ZodType,
+          ...z.ZodType[],
+        ],
+      );
+    case "intersection":
+      return z.intersection(relaxOutputSchema(def.left), relaxOutputSchema(def.right));
+    case "record":
+      return z.record(z.string(), relaxOutputSchema(def.valueType));
+    case "string":
+      return z.string(); // drop datetime/uuid/email/regex formats
+    case "number":
+      return z.number(); // drop int/min/max bounds
+    case "boolean":
+      return z.boolean();
+    case "enum": {
+      const entries = Object.values((def.entries ?? {}) as Record<string, unknown>);
+      // String enums → plain string (accept drift). Non-string enums → fully permissive.
+      return entries.every((v) => typeof v === "string") ? z.string() : z.unknown();
+    }
+    default:
+      // literal / date / void / never / lazy / pipe / any / unknown / etc. → permissive.
+      return z.unknown();
+  }
+}
+
+/**
+ * Builds the schema REGISTERED as a tool's `outputSchema`. For a top-level `ZodObject`,
+ * returns the recursively-relaxed (and loose) object. For a non-`ZodObject` schema (bare
+ * `z.array`/`z.record`/intersection/union), keeps Story 10.1's wrapper: the MCP protocol's
+ * `structuredContent` is object-shaped, so the (relaxed) schema is advertised — and the value
+ * returned — under `NON_OBJECT_SCHEMA_WRAPPER_KEY`. The SDK accepts a full Zod schema here
+ * (`ZodRawShapeCompat | AnySchema`), not only a raw shape.
+ */
+export function outputSchemaForRegister(schema: ToolSpec["inputSchema"]): z.ZodType {
+  if (schema instanceof z.ZodObject) {
+    return relaxOutputSchema(schema);
+  }
+  return z.object({ [NON_OBJECT_SCHEMA_WRAPPER_KEY]: relaxOutputSchema(schema) });
 }

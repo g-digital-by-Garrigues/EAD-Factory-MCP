@@ -1,4 +1,4 @@
-# EAD Factory MCP
+# EAD Factory MCP Server
 
 [![npm version](https://img.shields.io/npm/v/@g-digital/mcp-ead-factory)](https://www.npmjs.com/package/@g-digital/mcp-ead-factory)
 [![npm downloads](https://img.shields.io/npm/dm/@g-digital/mcp-ead-factory)](https://www.npmjs.com/package/@g-digital/mcp-ead-factory)
@@ -6,11 +6,7 @@
 [![provenance](https://img.shields.io/badge/npm-provenance-green)](https://www.npmjs.com/package/@g-digital/mcp-ead-factory)
 [![smithery badge](https://smithery.ai/badge/g-digital/ead-factory)](https://smithery.ai/servers/g-digital/ead-factory)
 
-**EAD Factory MCP — Digital Trust services APIs for your agents.**
-
-This MCP server bridges any MCP-compatible agent (Claude Code, Claude Desktop, Cursor, Windsurf, Cline, VS Code, JetBrains, Zed) to EADTrust's Digital Trust services: Evidence Manager (qualified digital evidence + timestamping) and Signature Manager (electronic signature workflows).
-
-> Need credentials? See: [Get your testing credentials here!!](https://webforms.pipedrive.com/f/bYUKJVgt3TZ0QiINtf0mimlgL3BJw79kQaN3i7nXnqoPYabRqYPI5KX9ohhp7T5TTt)
+MCP server for EAD Factory: qualified evidence, signature, notifications and chat via AI agents.
 
 ## Quick start
 
@@ -18,7 +14,7 @@ This MCP server bridges any MCP-compatible agent (Claude Code, Claude Desktop, C
 npx -y @g-digital/mcp-ead-factory
 ```
 
-You will need Okta credentials (`OKTA_CLIENT_ID` + `OKTA_CLIENT_SECRET`) and at least the Evidence Manager + Signature Manager base URLs for the environment you target (see [Environment URLs](#environment-urls)).
+Or see [ONBOARDING.md](ONBOARDING.md) for a step-by-step setup guide (≤ 5 minutes).
 
 ## Where to install
 
@@ -28,34 +24,15 @@ This MCP is published to every major MCP distribution channel by the [g-digital 
 |---|---|
 | **npm** | `npx -y @g-digital/mcp-ead-factory` — [npmjs.com/package/@g-digital/mcp-ead-factory](https://www.npmjs.com/package/@g-digital/mcp-ead-factory) |
 | **Docker Hub** | `docker pull gdigital/ead-factory:latest` — [hub.docker.com/r/gdigital/ead-factory](https://hub.docker.com/r/gdigital/ead-factory) |
-| **MCP Official Registry** | Auto-discovered as `io.github.g-digital-by-Garrigues/ead-factory` by any client that reads the registry — [registry.modelcontextprotocol.io](https://registry.modelcontextprotocol.io/v0/servers/io.github.g-digital-by-Garrigues/ead-factory) |
-| **n8n community node** | In n8n Settings → Community Nodes → install `@g-digital/n8n-nodes-ead-factory` (works with the AI Agent node via `usableAsTool`) — [npmjs.com/package/@g-digital/n8n-nodes-ead-factory](https://www.npmjs.com/package/@g-digital/n8n-nodes-ead-factory) |
-| **Smithery** | `smithery mcp install g-digital/ead-factory` (from v1.0.7) — [smithery.ai/servers/g-digital/ead-factory](https://smithery.ai/servers/g-digital/ead-factory) |
+| **MCP Official Registry** | Auto-discovered as `io.github.g-digital-by-Garrigues/ead-factory` — [registry.modelcontextprotocol.io](https://registry.modelcontextprotocol.io/v0/servers/io.github.g-digital-by-Garrigues/ead-factory) |
+| **n8n community node** | Install `@g-digital/n8n-nodes-ead-factory` in n8n Settings → Community Nodes — [npmjs.com/package/@g-digital/n8n-nodes-ead-factory](https://www.npmjs.com/package/@g-digital/n8n-nodes-ead-factory) |
+| **Smithery** | `smithery mcp install g-digital/ead-factory` — [smithery.ai/servers/g-digital/ead-factory](https://smithery.ai/servers/g-digital/ead-factory) |
 
-Every channel ships the same MCP server contract; the tools and env-var configuration below apply regardless of which install path you choose.
+Every channel ships the same MCP server contract; the tools and environment configuration below apply regardless of which install path you choose.
 
-## Tools
+> Need credentials? Visit: [https://digitaltrust.gcloudfactory.com](https://digitaltrust.gcloudfactory.com)
 
-### Evidence Manager
-
-| Tool | Description |
-|---|---|
-| `generate_evidence` | Full workflow: authenticate → SHA-256 hash → register evidence → upload file to S3 → poll until COMPLETED/ERROR |
-| `get_evidence` | Retrieve full evidence details by ID (status, timestamps, custody, metadata) |
-
-### Signature Manager
-
-| Tool | Description |
-|---|---|
-| `create_signature_request` | Creates a new signature request (DRAFT). Supports `fullFlow=true` to complete the entire flow in one call using preconfigured participants |
-| `add_document_to_signature_request` | Adds a document to a DRAFT signature request and uploads the file to S3 |
-| `add_signatory_to_document` | Adds a signatory to a document within a signature request |
-| `add_validator_to_signatory` | Adds a validator to a signatory (must approve before the signatory can sign) |
-| `add_observer_to_document` | Adds an observer to a document (receives notifications but does not sign) |
-| `activate_signature_request` | Activates a signature request (DRAFT → ACTIVE), triggering notifications to signatories |
-| `get_signature_request` | Retrieves full details of a signature request by ID (status, documents, participants, history) |
-
-## Register the MCP in your client
+## Installation
 
 ### Claude Desktop
 
@@ -69,25 +46,16 @@ Every channel ships the same MCP server contract; the tools and env-var configur
       ],
       "command": "npx",
       "env": {
-        "API_BASE_URL": "",
-        "FULL_FLOW_EMAIL_BASE": "",
-        "FULL_FLOW_FILE_PATH": "",
-        "HTTP_PORT": "",
-        "OKTA_CLIENT_ID": "",
-        "OKTA_CLIENT_SECRET": "<PASTE_OKTA_CLIENT_SECRET_HERE>",
-        "OKTA_SCOPE": "",
-        "OKTA_TOKEN_URL": "",
-        "POLL_INTERVAL_MS": "",
-        "POLL_MAX_ATTEMPTS": "",
-        "SIGNATURE_API_BASE_URL": "",
-        "TRANSPORT": ""
+        "MCP_SVC_CLIENT_ID": "",
+        "MCP_SVC_CLIENT_SECRET": "<PASTE_MCP_SVC_CLIENT_SECRET_HERE>",
+        "MCP_SVC_TOKEN_URL": ""
       }
     }
   }
 }
 ```
 
-> Need credentials? See: https://eadtrust.example.com/onboarding
+> Need credentials? See: https://digitaltrust.gcloudfactory.com
 
 ### Claude Code (CLI)
 
@@ -101,25 +69,16 @@ Every channel ships the same MCP server contract; the tools and env-var configur
       ],
       "command": "npx",
       "env": {
-        "API_BASE_URL": "",
-        "FULL_FLOW_EMAIL_BASE": "",
-        "FULL_FLOW_FILE_PATH": "",
-        "HTTP_PORT": "",
-        "OKTA_CLIENT_ID": "",
-        "OKTA_CLIENT_SECRET": "<PASTE_OKTA_CLIENT_SECRET_HERE>",
-        "OKTA_SCOPE": "",
-        "OKTA_TOKEN_URL": "",
-        "POLL_INTERVAL_MS": "",
-        "POLL_MAX_ATTEMPTS": "",
-        "SIGNATURE_API_BASE_URL": "",
-        "TRANSPORT": ""
+        "MCP_SVC_CLIENT_ID": "",
+        "MCP_SVC_CLIENT_SECRET": "<PASTE_MCP_SVC_CLIENT_SECRET_HERE>",
+        "MCP_SVC_TOKEN_URL": ""
       }
     }
   }
 }
 ```
 
-> Need credentials? See: https://eadtrust.example.com/onboarding
+> Need credentials? See: https://digitaltrust.gcloudfactory.com
 
 ### Cursor
 
@@ -133,25 +92,16 @@ Every channel ships the same MCP server contract; the tools and env-var configur
       ],
       "command": "npx",
       "env": {
-        "API_BASE_URL": "",
-        "FULL_FLOW_EMAIL_BASE": "",
-        "FULL_FLOW_FILE_PATH": "",
-        "HTTP_PORT": "",
-        "OKTA_CLIENT_ID": "",
-        "OKTA_CLIENT_SECRET": "<PASTE_OKTA_CLIENT_SECRET_HERE>",
-        "OKTA_SCOPE": "",
-        "OKTA_TOKEN_URL": "",
-        "POLL_INTERVAL_MS": "",
-        "POLL_MAX_ATTEMPTS": "",
-        "SIGNATURE_API_BASE_URL": "",
-        "TRANSPORT": ""
+        "MCP_SVC_CLIENT_ID": "",
+        "MCP_SVC_CLIENT_SECRET": "<PASTE_MCP_SVC_CLIENT_SECRET_HERE>",
+        "MCP_SVC_TOKEN_URL": ""
       }
     }
   }
 }
 ```
 
-> Need credentials? See: https://eadtrust.example.com/onboarding
+> Need credentials? See: https://digitaltrust.gcloudfactory.com
 
 ### Windsurf
 
@@ -165,25 +115,16 @@ Every channel ships the same MCP server contract; the tools and env-var configur
       ],
       "command": "npx",
       "env": {
-        "API_BASE_URL": "",
-        "FULL_FLOW_EMAIL_BASE": "",
-        "FULL_FLOW_FILE_PATH": "",
-        "HTTP_PORT": "",
-        "OKTA_CLIENT_ID": "",
-        "OKTA_CLIENT_SECRET": "<PASTE_OKTA_CLIENT_SECRET_HERE>",
-        "OKTA_SCOPE": "",
-        "OKTA_TOKEN_URL": "",
-        "POLL_INTERVAL_MS": "",
-        "POLL_MAX_ATTEMPTS": "",
-        "SIGNATURE_API_BASE_URL": "",
-        "TRANSPORT": ""
+        "MCP_SVC_CLIENT_ID": "",
+        "MCP_SVC_CLIENT_SECRET": "<PASTE_MCP_SVC_CLIENT_SECRET_HERE>",
+        "MCP_SVC_TOKEN_URL": ""
       }
     }
   }
 }
 ```
 
-> Need credentials? See: https://eadtrust.example.com/onboarding
+> Need credentials? See: https://digitaltrust.gcloudfactory.com
 
 ### Cline
 
@@ -197,25 +138,16 @@ Every channel ships the same MCP server contract; the tools and env-var configur
       ],
       "command": "npx",
       "env": {
-        "API_BASE_URL": "",
-        "FULL_FLOW_EMAIL_BASE": "",
-        "FULL_FLOW_FILE_PATH": "",
-        "HTTP_PORT": "",
-        "OKTA_CLIENT_ID": "",
-        "OKTA_CLIENT_SECRET": "<PASTE_OKTA_CLIENT_SECRET_HERE>",
-        "OKTA_SCOPE": "",
-        "OKTA_TOKEN_URL": "",
-        "POLL_INTERVAL_MS": "",
-        "POLL_MAX_ATTEMPTS": "",
-        "SIGNATURE_API_BASE_URL": "",
-        "TRANSPORT": ""
+        "MCP_SVC_CLIENT_ID": "",
+        "MCP_SVC_CLIENT_SECRET": "<PASTE_MCP_SVC_CLIENT_SECRET_HERE>",
+        "MCP_SVC_TOKEN_URL": ""
       }
     }
   }
 }
 ```
 
-> Need credentials? See: https://eadtrust.example.com/onboarding
+> Need credentials? See: https://digitaltrust.gcloudfactory.com
 
 ### VS Code
 
@@ -229,25 +161,16 @@ Every channel ships the same MCP server contract; the tools and env-var configur
       ],
       "command": "npx",
       "env": {
-        "API_BASE_URL": "",
-        "FULL_FLOW_EMAIL_BASE": "",
-        "FULL_FLOW_FILE_PATH": "",
-        "HTTP_PORT": "",
-        "OKTA_CLIENT_ID": "",
-        "OKTA_CLIENT_SECRET": "<PASTE_OKTA_CLIENT_SECRET_HERE>",
-        "OKTA_SCOPE": "",
-        "OKTA_TOKEN_URL": "",
-        "POLL_INTERVAL_MS": "",
-        "POLL_MAX_ATTEMPTS": "",
-        "SIGNATURE_API_BASE_URL": "",
-        "TRANSPORT": ""
+        "MCP_SVC_CLIENT_ID": "",
+        "MCP_SVC_CLIENT_SECRET": "<PASTE_MCP_SVC_CLIENT_SECRET_HERE>",
+        "MCP_SVC_TOKEN_URL": ""
       }
     }
   }
 }
 ```
 
-> Need credentials? See: https://eadtrust.example.com/onboarding
+> Need credentials? See: https://digitaltrust.gcloudfactory.com
 
 ### JetBrains
 
@@ -261,25 +184,16 @@ Every channel ships the same MCP server contract; the tools and env-var configur
       ],
       "command": "npx",
       "env": {
-        "API_BASE_URL": "",
-        "FULL_FLOW_EMAIL_BASE": "",
-        "FULL_FLOW_FILE_PATH": "",
-        "HTTP_PORT": "",
-        "OKTA_CLIENT_ID": "",
-        "OKTA_CLIENT_SECRET": "<PASTE_OKTA_CLIENT_SECRET_HERE>",
-        "OKTA_SCOPE": "",
-        "OKTA_TOKEN_URL": "",
-        "POLL_INTERVAL_MS": "",
-        "POLL_MAX_ATTEMPTS": "",
-        "SIGNATURE_API_BASE_URL": "",
-        "TRANSPORT": ""
+        "MCP_SVC_CLIENT_ID": "",
+        "MCP_SVC_CLIENT_SECRET": "<PASTE_MCP_SVC_CLIENT_SECRET_HERE>",
+        "MCP_SVC_TOKEN_URL": ""
       }
     }
   }
 }
 ```
 
-> Need credentials? See: https://eadtrust.example.com/onboarding
+> Need credentials? See: https://digitaltrust.gcloudfactory.com
 
 ### Zed
 
@@ -293,105 +207,173 @@ Every channel ships the same MCP server contract; the tools and env-var configur
       ],
       "command": "npx",
       "env": {
-        "API_BASE_URL": "",
-        "FULL_FLOW_EMAIL_BASE": "",
-        "FULL_FLOW_FILE_PATH": "",
-        "HTTP_PORT": "",
-        "OKTA_CLIENT_ID": "",
-        "OKTA_CLIENT_SECRET": "<PASTE_OKTA_CLIENT_SECRET_HERE>",
-        "OKTA_SCOPE": "",
-        "OKTA_TOKEN_URL": "",
-        "POLL_INTERVAL_MS": "",
-        "POLL_MAX_ATTEMPTS": "",
-        "SIGNATURE_API_BASE_URL": "",
-        "TRANSPORT": ""
+        "MCP_SVC_CLIENT_ID": "",
+        "MCP_SVC_CLIENT_SECRET": "<PASTE_MCP_SVC_CLIENT_SECRET_HERE>",
+        "MCP_SVC_TOKEN_URL": ""
       }
     }
   }
 }
 ```
 
-> Need credentials? See: https://eadtrust.example.com/onboarding
+> Need credentials? See: https://digitaltrust.gcloudfactory.com
 
-## Configuration
+### Claude Desktop / Claude Code
+
+Add to your `~/.claude.json` or `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "ead-factory": {
+      "command": "npx",
+      "args": ["-y", "@g-digital/mcp-ead-factory"],
+      "env": {
+        "MCP_SVC_TOKEN_URL": "https://your-idp.example.com/oauth2/v1/token",
+        "MCP_SVC_CLIENT_ID": "your-client-id",
+        "MCP_SVC_CLIENT_SECRET": "your-client-secret"
+      }
+    }
+  }
+}
+```
+
+### Docker
+
+```bash
+docker run --rm -i \
+  -e MCP_SVC_TOKEN_URL=https://your-idp.example.com/oauth2/v1/token \
+  -e MCP_SVC_CLIENT_ID=your-client-id \
+  -e MCP_SVC_CLIENT_SECRET=your-client-secret \
+  gdigital/ead-factory:latest
+```
+
+## Environment Variables
 
 | Name | Required | Secret | Description |
 | --- | --- | --- | --- |
-| `API_BASE_URL` | Yes | No | Evidence Manager API base URL |
-| `FULL_FLOW_EMAIL_BASE` | Yes | No | Full flow base email — used to compose participant emails (user+signatory@domain, etc.) |
-| `FULL_FLOW_FILE_PATH` | Yes | No | Full flow default file path |
-| `HTTP_PORT` | Yes | No | HTTP_PORT |
-| `OKTA_CLIENT_ID` | Yes | No | OKTA_CLIENT_ID |
-| `OKTA_CLIENT_SECRET` | Yes | Yes | OKTA_CLIENT_SECRET (See https://eadtrust.example.com/onboarding for credential acquisition.) |
-| `OKTA_SCOPE` | Yes | No | OKTA_SCOPE |
-| `OKTA_TOKEN_URL` | Yes | No | OAuth credentials (Okta client_credentials flow) Used both for calling Evidence Manager API and for verifying incoming Bearer tokens (HTTP mode) |
-| `POLL_INTERVAL_MS` | Yes | No | Polling configuration for evidence status |
-| `POLL_MAX_ATTEMPTS` | Yes | No | POLL_MAX_ATTEMPTS |
-| `SIGNATURE_API_BASE_URL` | Yes | No | Signature Manager API base URL |
-| `TRANSPORT` | Yes | No | Transport: "stdio" for local Claude Code, "http" for remote deployment with auth |
-### Environment URLs
+| `MCP_ALLOW_INSECURE_FILE_URL` | No | No | Set to "true" to allow plain http:// fileUrl downloads in evidence_create (default https-only). Private/internal addresses are rejected regardless (resolution-time check; see the documented DNS TOCTOU limitation in the hosted-deployment runbook). |
+| `MCP_ALLOW_UNVERIFIED_BEARER` | No | No | Escape hatch for MCP_HTTP_PUBLIC=true WITHOUT inbound-token introspection: set to "true" ONLY when an upstream gateway already verifies Bearer tokens. The server logs a prominent warning and forwards tokens upstream unverified. |
+| `MCP_ALLOWED_HOSTS` | No | No | Comma-separated allowed Host headers. Empty = Host validation disabled (default). When set, requests with a Host outside the list are rejected. |
+| `MCP_ALLOWED_ORIGINS` | No | No | Comma-separated allowed browser Origins (DNS-rebinding defense). Empty = reject any request carrying an Origin header; non-browser clients (CLI/SDK) send no Origin and are always allowed. Use '*' to allow all. |
+| `MCP_API_BASE_URL` | No | No | Gateway ROOT URL (e.g. https://api.int.gcloudfactory.com) — each manager's path prefix is appended automatically; do NOT include a manager path here |
+| `MCP_API_BASE_URL_CHAT` | No | No | Full base URL override for the chat manager, used as-is (default: https://api.gcloudfactory.com/chat-bot-manager) |
+| `MCP_API_BASE_URL_EVIDENCE` | No | No | Full base URL override for the evidence manager, used as-is (default: https://api.gcloudfactory.com/digital-trust) |
+| `MCP_API_BASE_URL_NOTIFICATION` | No | No | Full base URL override for the notification manager, used as-is (default: https://api.gcloudfactory.com/notifications) |
+| `MCP_API_BASE_URL_SIGNATURE` | No | No | Full base URL override for the signature manager, used as-is (default: https://api.gcloudfactory.com/signature-manager) |
+| `MCP_HTTP_HOST` | No | No | Interface the HTTP transport binds to. Default 127.0.0.1 (localhost only). Set 0.0.0.0 to expose on all interfaces (containers do this automatically). |
+| `MCP_HTTP_MAX_BODY_BYTES` | No | No | Maximum accepted POST /mcp request-body size in bytes (default 16777216 = 16 MiB — sized so base64 file uploads within the documented tool limits fit). Oversized requests get a 413 JSON-RPC error before/while reading — closes a memory-exhaustion DoS vector in public deployments. Note: base64 file sources are capped by this limit BEFORE MCP_FILE_MAX_BYTES applies. |
+| `MCP_HTTP_PUBLIC` | No | No | Set to "true" for public/multi-tenant deployments. Activates Host validation and refuses to start unless (1) MCP_ALLOWED_ORIGINS or MCP_ALLOWED_HOSTS is set AND (2) inbound Bearer introspection is configured (MCP_SVC_INTROSPECT_URL + MCP_SVC_CLIENT_ID/SECRET) or MCP_ALLOW_UNVERIFIED_BEARER=true is set explicitly (fail-closed). |
+| `MCP_SVC_CLIENT_ID` | Yes | No | OAuth2 client_credentials client ID |
+| `MCP_SVC_CLIENT_SECRET` | Yes | Yes | OAuth2 client_credentials client secret (See https://digitaltrust.gcloudfactory.com for credential acquisition.) |
+| `MCP_SVC_INTROSPECT_URL` | No | No | RFC 7662 token introspection URL for inbound Bearer verification in HTTP mode. Opt-in — reuses the service-account client id/secret above as the resource-server credentials. |
+| `MCP_SVC_SCOPE` | No | No | Optional OAuth2 scope for the service-account token request |
+| `MCP_SVC_TOKEN_URL` | Yes | No | Token endpoint URL for the OAuth2 client_credentials flow |
+| `PORT` | No | No | HTTP port when running in hosted (HTTP) mode; ignored in stdio mode |
 
-#### AWS
-
-| Environment | `API_BASE_URL` | `OKTA_TOKEN_URL` |
+| Variable | Required | Description |
 |---|---|---|
-| INT | `https://api.int.gcloudfactory.com/digital-trust` | `https://legalappfactory.okta.com/oauth2/aus5zlw4kr0vhHKyx417/v1/token` |
-| PRE | `https://api.pre.gcloudfactory.com/digital-trust` | `https://sso.garrigues.io.builders/oauth2/aus653dgdgTFL2mhw417/v1/token` |
-| PRO | `https://api.gcloudfactory.com/digital-trust` | `https://legalappfactory.okta.com/oauth2/aus657e2pcoS6hOS6417/v1/token` |
+| `MCP_SVC_TOKEN_URL` | Required | OAuth2 client_credentials token endpoint URL |
+| `MCP_SVC_CLIENT_ID` | Required | OAuth2 client ID |
+| `MCP_SVC_CLIENT_SECRET` | Required | OAuth2 client secret |
+| `MCP_SVC_SCOPE` | Optional | OAuth2 scope for the token request |
+| `MCP_AUTH_JWT` | Optional | Pre-seeded JWT (skips interactive login) |
+| `MCP_OTEL_ENABLED` | Optional | Set to `true` to enable OpenTelemetry tracing |
+| `MCP_API_BASE_URL` | Optional | Gateway root URL — each manager's path prefix is appended automatically; use `MCP_API_BASE_URL_<MANAGER>` for a full per-manager override (used as-is) |
 
-#### OCI
+## Bundled Skills
 
-| Environment | `API_BASE_URL` |
-|---|---|
-| INT | `https://api.int.eadtrust.gcloudfactory.com/digital-trust` |
-| PRO | `https://api.eadtrust.gcloudfactory.com/digital-trust` |
+This package ships Claude Code slash-commands under `.claude/commands/`. After install, invoke them from Claude Code:
 
+- `/create-internal-evidence` — step-by-step workflow guide
+- `/create-signature-request` — step-by-step workflow guide
+- `/create-notification-request` — step-by-step workflow guide
 
-## Remote deployment (HTTP + Bearer auth)
+See [docs/agent-prompts.md](docs/agent-prompts.md) for end-to-end prompt examples and the tool sequences they trigger.
 
-Set `TRANSPORT=http` to run the server as an HTTP service. The `/mcp` endpoint requires a valid Okta Bearer token (verified against the introspection endpoint derived from `OKTA_TOKEN_URL`). The `/health` endpoint is unauthenticated for monitoring.
+## Available Tools
 
-## Architecture
+This server exposes **64 tools**:
 
-```
-Client (Claude Code / MCP client)
-  │
-  ├─ stdio ──► McpServer
-  │
-  └─ HTTP  ──► Express + Bearer auth (Okta introspect) ──► StreamableHTTP ──► McpServer
-                                                                │
-                                                          tools/call
-                                                                │
-                                                                ▼
-                                                      workflow.service
-                                                       ├── auth.service         (Okta client_credentials → token cache)
-                                                       ├── hash.service         (SHA-256 from local file)
-                                                       ├── evidence.service     (POST /api/v1/private/evidences)
-                                                       └── s3-upload.service    (PUT presigned URL + retry)
-```
+| Tool | Description |
+|------|-------------|
+| `evidence_case_file_delete_bulk` | Permanently deletes SEVERAL case files in one call. Destructive and not reversible — confirm the caseFileIds first (evidence_case_file_search) and prefer closing a case file via evidence_case_file_status_update when you only need to end work on it. |
+| `evidence_case_file_search` | Searches case files with optional filters (name, status, dates, pagination). Use to find a caseFileId when you don't have it, or to list what exists before creating a new case file with evidence_case_file_create. |
+| `evidence_case_file_create` | Creates a new case file — the top-level container for evidence groups, evidence, and reports. Use this first, before any other Evidence-manager tool. No prerequisites. Unlike most create tools, `id` is CALLER-SUPPLIED (generate a fresh UUID v4 yourself, this API does not assign one) — there is no `name` field, use `title` instead. Example: evidence_case_file_create({ id: '<generate a UUID v4>', title: 'Q1 2026 audit' }) — use that same id as caseFileId in evidence_group_create. |
+| `evidence_case_file_update_bulk` | Updates the editable metadata of SEVERAL case files in one call (each entry carries its own caseFileId and changes). Prefer evidence_case_file_update for a single case file. Requires: the caseFileIds of every case file to update (evidence_case_file_search to find them). |
+| `evidence_case_file_get` | Retrieves a case file's details by id. Use to confirm a case file exists, or to check its status before creating evidence groups or reports under it. Requires: evidence_case_file_create → caseFileId. |
+| `evidence_case_file_update` | Updates a single case file's editable metadata (e.g. name, description). Requires: evidence_case_file_create or evidence_case_file_search → caseFileId. To change its OPEN/CLOSE lifecycle state use evidence_case_file_status_update instead. |
+| `evidence_case_file_relationship_assign` | Assigns a relationship on a case file, linking it to an external/related entity reference for traceability. Use after creating the case file when your workflow tracks which matter, client, or system record it belongs to. Requires: evidence_case_file_create → caseFileId. |
+| `evidence_case_file_report_preview` | Generates an UNSIGNED preview of a case file's evidentiary report so you can check its content before producing the signed version with evidence_case_file_report_generate. Requires: evidence_case_file_create → caseFileId, with sealed evidence groups inside. |
+| `evidence_case_file_report_generate` | Generates the SIGNED evidentiary report of a case file (the certified document covering its sealed evidence). Returns a reportId — then call evidence_case_file_report_pdf_url_get (PDF) or evidence_case_file_report_zip_url_get (full package) to download. Requires: evidence_case_file_create → caseFileId; preview first with evidence_case_file_report_preview. |
+| `evidence_case_file_report_update` | Updates a previously generated case-file report's metadata. Requires: evidence_case_file_report_generate → reportId (and the caseFileId it belongs to). Does not re-generate the report content — generate a new report for updated evidence. |
+| `evidence_case_file_report_pdf_url_get` | Retrieves a download URL for the signed PDF document of a case-file report. Requires: evidence_case_file_report_generate → reportId (plus caseFileId). For the full evidence package (PDF + files + verification data) use evidence_case_file_report_zip_url_get. |
+| `evidence_case_file_report_zip_url_get` | Retrieves a download URL for the complete ZIP package of a case-file report (signed PDF plus evidence files and verification material). Requires: evidence_case_file_report_generate → reportId (plus caseFileId). |
+| `evidence_case_file_status_update` | Changes a case file's lifecycle status (OPEN or CLOSE). Use CLOSE when work on the case file is finished and it should no longer accept new evidence groups; reopen with OPEN. Requires: evidence_case_file_create or evidence_case_file_search → caseFileId. |
+| `evidence_report_delete` | Permanently deletes a generated report by its reportId. Destructive — the signed document and its package stop being downloadable. Requires: evidence_case_file_report_generate → reportId. The underlying case file and its evidence are NOT touched. |
+| `evidence_group_evidence_register` | Register a new evidence in a group — the first step of a 2-step upload (register, then PUT the file bytes to the returned upload URL). Use for each file you want to add to an OPEN evidence group. Requires: evidence_group_create → evidenceGroupId, evidence_case_file_create → caseFileId, and the file's SHA-256 hash (compute it before calling, or use the evidence_create_sealed composite tool which does this for you). Do not call evidence_group_close until every registered evidence's bytes have been uploaded. Custody type: INTERNAL = EAD Factory stores and custodies the file itself. | EXTERNAL = The file lives outside EAD Factory — you attest to its hash only, EAD Factory never stores the bytes. Testimony (qualified proof) provider family: TSP = Trusted Service Provider — eIDAS-qualified electronic timestamp; the legally strongest proof tier. | DLT = Distributed Ledger Technology — blockchain-anchored proof; immutable and independently verifiable. |
+| `evidence_group_evidence_get` | Gets one evidence's details (metadata, hash, custody, upload state) inside a specific evidence group. Requires: evidence_case_file_create → caseFileId, evidence_group_create → evidenceGroupId, evidence_group_evidence_register → evidenceId. |
+| `evidence_group_evidence_delete` | Permanently deletes one evidence from an evidence group. Only makes sense while the group is still OPEN (sealed groups are immutable). Requires: caseFileId + evidenceGroupId + evidence_group_evidence_register → evidenceId. |
+| `evidence_group_evidence_download_url_create` | Creates a temporary download URL for an evidence file stored in a group (INTERNAL custody). Use to retrieve the original bytes after upload. Requires: caseFileId + evidenceGroupId + evidence_group_evidence_register → evidenceId. |
+| `evidence_group_evidence_upload_url_create` | Creates a fresh presigned upload URL for an ALREADY-REGISTERED evidence in a group — step 2 of the register-then-upload flow (PUT the file bytes to the returned URL). Use when the URL from evidence_group_evidence_register expired or was lost. Requires: caseFileId + evidenceGroupId + evidenceId. evidence_create_sealed does all of this automatically. |
+| `evidence_thumbnail_url_get` | Retrieves a temporary URL for an image evidence's thumbnail at the requested size — use for quick visual verification without downloading the original file. Requires: caseFileId + evidenceGroupId + evidenceId (image-type evidence only) and a thumbnailSize path value. |
+| `evidence_search` | Searches evidences across the tenant with optional filters (state, dates, pagination) — not scoped to one group. Use to find an evidenceId or audit what exists; for one group's content use evidence_group_get instead. |
+| `generate_evidence` | Register a new evidence (legacy top-level name; not scoped to a specific evidence group at creation time, unlike evidence_group_evidence_register). Use for standalone evidence outside the group-based flow, or for continuity with the legacy EAD-Factory-MCP integration. Requires the file's SHA-256 hash. Prefer evidence_create_sealed for a new, complete evidence group + evidence + seal flow. Custody type: INTERNAL = EAD Factory stores and custodies the file itself. | EXTERNAL = The file lives outside EAD Factory — you attest to its hash only, EAD Factory never stores the bytes. Testimony (qualified proof) provider family: TSP = Trusted Service Provider — eIDAS-qualified electronic timestamp; the legally strongest proof tier. | DLT = Distributed Ledger Technology — blockchain-anchored proof; immutable and independently verifiable. |
+| `evidence_update_bulk` | Updates the editable metadata of SEVERAL evidences in one call (each entry carries its own evidenceId and changes). Prefer evidence_update for a single evidence. Requires: the evidenceIds to update (evidence_search to find them). |
+| `get_evidence` | Retrieves an evidence record's details and status by id (legacy top-level name). Use to check an evidence's timestamping status (IN_PROCESS / COMPLETED / ERROR) after registration. Requires: generate_evidence or evidence_group_evidence_register → evidenceId. |
+| `evidence_delete` | Permanently deletes one evidence by evidenceId (no group path needed). Destructive; sealed content should not be deleted — use only for drafts or mis-registered evidence. Requires: evidence_group_evidence_register or generate_evidence → evidenceId. |
+| `evidence_update` | Updates a single evidence's editable metadata (e.g. name, description) by evidenceId. The file content and hash are immutable — re-register a new evidence for changed files. Requires: evidence_group_evidence_register or generate_evidence → evidenceId. |
+| `evidence_download_url_create` | Creates a temporary download URL for an evidence's stored file when you only hold the evidenceId (no group path needed — same bytes as evidence_group_evidence_download_url_create). Requires: generate_evidence or evidence_group_evidence_register → evidenceId. |
+| `evidence_upload_url_create` | Creates a fresh presigned upload URL for an already-registered evidence by evidenceId — step 2 of the register-then-upload flow (PUT the file bytes to the returned URL). Pairs with generate_evidence the way evidence_group_evidence_upload_url_create pairs with evidence_group_evidence_register. Requires: generate_evidence → evidenceId. |
+| `evidence_temp_file_upload_url_create` | Creates a presigned upload URL for a TEMPORARY file not yet registered as evidence. Use for staging content that another operation will reference; for real evidence prefer the register-then-upload flow (evidence_group_evidence_register) or the evidence_create_sealed composite, which handle registration and upload together. |
+| `evidence_multipart_upload_start` | Starts a MULTIPART upload session for a large evidence file (returns the upload coordinates for uploading the file in parts). Use when a single presigned PUT is not enough for the file size. Requires: an already-registered evidence (evidence_group_evidence_register or generate_evidence → evidenceId) and the file name. |
+| `evidence_group_delete_bulk` | Permanently deletes SEVERAL evidence groups of one case file in one call. Destructive — prefer evidence_group_discard for a single group, and never delete sealed groups that back issued reports. Requires: caseFileId + the evidenceGroupIds to delete (evidence_group_search to find them). |
+| `evidence_group_create` | Creates an evidence group inside a case file — evidence records are always registered inside a group, never standalone (except via the legacy generate_evidence tool). Use when starting a new batch of related evidence (e.g. all files for one incident). Like evidence_case_file_create, `id` is CALLER-SUPPLIED (generate a fresh UUID v4 yourself). Requires: evidence_case_file_create → caseFileId. Example: evidence_group_create({ id: '<generate a UUID v4>', caseFileId, type: 'FILE' }) returns { status: 'OPEN', ... } — use that same id as evidenceGroupId in evidence_group_evidence_register, then evidence_group_close once every evidence in the group has been uploaded. |
+| `evidence_group_get` | Gets one evidence group's details — status (OPEN/CLOSED), seal information, and its evidences with their upload states. Use to verify every file was uploaded before evidence_group_close, or to check the seal after closing. Requires: caseFileId + evidence_group_create → evidenceGroupId. |
+| `evidence_group_discard` | Discards (deletes) an OPEN evidence group and its registered evidences — use to abandon a group you no longer intend to seal. Destructive; sealed (CLOSED) groups are immutable evidence and should not be discarded. Requires: caseFileId + evidence_group_create → evidenceGroupId. |
+| `evidence_group_update` | Updates an evidence group's editable metadata (e.g. name, description). Only meaningful while the group is OPEN — sealed groups are immutable. Requires: caseFileId + evidence_group_create → evidenceGroupId. |
+| `evidence_group_close` | Seals (closes) an evidence group, triggering qualified timestamping — after this, no more evidence can be added. Use only after every evidence registered in the group has had its file bytes uploaded to the presigned URL from evidence_group_evidence_register. Requires: evidence_group_create → evidenceGroupId, evidence_case_file_create → caseFileId, and the current evidencesCount. ASYNC: the group transitions OPEN → CLOSING → CLOSED; poll evidence_group_get until status is CLOSED before generating a report. Prefer the evidence_create_sealed composite tool for a new group — it registers, uploads, closes, and waits for CLOSED in one call. |
+| `evidence_group_search` | Searches evidence groups across case files with optional filters (status, dates, pagination). Use to find an evidenceGroupId or list groups pending sealing; for one group's full detail use evidence_group_get. |
+| `evidence_group_update_bulk` | Updates the editable metadata of SEVERAL evidence groups in one call (each entry carries its own evidenceGroupId and changes). Prefer evidence_group_update for a single group. Requires: the evidenceGroupIds to update (evidence_group_search to find them). |
+| `evidence_report_pdf_url_get` | Retrieves a download URL for a report's signed PDF when you only hold the reportId (no caseFileId path needed — same document evidence_case_file_report_pdf_url_get returns). Requires: evidence_case_file_report_generate → reportId. |
+| `evidence_report_zip_url_get` | Retrieves a download URL for a report's complete ZIP package when you only hold the reportId (same package evidence_case_file_report_zip_url_get returns). Requires: evidence_case_file_report_generate → reportId. |
+| `create_signature_request` | Creates a new signature request — the top-level container for documents and signatories in a signing flow. Use this first, before add_document_to_signature_request. No prerequisites. Example: create_signature_request({ name: 'NDA — Acme Corp', createdBy: 'jane@company.com' }) returns { id, ... } — use the returned id as signatureRequestId in subsequent calls. |
+| `add_document_to_signature_request` | Adds a document to a signature request — the first step of a 2-step upload (add, then PUT the file bytes to the returned upload URL). Use once per document that needs signing. Requires: create_signature_request → signatureRequestId, and the document's SHA-256 hash (compute it before calling, or use the signature_request_full composite tool). Add signatories with add_signatory_to_document before activating. Signature type: INTERPOSITION = EAD Factory mediates the signing act on the signatory's behalf (e.g. an OTP sent via WhatsApp/SMS) — the signatory needs no software or certificate. | ADVANCED = Advanced electronic signature — the signatory signs directly (signing pad or certificate); a stronger legal tier than INTERPOSITION. | OTHER = A signature type not covered by INTERPOSITION or ADVANCED. |
+| `add_signatory_to_document` | Adds a signatory (by name + email) to a document within a signature request. Use once per person who needs to sign that specific document. Requires: create_signature_request → signatureRequestId, add_document_to_signature_request → documentId. Add all signatories before calling activate_signature_request — signatories cannot be added after activation. |
+| `add_validator_to_signatory` | Adds a validator to a document's signatory: a person who must approve (validate) that signatory's identity or the document before the signature can proceed. Add validators BEFORE activate_signature_request. Requires: add_document_to_signature_request → documentId, add_signatory_to_document → signatoryId. The signature_request_full composite accepts validators inline. |
+| `add_observer_to_document` | Adds an observer to a signature request's document: a person who receives read-only visibility of the process and the signed result without signing. Add observers BEFORE activate_signature_request. Requires: create_signature_request → signatureRequestId, add_document_to_signature_request → documentId. |
+| `activate_signature_request` | Activates a signature request, sending signing notifications to every added signatory — after this, no more documents or signatories can be added (use add_validator_to_signatory / add_observer_to_document before activating if you need those roles). Requires: create_signature_request → signatureRequestId, at least one document (add_document_to_signature_request) with its bytes uploaded, and at least one signatory per document (add_signatory_to_document). Prefer signature_request_full for a new request — it creates, adds documents+signatories, and activates in one call. |
+| `get_signature_request` | Retrieves a signature request's details and status by id (legacy top-level name). Use to check signing progress after activation. Requires: create_signature_request → signatureRequestId. |
+| `signature_request_list` | List signature requests, optionally filtered by close condition among other criteria. Use to find a request when you don't have its id (e.g. by name or status). Signature-request close condition: ALL_REQUIRED = The request only closes once EVERY signatory has signed. | PARTIAL_ALLOWED = The request can close once the minimum required signatories have signed, even if others haven't yet. |
+| `signature_request_cancel` | Cancels an active signature request — no further signing can occur. Use when a request was activated in error or is no longer needed. Requires: create_signature_request → signatureRequestId. Cannot be undone. |
+| `signature_certificate_generate` | Generates the well-signed appearance certificate document for a signature request. Use once every signatory has signed (check with get_signature_request). Requires: create_signature_request → signatureRequestId. Unlike EAD Enterprise's equivalent tool (a GET that polls an already-generated URL), this triggers generation and returns the result in the same call. |
+| `signature_coordinate_set` | Sets the on-page (x, y, page) coordinates where a signatory's signature appears on a document. Use after add_signatory_to_document if the signature placement needs to be explicit rather than auto-positioned. Requires: create_signature_request → signatureRequestId, add_document_to_signature_request → documentId, add_signatory_to_document → signatoryId. |
+| `signature_document_download_url_get` | Retrieves the download link for the FINAL, well-signed version of a document — the actual signed file, once every signatory has signed. Requires: create_signature_request → signatureRequestId, add_document_to_signature_request → documentId. Use get_signature_request first to confirm signing is complete before calling this. Not to be confused with signature_certificate_generate, which produces a separate appearance certificate document, not the signed document itself. |
+| `notification_request_create` | Creates a new notification request (draft) — the top-level container for receivers and attachments in a certified-notification flow. Use this first, before any other Notification-manager tool. No prerequisites. Set `autosend: true` to also send immediately on activation of the first receiver batch, or leave it false to add receivers/documents over several calls before calling notification_request_send yourself. Returns requestId and one notificationId per receiver already on the request (if any were included inline). |
+| `notification_request_send` | Activates a notification request, triggering delivery to every added receiver across their configured channels. Runs as an MCP Task (bounded-polling until every receiver's notification leaves its in-flight state — EAD Factory's upstream emits no events for this transition). Requires: notification_request_create → requestId, at least one receiver (notification_receiver_add). Use notification_request_status to check progress without waiting for the Task to complete. |
+| `notification_request_status` | Searches notifications, optionally filtered by requestId and/or delivery state — the closest equivalent to "checking a request's status": a request fans out into one notification per receiver, each with its own state history, so this returns every notification matching the filter with its current state. Omit requestId to search across every request. Requires: notification_request_create → requestId (if filtering to one request). |
+| `notification_receiver_add` | Adds one or more receivers to a draft notification request — each receiver becomes its own per-channel notification under the shared requestId (there is no separate receiverId; track receivers by the notificationIds this call returns). Use once per batch of receivers before calling notification_request_send. Requires: notification_request_create → requestId. Each receiver's shape depends on its `provider` (SMTP/SMS/NOTICEMAN/WFB) — see the schema for the fields each variant needs. Notification delivery provider: SMTP = Email delivery. | SMS = SMS text message delivery. | NOTICEMAN = EAD Factory's own certified notification channel (qualified electronic delivery). | NOTICEMAN_AND_WHATSAPP = Certified channel plus a WhatsApp copy. | NOTICEMAN_AND_WHATSAPP_AND_RCS = Certified channel plus WhatsApp and RCS copies. | NOTICEMAN_AND_RCS = Certified channel plus an RCS (Rich Communication Services) copy. | WFB = WhatsApp Business messaging, uncertified (no Noticeman qualified channel). | RCS = RCS (Rich Communication Services) messaging only, uncertified. |
+| `notification_document_add` | Registers one or more document attachments (metadata only — fileName + SHA-256 hash) on a draft notification request. Use once per batch of documents before activating. Requires: notification_request_create → requestId. This only registers metadata; call notification_document_upload_url_create for each registered attachment to get a URL to PUT the actual file bytes to. |
+| `notification_document_upload_url_create` | Creates a presigned upload URL for a document attachment already registered via notification_document_add — PUT the file bytes to the returned URL. Requires: notification_request_create → requestId, notification_document_add → attachmentId. |
+| `notification_document_download_url_create` | Creates a presigned download URL for a document attachment on a notification request. Requires: notification_request_create → requestId, notification_document_add → attachmentId. |
+| `notification_certificate_generate` | Generates a delivery-certificate report for one or more notifications on a request. Use once notification_request_status shows the relevant notifications have left their in-flight state. Requires: notification_request_create → requestId, notification_request_status → notificationIds. Returns a reportId — call notification_certificate_pdf_url_get with it to get the actual download URL (2-step, same shape as Evidence's report tools). |
+| `notification_certificate_pdf_url_get` | Retrieves the download URL for a previously generated notification delivery certificate. Requires: notification_certificate_generate → reportId. |
+| `evidence_create_sealed` | Creates (or reuses) an evidence group, registers and uploads one or more files as evidence, then seals (closes) the group — the full flagship evidence flow in one call instead of evidence_group_create + N x (evidence_group_evidence_register + upload) + evidence_group_close. Bounded-polls until the group reaches CLOSED (EAD Factory's upstream emits no events for this transition): task-aware MCP clients get an asynchronous Task; any other client simply receives the final result synchronously. Requires: case_file_create -> caseFileId. Provide `evidenceGroupId` to add to an existing OPEN group instead of creating one. Each evidence's file uses the shared FileInput contract (local path, base64, https URL, or n8n binary item) — never a bespoke file field. On success returns the group id, its final CLOSED status, and each evidence's id + sha256. Use the atomic evidence_group_create / evidence_group_evidence_register / evidence_group_close tools instead when you need to inspect or react to each intermediate step. |
+| `signature_request_full` | Creates a signature request, adds one or more documents (each with its own signatories), and activates it — the full flagship signature flow in one call instead of create_signature_request + N x (add_document_to_signature_request + add_signatory_to_document) + activate_signature_request. Each document's file uses the shared FileInput contract (local path, base64, https URL, or n8n binary item) — never a bespoke file field. Set `activate: false` to leave the request in draft so you can add validators/observers (add_validator_to_signatory, add_observer_to_document) before activating it yourself. On success returns the request id, each document's id, and each signatory's id. Use the atomic tools instead when you need to inspect or react to each intermediate step, or need validators/observers before activation. |
+| `ead_factory_help` | Returns an overview of EAD Factory's managers (Evidence, Signature, Notification, Chat), their key tools and starting points, and guidance on when to use a composite workflow tool (e.g. evidence_create_sealed) versus the atomic tools. Call this first if you're unsure which tool to use — no credentials needed. |
 
-## `generate_evidence` — Input schema
+## MCP Tasks support
 
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `filePath` | string | Yes | Absolute path to the file on disk |
-| `evidenceId` | string (UUID) | Yes | Unique ID for idempotency |
-| `title` | string | Yes | Human-readable title |
-| `createdBy` | string | Yes | Creator name (max 50 chars) |
-| `capturedAt` | string (ISO 8601) | Yes | Capture datetime |
-| `custodyType` | `INTERNAL` \| `EXTERNAL` | No | Defaults to `INTERNAL` |
-| `testimonyTSP` | boolean | No | TSP via EADTrust (default `true`) |
-| `testimonyDLT` | boolean | No | DLT via Lacnet (requires tenant activation) |
-| `requiredTestimonyProviders` | string | No | Comma-separated: `"TSP"`, `"DLT"`, `"TSP,DLT"` |
-| `metadata` | string (JSON) | No | Custom key-value pairs as a JSON string |
+`notification_request_send` runs as an MCP Task and **requires a client with MCP Tasks support** — from other clients the call fails; instead, create the request with `autosend: true` (`notification_request_create`) and poll `notification_request_status` yourself.
 
-## API endpoints consumed
+`evidence_create_sealed` works from **any** client: task-aware clients get an asynchronous Task; all others simply receive the final result synchronously.
 
-- `POST {OKTA_TOKEN_URL}` — OAuth `client_credentials` token
-- `POST {API_BASE_URL}/api/v1/private/evidences` — register evidence
-- `GET {API_BASE_URL}/api/v1/private/evidences/{id}` — fetch evidence
-- `PUT <presigned-s3-url>` — upload file binary
+## Coexistence
+
+This MCP server is the **current, actively maintained** interface for the EAD Factory (Digital Trust) platform.
+
+It coexists safely with any other MCP servers in your setup — it exposes only EAD-Factory-namespaced tools and shares no local state with other servers.
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).

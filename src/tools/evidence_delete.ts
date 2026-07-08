@@ -15,7 +15,7 @@ const inputSchema = applyFieldGlosses(rawInputSchema, {"caseFileId":"MANDATORY. 
 
 export const evidence_delete = defineTool({
   name: "evidence_delete",
-  description: "Delete evidence",
+  description: "Permanently deletes one evidence by evidenceId (no group path needed). Destructive; sealed content should not be deleted — use only for drafts or mis-registered evidence. Requires: evidence_group_evidence_register or generate_evidence → evidenceId.",
   inputSchema,
   annotations: {
     title: "Evidence Delete",
@@ -30,7 +30,7 @@ export const evidence_delete = defineTool({
     const token = ctx.auth?.token ?? "";
     const sdkClient = createClient(
       createConfig({
-        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? process.env.MCP_API_BASE_URL ?? "https://api.gcloudfactory.com/digital-trust",
+        baseUrl: process.env.MCP_API_BASE_URL_EVIDENCE ?? (process.env.MCP_API_BASE_URL ? `${process.env.MCP_API_BASE_URL.replace(/\/+$/, "")}/digital-trust` : "https://api.gcloudfactory.com/digital-trust"),
         headers: {
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),

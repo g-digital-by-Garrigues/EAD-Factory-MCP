@@ -109,8 +109,10 @@ export const signature_request_full = defineTool({
       createConfig({
         baseUrl:
           process.env.MCP_API_BASE_URL_SIGNATURE ??
-          process.env.MCP_API_BASE_URL ??
-          "https://api.gcloudfactory.com/signature-manager",
+          // Story 1.2 (audit G1): global var = gateway ROOT, manager prefix appended
+          (process.env.MCP_API_BASE_URL
+            ? `${process.env.MCP_API_BASE_URL.replace(/\/+$/, "")}/signature-manager`
+            : "https://api.gcloudfactory.com/signature-manager"),
         headers: {
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),

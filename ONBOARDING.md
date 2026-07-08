@@ -8,9 +8,7 @@ Get from zero to your first tool call in under 5 minutes.
 
 Visit [https://digitaltrust.gcloudfactory.com](https://digitaltrust.gcloudfactory.com) to create an account or obtain API credentials.
 
-You will need either:
-- **Email + password** (Flow 1 — interactive login), or
-- **OpenID Connect refresh token** (Flow 2 — for automated / CI use)
+You will need a **service account** (OAuth2 `client_credentials`): the token endpoint URL, a client ID, and a client secret.
 
 ---
 
@@ -30,27 +28,14 @@ Add this block inside `"mcpServers"`:
   "command": "npx",
   "args": ["-y", "@g-digital/mcp-ead-factory"],
   "env": {
-    "MCP_AUTH_EMAIL": "your-email@example.com",
-    "MCP_AUTH_PASSWORD": "your-password"
+    "MCP_SVC_TOKEN_URL": "https://your-idp.example.com/oauth2/v1/token",
+    "MCP_SVC_CLIENT_ID": "your-client-id",
+    "MCP_SVC_CLIENT_SECRET": "your-client-secret"
   }
 }
 ```
 
-Replace `your-email@example.com` and `your-password` with your real credentials.
-
-### OpenID Connect (Flow 2 — no password in config)
-
-```json
-"ead-factory": {
-  "command": "npx",
-  "args": ["-y", "@g-digital/mcp-ead-factory"],
-  "env": {
-    "MCP_OPENID_ISSUER": "https://your-tenant.auth.example.com",
-    "MCP_OPENID_CLIENT_ID": "your-client-id",
-    "MCP_OPENID_REFRESH_TOKEN": "your-refresh-token"
-  }
-}
-```
+Replace the placeholder values with your real service-account credentials (token endpoint URL, client ID, client secret).
 
 ---
 
@@ -68,10 +53,10 @@ The server starts automatically when Claude launches. Startup takes 2–5 second
 Try this prompt in Claude:
 
 ```
-Using the ead-factory MCP server, tell me who I am logged in as.
+Using the ead-factory MCP server, call ead_factory_help and summarize what this server can do.
 ```
 
-Claude will call the `session_info` tool and return your account details. If you see your email address in the response, setup is complete.
+Claude will call the `ead_factory_help` tool. If you get back an overview of the Evidence, Signature, and Notification managers, setup is complete — no credentials are needed for this call.
 
 ---
 
@@ -91,7 +76,7 @@ This package includes step-by-step guides as Claude Code slash-commands. After s
 |---------|-------------|-----|
 | `"Missing Authorization: Bearer <jwt>"` | HTTP mode: no Bearer header sent | Use stdio mode (npx) or add the Bearer header to your client |
 | `"JWT is expired"` | Session token has expired | Claude will auto-refresh; if it fails, restart the server |
-| `"Upstream HTTP 401"` | Wrong credentials | Re-check `MCP_AUTH_EMAIL` / `MCP_AUTH_PASSWORD` in your config |
+| `"Upstream HTTP 401"` | Wrong credentials | Re-check `MCP_SVC_TOKEN_URL` / `MCP_SVC_CLIENT_ID` / `MCP_SVC_CLIENT_SECRET` in your config |
 | `"Upstream HTTP 503"` | API temporarily unavailable | Wait 1–2 minutes and retry |
 | Tool not found in Claude | Server not connected | Run `/mcp` in Claude Code to verify connection; check Claude Desktop logs |
 | `Error: Cannot find package` | npm cache issue | Run `npx --yes @g-digital/mcp-ead-factory` manually once to pre-warm the cache |

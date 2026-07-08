@@ -1,42 +1,42 @@
 {
-  "name": "@g-digital/mcp-ead-factory",
-  "version": "1.0.15",
-  "description": "MCP server for EAD Factory: qualified evidence, signature, notifications and chat via AI agents.",
-  "mcpName": "io.github.g-digital-by-Garrigues/ead-factory",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/g-digital-by-Garrigues/EAD-Factory-MCP.git"
-  },
-  "type": "module",
   "bin": {
     "mcp-ead-factory": "./dist/server.js"
   },
-  "main": "./dist/server.js",
-  "types": "./dist/server.d.ts",
+  "dependencies": {
+    "@hey-api/client-fetch": "^0.9.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "lru-cache": "^11.0.0",
+    "pino": "^10.0.0",
+    "zod": "^4.0.0"
+  },
+  "description": "MCP server for EAD Factory: qualified evidence, signature, notifications and chat via AI agents.",
+  "devDependencies": {
+    "tsup": "^8.5.0",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=22"
+  },
   "files": [
     "dist",
     ".distribution.yaml",
     "assets",
     ".claude/commands/**/*.md"
   ],
-  "engines": {
-    "node": ">=22"
+  "license": "MIT",
+  "main": "./dist/server.js",
+  "mcpName": "io.github.g-digital-by-Garrigues/ead-factory",
+  "name": "@g-digital/mcp-ead-factory",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/g-digital-by-Garrigues/EAD-Factory-MCP.git"
   },
   "scripts": {
     "build": "tsup",
-    "start": "node dist/server.js",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "start": "node dist/server.js"
   },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.29.0",
-    "@hey-api/client-fetch": "^0.9.0",
-    "lru-cache": "^11.0.0",
-    "pino": "^10.0.0",
-    "zod": "^4.0.0"
-  },
-  "devDependencies": {
-    "tsup": "^8.5.0",
-    "typescript": "^5.5.0"
-  }
+  "type": "module",
+  "types": "./dist/server.d.ts",
+  "version": "1.1.0"
 }

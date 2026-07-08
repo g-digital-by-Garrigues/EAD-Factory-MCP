@@ -3831,7 +3831,15 @@ export type SignatureGetSignatureRequestsResponses = {
     /**
      * Signature requests obtained successfully
      */
-    200: Array<SignatureSignatureRequestViewModel1>;
+    200: {
+        records?: Array<SignatureSignatureRequestViewModel1>;
+        _metadata?: {
+            currentPage?: number;
+            totalPages?: number;
+            pageSize?: number;
+            totalRecords?: number;
+        };
+    };
 };
 
 export type SignatureGetSignatureRequestsResponse = SignatureGetSignatureRequestsResponses[keyof SignatureGetSignatureRequestsResponses];
@@ -3951,7 +3959,7 @@ export type SignatureGetSignatureRequestResponses = {
     /**
      * Signature request obtained successfully
      */
-    200: Array<SignatureSignatureRequestDetailViewModel>;
+    200: SignatureSignatureRequestDetailViewModel;
 };
 
 export type SignatureGetSignatureRequestResponse = SignatureGetSignatureRequestResponses[keyof SignatureGetSignatureRequestResponses];
