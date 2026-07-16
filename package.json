@@ -1,6 +1,6 @@
 {
   "name": "@g-digital/mcp-ead-factory",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "MCP server for EAD Factory: qualified evidence, signature, notifications and chat via AI agents.",
   "mcpName": "io.github.g-digital-by-Garrigues/ead-factory",
   "license": "MIT",
