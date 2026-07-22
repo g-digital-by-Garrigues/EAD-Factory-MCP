@@ -1,6 +1,9 @@
-import { defineConfig } from 'tsup';
-
-export default defineConfig([
+// No `import { defineConfig } from 'tsup'` here: the n8n scanner lints every .ts in
+// the tree — the reviewers lint the source repo, not the published tarball, which
+// ships dist/ only — and @n8n/community-nodes/no-restricted-imports rejects importing
+// tsup. defineConfig only adds typing, so a plain array export builds identically and
+// carries no tsup import. The published node genuinely has no tsup dependency.
+export default ([
   {
     // n8n node bundle: node class + credentials.
     // REST-direct architecture (Epic 12 ADR 0008): no MCP subprocess,
@@ -8,7 +11,7 @@ export default defineConfig([
     // Icon PNGs are handled by the `copyfiles` step in the build script.
     entry: {
       'nodes/EadFactory/EadFactory.node': 'nodes/EadFactory/EadFactory.node.ts',
-      'credentials/EadFactoryApi.credentials': 'credentials/EadFactoryApi.credentials.ts',
+      'credentials/EadFactoryOAuth2Api.credentials': 'credentials/EadFactoryOAuth2Api.credentials.ts',
     },
     format: ['cjs'],
     target: 'node18',
@@ -30,3 +33,4 @@ export default defineConfig([
     dts: false,
   },
 ]);
+

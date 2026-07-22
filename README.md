@@ -264,11 +264,11 @@ docker run --rm -i \
 | `MCP_HTTP_HOST` | No | No | Interface the HTTP transport binds to. Default 127.0.0.1 (localhost only). Set 0.0.0.0 to expose on all interfaces (containers do this automatically). |
 | `MCP_HTTP_MAX_BODY_BYTES` | No | No | Maximum accepted POST /mcp request-body size in bytes (default 16777216 = 16 MiB — sized so base64 file uploads within the documented tool limits fit). Oversized requests get a 413 JSON-RPC error before/while reading — closes a memory-exhaustion DoS vector in public deployments. Note: base64 file sources are capped by this limit BEFORE MCP_FILE_MAX_BYTES applies. |
 | `MCP_HTTP_PUBLIC` | No | No | Set to "true" for public/multi-tenant deployments. Activates Host validation and refuses to start unless (1) MCP_ALLOWED_ORIGINS or MCP_ALLOWED_HOSTS is set AND (2) inbound Bearer introspection is configured (MCP_SVC_INTROSPECT_URL + MCP_SVC_CLIENT_ID/SECRET) or MCP_ALLOW_UNVERIFIED_BEARER=true is set explicitly (fail-closed). |
-| `MCP_SVC_CLIENT_ID` | Yes | No | OAuth2 client_credentials client ID |
-| `MCP_SVC_CLIENT_SECRET` | Yes | Yes | OAuth2 client_credentials client secret (See https://digitaltrust.gcloudfactory.com for credential acquisition.) |
-| `MCP_SVC_INTROSPECT_URL` | No | No | RFC 7662 token introspection URL for inbound Bearer verification in HTTP mode. Opt-in — reuses the service-account client id/secret above as the resource-server credentials. |
-| `MCP_SVC_SCOPE` | No | No | Optional OAuth2 scope for the service-account token request |
-| `MCP_SVC_TOKEN_URL` | Yes | No | Token endpoint URL for the OAuth2 client_credentials flow |
+| `MCP_SVC_CLIENT_ID` | Yes | No | OAuth2 client_credentials client ID. |
+| `MCP_SVC_CLIENT_SECRET` | Yes | Yes | OAuth2 client_credentials client secret. (See https://digitaltrust.gcloudfactory.com for credential acquisition.) |
+| `MCP_SVC_INTROSPECT_URL` | No | No | RFC 7662 token introspection URL for inbound Bearer verification in HTTP mode. Opt-in, and required when MCP_HTTP_PUBLIC=true. Leave empty for stdio (local) use. |
+| `MCP_SVC_SCOPE` | No | No | Optional OAuth2 scope for the service-account token request. |
+| `MCP_SVC_TOKEN_URL` | Yes | No | Token endpoint URL for the OAuth2 client_credentials flow. |
 | `PORT` | No | No | HTTP port when running in hosted (HTTP) mode; ignored in stdio mode |
 
 | Variable | Required | Description |
@@ -290,6 +290,15 @@ This package ships Claude Code slash-commands under `.claude/commands/`. After i
 - `/create-notification-request` — step-by-step workflow guide
 
 See [docs/agent-prompts.md](docs/agent-prompts.md) for end-to-end prompt examples and the tool sequences they trigger.
+
+## Prefer to code against the REST API directly?
+
+You don't have to go through this MCP server. This repo also ships a **Claude Code skill** — a standalone integration guide (authentication, call ordering, options, enums, gotchas) for programming directly against the REST API:
+
+- **Skill:** [`.claude/skills/ead-factory-api/SKILL.md`](.claude/skills/ead-factory-api/SKILL.md) — open this repo in Claude Code and it is available directly.
+- **As a reference:** [docs/api-integration-skill.md](docs/api-integration-skill.md).
+
+It is independent of the MCP tools and the n8n node — pick whichever entry point fits your integration.
 
 ## Available Tools
 

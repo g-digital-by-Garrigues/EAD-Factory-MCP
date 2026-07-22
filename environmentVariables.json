@@ -73,31 +73,31 @@
       "name": "MCP_HTTP_PUBLIC"
     },
     {
-      "description": "OAuth2 client_credentials client ID",
+      "description": "OAuth2 client_credentials client ID.",
       "isRequired": true,
       "isSecret": false,
       "name": "MCP_SVC_CLIENT_ID"
     },
     {
-      "description": "OAuth2 client_credentials client secret (See https://digitaltrust.gcloudfactory.com for credential acquisition.)",
+      "description": "OAuth2 client_credentials client secret. (See https://digitaltrust.gcloudfactory.com for credential acquisition.)",
       "isRequired": true,
       "isSecret": true,
       "name": "MCP_SVC_CLIENT_SECRET"
     },
     {
-      "description": "RFC 7662 token introspection URL for inbound Bearer verification in HTTP mode. Opt-in — reuses the service-account client id/secret above as the resource-server credentials.",
+      "description": "RFC 7662 token introspection URL for inbound Bearer verification in HTTP mode. Opt-in, and required when MCP_HTTP_PUBLIC=true. Leave empty for stdio (local) use.",
       "isRequired": false,
       "isSecret": false,
       "name": "MCP_SVC_INTROSPECT_URL"
     },
     {
-      "description": "Optional OAuth2 scope for the service-account token request",
+      "description": "Optional OAuth2 scope for the service-account token request.",
       "isRequired": false,
       "isSecret": false,
       "name": "MCP_SVC_SCOPE"
     },
     {
-      "description": "Token endpoint URL for the OAuth2 client_credentials flow",
+      "description": "Token endpoint URL for the OAuth2 client_credentials flow.",
       "isRequired": true,
       "isSecret": false,
       "name": "MCP_SVC_TOKEN_URL"

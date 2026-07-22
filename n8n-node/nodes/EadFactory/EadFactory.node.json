@@ -1,5 +1,5 @@
 {
-  "node": "@g-digital/n8n-nodes-ead-factory",
+  "node": "@g-digital/n8n-nodes-ead-factory.eadFactory",
   "nodeVersion": "1.0",
   "codexVersion": "1.0",
   "categories": ["Utility"],
