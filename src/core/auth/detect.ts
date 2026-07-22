@@ -1,12 +1,12 @@
 /**
  * Credential detection: determines which auth flow to use from env vars.
- * AC6: Mixed vars from both flows → fast-fail with explicit error.
+ * Fast-fails when vars from more than one flow are mixed.
  */
 import { DeviceFlowAdapter } from "./device-flow.js";
 import { EmailPasswordAdapter } from "./email-password.js";
-import { OpenIdAdapter } from "./openid.js";
 import { ServiceAccountAdapter } from "./service-account.js";
 import type { AuthAdapter } from "./session.js";
+import { UserKeyAdapter } from "./user-key.js";
 
 export class AuthConfigError extends Error {
   constructor(message: string) {
@@ -19,23 +19,26 @@ export interface AuthEnv {
   MCP_AUTH_EMAIL?: string;
   MCP_AUTH_PASSWORD?: string;
   MCP_AUTH_JWT?: string;
-  MCP_OPENID_ISSUER?: string;
-  MCP_OPENID_CLIENT_ID?: string;
-  MCP_OPENID_REFRESH_TOKEN?: string;
+  // User-key flow (Epic E14): a single long-lived key exchanged for a session JWT
+  MCP_AUTH_USER_KEY?: string;
   MCP_API_BASE_URL?: string;
-  // Service-account flow (OAuth2 client_credentials, ADR-A2 / FR-5..8)
+  // OUTBOUND service-account flow (OAuth2 client_credentials, ADR-A2 / FR-5..8).
+  // MCP_SVC_TOKEN_URL is exclusive to this flow and is what selects it.
   MCP_SVC_TOKEN_URL?: string;
+  MCP_SVC_SCOPE?: string;
+  // SHARED credentials: used by the outbound flow above AND by inbound introspection
+  // below. Never treat them on their own as a service-account flow (STR-E15-04).
   MCP_SVC_CLIENT_ID?: string;
   MCP_SVC_CLIENT_SECRET?: string;
-  MCP_SVC_SCOPE?: string;
-  // Inbound Bearer introspection (RFC 7662, Story 2.3) — reuses the client id/secret above
+  // INBOUND Bearer introspection (RFC 7662, Story 2.3) — a transport concern, not an
+  // auth flow. Required by MCP_HTTP_PUBLIC=true; reuses the client id/secret above.
   MCP_SVC_INTROSPECT_URL?: string;
 }
 
 export function detectAuthAdapter(env: AuthEnv = process.env as AuthEnv): AuthAdapter | null {
   const baseUrl = env.MCP_API_BASE_URL ?? "https://api-gocertius.gocertius.io";
 
-  // MCP_AUTH_JWT: JWT pre-seeded directly (e.g. extracted from browser session).
+  // MCP_AUTH_JWT: JWT pre-seeded directly (e.g. extracted from a browser session).
   // Use DeviceFlowAdapter so authSession reads from deviceFlowStore (seeded in server.ts).
   if (env.MCP_AUTH_JWT) {
     return new DeviceFlowAdapter();
@@ -43,31 +46,37 @@ export function detectAuthAdapter(env: AuthEnv = process.env as AuthEnv): AuthAd
 
   const hasEmail = Boolean(env.MCP_AUTH_EMAIL);
   const hasPassword = Boolean(env.MCP_AUTH_PASSWORD);
-  const hasIssuer = Boolean(env.MCP_OPENID_ISSUER);
-  const hasClientId = Boolean(env.MCP_OPENID_CLIENT_ID);
-  const hasRefreshToken = Boolean(env.MCP_OPENID_REFRESH_TOKEN);
+  const hasUserKey = Boolean(env.MCP_AUTH_USER_KEY);
 
   // Service-account flow (ADR-A2): all three of token URL + client id + secret required.
+  //
+  // MCP_SVC_TOKEN_URL is what identifies this flow. MCP_SVC_CLIENT_ID/SECRET are
+  // deliberately NOT part of the test: they are SHARED with inbound RFC 7662
+  // introspection (MCP_SVC_INTROSPECT_URL), which MCP_HTTP_PUBLIC=true requires.
+  // Keying on "any MCP_SVC_* var" made those two concerns collide — configuring
+  // introspection on a gocertius/suite deployment either conflicted with its
+  // email/user-key flow or tripped the incomplete-set check, so the server
+  // refused to start and public HTTP mode was unusable there (STR-E15-04).
   const hasSvcTokenUrl = Boolean(env.MCP_SVC_TOKEN_URL);
   const hasSvcClientId = Boolean(env.MCP_SVC_CLIENT_ID);
   const hasSvcClientSecret = Boolean(env.MCP_SVC_CLIENT_SECRET);
-  const hasSvcAny = hasSvcTokenUrl || hasSvcClientId || hasSvcClientSecret;
   const hasSvcFlow = hasSvcTokenUrl && hasSvcClientId && hasSvcClientSecret;
 
   // Conflict: service_account is mutually exclusive with the user-context flows.
-  if (hasSvcAny && (hasEmail || hasPassword || hasIssuer || hasClientId || hasRefreshToken)) {
+  if (hasSvcTokenUrl && (hasEmail || hasPassword || hasUserKey)) {
     throw new AuthConfigError(
-      "Auth config conflict: service-account vars (MCP_SVC_*) cannot be combined with " +
-        "email/password or OpenID vars. Configure exactly one auth flow. " +
-        "Service account: MCP_SVC_TOKEN_URL + MCP_SVC_CLIENT_ID + MCP_SVC_CLIENT_SECRET (+ optional MCP_SVC_SCOPE).",
+      "Auth config conflict: the service-account flow (MCP_SVC_TOKEN_URL) cannot be combined " +
+        "with email/password or user-key vars. Configure exactly one auth flow. " +
+        "Service account: MCP_SVC_TOKEN_URL + MCP_SVC_CLIENT_ID + MCP_SVC_CLIENT_SECRET (+ optional MCP_SVC_SCOPE). " +
+        "Note: MCP_SVC_CLIENT_ID/MCP_SVC_CLIENT_SECRET on their own are fine — they double as " +
+        "inbound introspection credentials (MCP_SVC_INTROSPECT_URL) and do not select this flow.",
     );
   }
 
   // Service account: route to ServiceAccountAdapter; fail-fast on a partial set.
-  if (hasSvcAny) {
+  if (hasSvcTokenUrl) {
     if (!hasSvcFlow) {
       const missing = [
-        !hasSvcTokenUrl && "MCP_SVC_TOKEN_URL",
         !hasSvcClientId && "MCP_SVC_CLIENT_ID",
         !hasSvcClientSecret && "MCP_SVC_CLIENT_SECRET",
       ].filter(Boolean);
@@ -84,27 +93,21 @@ export function detectAuthAdapter(env: AuthEnv = process.env as AuthEnv): AuthAd
     });
   }
 
-  // Email/password flow requires BOTH vars.
-  // MCP_AUTH_EMAIL alone (no password, no OpenID vars) signals "auto-discovery" mode:
-  // session_login will call /session-info/{email} to learn the auth type, issuer, and clientId.
-  const hasEmailFlow = hasEmail && hasPassword;
-  const hasOpenIdFlow = hasIssuer || hasClientId || hasRefreshToken;
-  // Email-only: user provides just their address; session_login discovers issuer/clientId from API
-  const hasEmailOnly = hasEmail && !hasPassword && !hasOpenIdFlow;
-
-  // Conflict: explicit email/password AND explicit OpenID vars
-  if (hasEmailFlow && hasOpenIdFlow) {
-    throw new AuthConfigError(
-      "Auth config conflict: both email/password and OpenID Connect vars are set. " +
-        "Configure exactly one auth flow. " +
-        "Email/password: MCP_AUTH_EMAIL + MCP_AUTH_PASSWORD. " +
-        "OpenID (auto-discovery): MCP_AUTH_EMAIL only — issuer and clientId are fetched from GoCertius. " +
-        "OpenID (headless): MCP_OPENID_ISSUER + MCP_OPENID_CLIENT_ID + MCP_OPENID_REFRESH_TOKEN.",
-    );
+  // User-key flow (Epic E14): a single long-lived key, exchanged for a session JWT.
+  // Mutually exclusive with the other user-context flows.
+  if (hasUserKey) {
+    if (hasEmail || hasPassword) {
+      throw new AuthConfigError(
+        "Auth config conflict: MCP_AUTH_USER_KEY cannot be combined with email/password vars. " +
+          "Configure exactly one auth flow.",
+      );
+    }
+    return new UserKeyAdapter({ baseUrl, userKey: env.MCP_AUTH_USER_KEY! });
   }
 
+  // Email/password flow requires BOTH vars.
+  const hasEmailFlow = hasEmail && hasPassword;
   if (hasEmailFlow) {
-    // Both vars are guaranteed non-empty when hasEmailFlow is true
     return new EmailPasswordAdapter({
       baseUrl,
       email: env.MCP_AUTH_EMAIL!,
@@ -112,31 +115,6 @@ export function detectAuthAdapter(env: AuthEnv = process.env as AuthEnv): AuthAd
     });
   }
 
-  if (hasOpenIdFlow) {
-    if (!env.MCP_OPENID_ISSUER || !env.MCP_OPENID_CLIENT_ID) {
-      throw new AuthConfigError(
-        "Incomplete OpenID config: MCP_OPENID_ISSUER and MCP_OPENID_CLIENT_ID must be set " +
-          "(or use email-only mode: set only MCP_AUTH_EMAIL and call session_login).",
-      );
-    }
-    // Device flow: ISSUER + CLIENT_ID without REFRESH_TOKEN → interactive Azure AD sign-in
-    if (!env.MCP_OPENID_REFRESH_TOKEN) {
-      return new DeviceFlowAdapter();
-    }
-    return new OpenIdAdapter({
-      baseUrl,
-      issuer: env.MCP_OPENID_ISSUER,
-      clientId: env.MCP_OPENID_CLIENT_ID,
-      refreshToken: env.MCP_OPENID_REFRESH_TOKEN,
-    });
-  }
-
-  // Email-only mode: session_login auto-discovers issuer/clientId from /session-info/{email}
-  // and stores the JWT in deviceFlowStore for all subsequent tool calls.
-  if (hasEmailOnly) {
-    return new DeviceFlowAdapter();
-  }
-
-  // No credentials configured — server boots without auth (FR-E-013)
+  // No credentials configured — server boots without auth (FR-E-013).
   return null;
 }
