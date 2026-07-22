@@ -25,6 +25,7 @@ license: MIT
 credential_help_url: "https://digitaltrust.gcloudfactory.com"
 logo_path: assets/logo-400x400.png
 logo_svg_path: assets/logo.svg
+logo_svg_dark_path: assets/logo.dark.svg
 
 # Publication targets
 target_overrides: {}
