@@ -76,7 +76,6 @@ docker run --rm -i \
 | `MCP_SVC_CLIENT_ID` | Required | OAuth2 client ID |
 | `MCP_SVC_CLIENT_SECRET` | Required | OAuth2 client secret |
 | `MCP_SVC_SCOPE` | Optional | OAuth2 scope for the token request |
-| `MCP_AUTH_JWT` | Optional | Pre-seeded JWT (skips interactive login) |
 | `MCP_OTEL_ENABLED` | Optional | Set to `true` to enable OpenTelemetry tracing |
 | `MCP_API_BASE_URL` | Optional | Gateway root URL — each manager's path prefix is appended automatically; use `MCP_API_BASE_URL_<MANAGER>` for a full per-manager override (used as-is) |
 
