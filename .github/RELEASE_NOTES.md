@@ -40,6 +40,12 @@ That path is gone. If you still set the variable, it is ignored: the server boot
 no credential and every tool that needs authentication returns an error. Remove it and
 configure the service account.
 
+## The install snippets now name what you have to fill in
+
+Every client install block shipped `"MCP_SVC_CLIENT_ID": ""` and `"MCP_SVC_TOKEN_URL": ""`.
+Copied as-is, that is a server that starts and fails on the first authenticated call.
+They now carry named placeholders, so the blanks are visible before you run anything.
+
 ## Tools
 
 64 tools, unchanged. Same names, same inputs.
