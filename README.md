@@ -46,9 +46,9 @@ Every channel ships the same MCP server contract; the tools and environment conf
       ],
       "command": "npx",
       "env": {
-        "MCP_SVC_CLIENT_ID": "",
+        "MCP_SVC_CLIENT_ID": "<SET_MCP_SVC_CLIENT_ID_HERE>",
         "MCP_SVC_CLIENT_SECRET": "<PASTE_MCP_SVC_CLIENT_SECRET_HERE>",
-        "MCP_SVC_TOKEN_URL": ""
+        "MCP_SVC_TOKEN_URL": "<SET_MCP_SVC_TOKEN_URL_HERE>"
       }
     }
   }
@@ -69,9 +69,9 @@ Every channel ships the same MCP server contract; the tools and environment conf
       ],
       "command": "npx",
       "env": {
-        "MCP_SVC_CLIENT_ID": "",
+        "MCP_SVC_CLIENT_ID": "<SET_MCP_SVC_CLIENT_ID_HERE>",
         "MCP_SVC_CLIENT_SECRET": "<PASTE_MCP_SVC_CLIENT_SECRET_HERE>",
-        "MCP_SVC_TOKEN_URL": ""
+        "MCP_SVC_TOKEN_URL": "<SET_MCP_SVC_TOKEN_URL_HERE>"
       }
     }
   }
@@ -92,9 +92,9 @@ Every channel ships the same MCP server contract; the tools and environment conf
       ],
       "command": "npx",
       "env": {
-        "MCP_SVC_CLIENT_ID": "",
+        "MCP_SVC_CLIENT_ID": "<SET_MCP_SVC_CLIENT_ID_HERE>",
         "MCP_SVC_CLIENT_SECRET": "<PASTE_MCP_SVC_CLIENT_SECRET_HERE>",
-        "MCP_SVC_TOKEN_URL": ""
+        "MCP_SVC_TOKEN_URL": "<SET_MCP_SVC_TOKEN_URL_HERE>"
       }
     }
   }
@@ -115,9 +115,9 @@ Every channel ships the same MCP server contract; the tools and environment conf
       ],
       "command": "npx",
       "env": {
-        "MCP_SVC_CLIENT_ID": "",
+        "MCP_SVC_CLIENT_ID": "<SET_MCP_SVC_CLIENT_ID_HERE>",
         "MCP_SVC_CLIENT_SECRET": "<PASTE_MCP_SVC_CLIENT_SECRET_HERE>",
-        "MCP_SVC_TOKEN_URL": ""
+        "MCP_SVC_TOKEN_URL": "<SET_MCP_SVC_TOKEN_URL_HERE>"
       }
     }
   }
@@ -138,9 +138,9 @@ Every channel ships the same MCP server contract; the tools and environment conf
       ],
       "command": "npx",
       "env": {
-        "MCP_SVC_CLIENT_ID": "",
+        "MCP_SVC_CLIENT_ID": "<SET_MCP_SVC_CLIENT_ID_HERE>",
         "MCP_SVC_CLIENT_SECRET": "<PASTE_MCP_SVC_CLIENT_SECRET_HERE>",
-        "MCP_SVC_TOKEN_URL": ""
+        "MCP_SVC_TOKEN_URL": "<SET_MCP_SVC_TOKEN_URL_HERE>"
       }
     }
   }
@@ -161,9 +161,9 @@ Every channel ships the same MCP server contract; the tools and environment conf
       ],
       "command": "npx",
       "env": {
-        "MCP_SVC_CLIENT_ID": "",
+        "MCP_SVC_CLIENT_ID": "<SET_MCP_SVC_CLIENT_ID_HERE>",
         "MCP_SVC_CLIENT_SECRET": "<PASTE_MCP_SVC_CLIENT_SECRET_HERE>",
-        "MCP_SVC_TOKEN_URL": ""
+        "MCP_SVC_TOKEN_URL": "<SET_MCP_SVC_TOKEN_URL_HERE>"
       }
     }
   }
@@ -184,9 +184,9 @@ Every channel ships the same MCP server contract; the tools and environment conf
       ],
       "command": "npx",
       "env": {
-        "MCP_SVC_CLIENT_ID": "",
+        "MCP_SVC_CLIENT_ID": "<SET_MCP_SVC_CLIENT_ID_HERE>",
         "MCP_SVC_CLIENT_SECRET": "<PASTE_MCP_SVC_CLIENT_SECRET_HERE>",
-        "MCP_SVC_TOKEN_URL": ""
+        "MCP_SVC_TOKEN_URL": "<SET_MCP_SVC_TOKEN_URL_HERE>"
       }
     }
   }
@@ -207,9 +207,9 @@ Every channel ships the same MCP server contract; the tools and environment conf
       ],
       "command": "npx",
       "env": {
-        "MCP_SVC_CLIENT_ID": "",
+        "MCP_SVC_CLIENT_ID": "<SET_MCP_SVC_CLIENT_ID_HERE>",
         "MCP_SVC_CLIENT_SECRET": "<PASTE_MCP_SVC_CLIENT_SECRET_HERE>",
-        "MCP_SVC_TOKEN_URL": ""
+        "MCP_SVC_TOKEN_URL": "<SET_MCP_SVC_TOKEN_URL_HERE>"
       }
     }
   }
@@ -277,7 +277,6 @@ docker run --rm -i \
 | `MCP_SVC_CLIENT_ID` | Required | OAuth2 client ID |
 | `MCP_SVC_CLIENT_SECRET` | Required | OAuth2 client secret |
 | `MCP_SVC_SCOPE` | Optional | OAuth2 scope for the token request |
-| `MCP_AUTH_JWT` | Optional | Pre-seeded JWT (skips interactive login) |
 | `MCP_OTEL_ENABLED` | Optional | Set to `true` to enable OpenTelemetry tracing |
 | `MCP_API_BASE_URL` | Optional | Gateway root URL — each manager's path prefix is appended automatically; use `MCP_API_BASE_URL_<MANAGER>` for a full per-manager override (used as-is) |
 
