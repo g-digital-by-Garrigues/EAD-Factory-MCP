@@ -18,7 +18,7 @@ const inputSchema = applyFieldGlosses(rawInputSchema, {"caseFileId":"MANDATORY. 
 
 export const notification_receiver_add = defineTool({
   name: "notification_receiver_add",
-  description: "Adds one or more receivers to a draft notification request — each receiver becomes its own per-channel notification under the shared requestId (there is no separate receiverId; track receivers by the notificationIds this call returns). Use once per batch of receivers before calling notification_request_send. Requires: notification_request_create → requestId. Each receiver's shape depends on its `provider` (SMTP/SMS/NOTICEMAN/WFB) — see the schema for the fields each variant needs. Notification delivery provider: SMTP = Email delivery. | SMS = SMS text message delivery. | NOTICEMAN = EAD Factory's own certified notification channel (qualified electronic delivery). | NOTICEMAN_AND_WHATSAPP = Certified channel plus a WhatsApp copy. | NOTICEMAN_AND_WHATSAPP_AND_RCS = Certified channel plus WhatsApp and RCS copies. | NOTICEMAN_AND_RCS = Certified channel plus an RCS (Rich Communication Services) copy. | WFB = WhatsApp Business messaging, uncertified (no Noticeman qualified channel). | RCS = RCS (Rich Communication Services) messaging only, uncertified.",
+  description: "Adds one or more receivers to a draft notification request — each receiver becomes its own per-channel notification under the shared requestId (there is no separate receiverId; track receivers by the notificationIds this call returns). Use once per batch of receivers before calling notification_request_send. Requires: notification_request_create → requestId. Each receiver's shape depends on its `provider` (SMTP/SMS/NOTICEMAN/WFB) — see the schema for the fields each variant needs. Notification delivery provider: SMTP = Email delivery. SMS = SMS text message delivery. NOTICEMAN = EAD Factory's own certified notification channel (qualified electronic delivery). NOTICEMAN_AND_WHATSAPP = Certified channel plus a WhatsApp copy. NOTICEMAN_AND_WHATSAPP_AND_RCS = Certified channel plus WhatsApp and RCS copies. NOTICEMAN_AND_RCS = Certified channel plus an RCS (Rich Communication Services) copy. WFB = WhatsApp Business messaging, uncertified (no Noticeman qualified channel). RCS = RCS (Rich Communication Services) messaging only, uncertified.",
   inputSchema,
   outputSchema: zNotificationAddReceiversResponse,
   annotations: {
@@ -39,6 +39,9 @@ export const notification_receiver_add = defineTool({
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),
         },
+        // This API ignores bracketed query parameters, so an object parameter must go
+        // out as `size=1`, not the client's default deepObject `filter[size]=1`.
+        querySerializer: { object: { style: "form", explode: true } },
       }),
     );
 
@@ -61,6 +64,7 @@ export const notification_receiver_add = defineTool({
       // consumed response.response's body to populate response.error by this point.
       throw UpstreamHttpError.fromParsedError(response.response?.status ?? 0, response.error, "notification_receiver_add");
     }
-    return response.data;
+    // Story 6.6 (FR-30/§5.4): tells the agent what to call next without a separate lookup.
+    return { ...response.data, nextSteps: [{"suggestedTool":"notification_request_send","why":"Once every receiver (and any document) is added, pass the same `requestId` to send the request."},{"suggestedTool":"notification_document_add","why":"To attach documents before sending, pass the same `requestId`."}] };
   },
 });

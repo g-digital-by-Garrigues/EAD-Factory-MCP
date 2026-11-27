@@ -37,6 +37,9 @@ export const activate_signature_request = defineTool({
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),
         },
+        // This API ignores bracketed query parameters, so an object parameter must go
+        // out as `size=1`, not the client's default deepObject `filter[size]=1`.
+        querySerializer: { object: { style: "form", explode: true } },
       }),
     );
 
@@ -59,6 +62,6 @@ export const activate_signature_request = defineTool({
       throw UpstreamHttpError.fromParsedError(response.response?.status ?? 0, response.error, "activate_signature_request");
     }
     // Story 6.6 (FR-30/§5.4): tells the agent what to call next without a separate lookup.
-    return { ...response.data, nextSteps: [{"suggestedTool":"get_signature_request","why":"Check signing progress after activation."}] };
+    return { ...response.data, nextSteps: [{"suggestedTool":"get_signature_request","why":"Pass this result's `id` as `signatureRequestId` to check signing progress."}] };
   },
 });

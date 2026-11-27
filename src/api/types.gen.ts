@@ -480,6 +480,10 @@ export type EvidenceCaseFilePreviewReportRequestModel = {
     metadata?: {
         [key: string]: string;
     };
+    /**
+     * When true, evidences that are not COMPLETED are excluded from the preview instead of failing the generation. Optional. Defaults to the tenant configuration.
+     */
+    ignoreNotCompletedEvidences?: boolean;
 };
 
 /**
@@ -516,6 +520,10 @@ export type EvidenceCaseFileReportRequestModel = {
      * Date from which the report will be scheduled for deletion. Optional. Must be at least the configured minimum threshold in the future.
      */
     deletionDate?: string;
+    /**
+     * When true, evidences that are not COMPLETED are excluded from the report and its evidence package instead of failing the generation. Optional. Defaults to the tenant configuration.
+     */
+    ignoreNotCompletedEvidences?: boolean;
 };
 
 /**
@@ -540,19 +548,6 @@ export type EvidenceUpdateCaseFileStatusRequestModel = {
      * New status of the case file
      */
     status: EvidenceCaseFileStatusViewModel & string;
-};
-
-/**
- * PreviewReport Request
- */
-export type EvidenceChatPreviewReportRequestModel = {
-    template: string;
-    languageCode: string;
-    fromDate?: string | null;
-    toDate?: string | null;
-    additionalData?: {
-        [key: string]: unknown;
-    };
 };
 
 export type EvidenceEvidenceGroupSearch = {
@@ -727,6 +722,11 @@ export type EvidenceUploadUrlTemporaryFileHttpRequestModel = {
     };
 };
 
+export type EvidenceUploadUrlTemporaryFileHttpResponseModel = {
+    url?: string;
+    expiration?: string;
+};
+
 export type EvidenceStartMultipartUploadRequestModel = {
     caseFileId?: string;
     evidenceGroupId?: string;
@@ -742,6 +742,11 @@ export type EvidenceStartMultipartUploadRequestModel = {
     };
 };
 
+export type EvidenceUploadLinkOutputModel = {
+    url?: string;
+    expiration?: string;
+};
+
 /**
  * Bulk delete signature request
  */
@@ -755,6 +760,7 @@ export type SignatureAddValidatorRequestModel = {
     surnames?: string;
     phone?: string;
     email: string;
+    provider?: SignatureSignatureRequestProvider;
 };
 
 /**
@@ -816,6 +822,10 @@ export type SignatureCreateSignatureRequestModel = {
     language?: string;
     uniqueValidator?: boolean;
     provider?: SignatureSignatureRequestProvider;
+    /**
+     * Notification flow provider (NOTICE_MANAGER | SCASC). Optional: defaults to the tenant configured default, then NOTICE_MANAGER. Immutable after creation.
+     */
+    notificationProvider?: string | null;
     senderName?: string;
     senderAddress?: string;
     closeConfig?: SignatureCloseConfig;
@@ -1022,12 +1032,14 @@ export type SignatureAddObserverRequestModel = {
     name: string;
     surnames?: string;
     email: string;
+    provider?: SignatureSignatureRequestProvider;
 };
 
 export type SignatureUpdateObserverRequestModel = {
     name?: string;
     surnames?: string;
     email?: string;
+    provider?: SignatureSignatureRequestProvider;
 };
 
 export type SignatureUpdateDocumentSequenceRequestModel = {
@@ -1055,6 +1067,7 @@ export type SignatureSignatoryViewModel = {
     participantType?: SignatureSignatoryParticipantType;
     taxId?: string;
     roleType?: string;
+    provider?: string;
     metadata?: {
         [key: string]: string;
     };
@@ -1068,6 +1081,7 @@ export type SignatureAddSignatoryRequestModel = {
     coordinates?: Array<SignatureAddSignatoryCoordinatesRequestModel>;
     sequence?: number;
     uniqueValidator?: boolean;
+    provider?: SignatureSignatureRequestProvider;
 };
 
 export type SignatureUpdateSignatoryRequestModel = {
@@ -1077,6 +1091,7 @@ export type SignatureUpdateSignatoryRequestModel = {
     uniqueValidator?: boolean;
     email?: string;
     sequence?: number;
+    provider?: SignatureSignatureRequestProvider;
 };
 
 export type SignatureUpdateSignatoryCoordinatesRequestModel = {
@@ -1092,6 +1107,7 @@ export type SignatureUpdateValidatorRequestModel = {
     surnames?: string;
     phone?: string;
     email?: string;
+    provider?: SignatureSignatureRequestProvider;
 };
 
 export type SignatureUploadLinkOutputModel = {
@@ -1632,6 +1648,8 @@ export type EvidenceTestimonyDataQueryModel = {
     providers?: Array<string>;
 };
 
+export type SignatureSignatureRequestProvider = 'NOTICEMAN' | 'NOTICEMAN_AND_WHATSAPP' | 'NOTICEMAN_AND_WHATSAPP_AND_RCS' | 'NOTICEMAN_AND_RCS';
+
 export type SignatureHashSetDownloadUrlViewModel = SignatureAbstractCollectionDownloadUrlViewModel & {
     empty?: boolean;
 };
@@ -1661,8 +1679,6 @@ export type SignatureSignatureRequestBodyModel = {
     status?: SignatureSignatureRequestStatusTypeModel;
     content?: SignatureSignatureRequestBodyContent;
 };
-
-export type SignatureSignatureRequestProvider = 'NOTICEMAN' | 'NOTICEMAN_AND_WHATSAPP' | 'NOTICEMAN_AND_WHATSAPP_AND_RCS' | 'NOTICEMAN_AND_RCS';
 
 export type SignatureCloseConfig = {
     condition?: SignatureCloseCondition;
@@ -1761,6 +1777,7 @@ export type SignatureSignatoryValidatorViewModel = {
     surnames?: string;
     email?: string;
     status?: SignatureSignatureValidatorStatus;
+    provider?: string;
     notifications?: Array<SignatureParticipantNotificationViewModel>;
 };
 
@@ -1845,13 +1862,13 @@ export type NotificationUploadRequestAttachmentLinkModel = {
  * Receiver request model
  */
 export type NotificationReceiverNotificationRequestModel = ({
-    provider: 'Notification_AddReceiverEmailNotificationRequestModel';
+    provider: 'SMTP';
 } & NotificationAddReceiverEmailNotificationRequestModel) | ({
-    provider: 'Notification_AddReceiverNoticemanNotificationRequestModel';
+    provider: 'NOTICEMAN';
 } & NotificationAddReceiverNoticemanNotificationRequestModel) | ({
-    provider: 'Notification_AddReceiverSmsNotificationRequestModel';
+    provider: 'SMS';
 } & NotificationAddReceiverSmsNotificationRequestModel) | ({
-    provider: 'Notification_AddReceiverWfbNotificationRequestModel';
+    provider: 'WFB';
 } & NotificationAddReceiverWfbNotificationRequestModel);
 
 export type NotificationRegisterNotificationContentRequestModel = {
@@ -2378,7 +2395,7 @@ export type EvidenceDeleteEvidenceGroupsResponses = {
 
 export type EvidenceDeleteEvidenceGroupsResponse = EvidenceDeleteEvidenceGroupsResponses[keyof EvidenceDeleteEvidenceGroupsResponses];
 
-export type EvidenceSearchData = {
+export type EvidenceSearchCaseFilesData = {
     body?: never;
     path?: never;
     query: {
@@ -2387,21 +2404,21 @@ export type EvidenceSearchData = {
     url: '/api/v1/private/case-files';
 };
 
-export type EvidenceSearchErrors = {
+export type EvidenceSearchCaseFilesErrors = {
     /**
      * Bad request
      */
     400: unknown;
 };
 
-export type EvidenceSearchResponses = {
+export type EvidenceSearchCaseFilesResponses = {
     /**
      * Case files retrieved
      */
     200: EvidenceSearchCaseFileCollectionViewModel;
 };
 
-export type EvidenceSearchResponse = EvidenceSearchResponses[keyof EvidenceSearchResponses];
+export type EvidenceSearchCaseFilesResponse = EvidenceSearchCaseFilesResponses[keyof EvidenceSearchCaseFilesResponses];
 
 export type EvidenceUpdateCaseFilesData = {
     body: EvidenceBulkPatchRequestModel;
@@ -2691,7 +2708,7 @@ export type EvidenceCloseEvidenceGroupResponses = {
 
 export type EvidenceCloseEvidenceGroupResponse = EvidenceCloseEvidenceGroupResponses[keyof EvidenceCloseEvidenceGroupResponses];
 
-export type EvidenceRegisterEvidenceData = {
+export type EvidenceRegisterEvidenceInGroupData = {
     body: EvidenceRegisterEvidenceRequestModel;
     path: {
         /**
@@ -2707,7 +2724,7 @@ export type EvidenceRegisterEvidenceData = {
     url: '/api/v1/private/case-files/{caseFileId}/evidence-groups/{evidenceGroupId}/evidences';
 };
 
-export type EvidenceRegisterEvidenceErrors = {
+export type EvidenceRegisterEvidenceInGroupErrors = {
     /**
      * Bad request
      */
@@ -2722,16 +2739,16 @@ export type EvidenceRegisterEvidenceErrors = {
     500: unknown;
 };
 
-export type EvidenceRegisterEvidenceResponses = {
+export type EvidenceRegisterEvidenceInGroupResponses = {
     /**
      * Evidence registered successfully
      */
     201: EvidenceRegisterEvidenceResponseModel;
 };
 
-export type EvidenceRegisterEvidenceResponse = EvidenceRegisterEvidenceResponses[keyof EvidenceRegisterEvidenceResponses];
+export type EvidenceRegisterEvidenceInGroupResponse = EvidenceRegisterEvidenceInGroupResponses[keyof EvidenceRegisterEvidenceInGroupResponses];
 
-export type EvidenceDeleteEvidenceData = {
+export type EvidenceDeleteEvidenceInGroupData = {
     body?: never;
     path: {
         /**
@@ -2751,7 +2768,7 @@ export type EvidenceDeleteEvidenceData = {
     url: '/api/v1/private/case-files/{caseFileId}/evidence-groups/{evidenceGroupId}/evidences/{evidenceId}';
 };
 
-export type EvidenceDeleteEvidenceErrors = {
+export type EvidenceDeleteEvidenceInGroupErrors = {
     /**
      * Not Found
      */
@@ -2762,16 +2779,16 @@ export type EvidenceDeleteEvidenceErrors = {
     500: unknown;
 };
 
-export type EvidenceDeleteEvidenceResponses = {
+export type EvidenceDeleteEvidenceInGroupResponses = {
     /**
      * Evidence deleted
      */
     204: void;
 };
 
-export type EvidenceDeleteEvidenceResponse = EvidenceDeleteEvidenceResponses[keyof EvidenceDeleteEvidenceResponses];
+export type EvidenceDeleteEvidenceInGroupResponse = EvidenceDeleteEvidenceInGroupResponses[keyof EvidenceDeleteEvidenceInGroupResponses];
 
-export type EvidenceGetEvidenceData = {
+export type EvidenceGetEvidenceInGroupData = {
     body?: never;
     path: {
         /**
@@ -2791,7 +2808,7 @@ export type EvidenceGetEvidenceData = {
     url: '/api/v1/private/case-files/{caseFileId}/evidence-groups/{evidenceGroupId}/evidences/{evidenceId}';
 };
 
-export type EvidenceGetEvidenceErrors = {
+export type EvidenceGetEvidenceInGroupErrors = {
     /**
      * Bad request
      */
@@ -2802,16 +2819,16 @@ export type EvidenceGetEvidenceErrors = {
     404: unknown;
 };
 
-export type EvidenceGetEvidenceResponses = {
+export type EvidenceGetEvidenceInGroupResponses = {
     /**
      * Evidence got
      */
     200: EvidenceGetEvidenceViewModel;
 };
 
-export type EvidenceGetEvidenceResponse = EvidenceGetEvidenceResponses[keyof EvidenceGetEvidenceResponses];
+export type EvidenceGetEvidenceInGroupResponse = EvidenceGetEvidenceInGroupResponses[keyof EvidenceGetEvidenceInGroupResponses];
 
-export type EvidenceCreateDownloadUrlData = {
+export type EvidenceCreateEvidenceGroupDownloadUrlData = {
     body?: never;
     path: {
         /**
@@ -2831,7 +2848,7 @@ export type EvidenceCreateDownloadUrlData = {
     url: '/api/v1/private/case-files/{caseFileId}/evidence-groups/{evidenceGroupId}/evidences/{evidenceId}/download-url';
 };
 
-export type EvidenceCreateDownloadUrlErrors = {
+export type EvidenceCreateEvidenceGroupDownloadUrlErrors = {
     /**
      * Resource not found
      */
@@ -2842,14 +2859,14 @@ export type EvidenceCreateDownloadUrlErrors = {
     500: unknown;
 };
 
-export type EvidenceCreateDownloadUrlResponses = {
+export type EvidenceCreateEvidenceGroupDownloadUrlResponses = {
     /**
      * Download url created
      */
     201: unknown;
 };
 
-export type EvidenceCreateUploadUrlData = {
+export type EvidenceCreateEvidenceGroupUploadUrlData = {
     body: {
         requestModel?: EvidenceNewUploadUrlRequestModel;
     };
@@ -2871,7 +2888,7 @@ export type EvidenceCreateUploadUrlData = {
     url: '/api/v1/private/case-files/{caseFileId}/evidence-groups/{evidenceGroupId}/evidences/{evidenceId}/upload-url';
 };
 
-export type EvidenceCreateUploadUrlErrors = {
+export type EvidenceCreateEvidenceGroupUploadUrlErrors = {
     /**
      * Resource not found
      */
@@ -2882,7 +2899,7 @@ export type EvidenceCreateUploadUrlErrors = {
     500: unknown;
 };
 
-export type EvidenceCreateUploadUrlResponses = {
+export type EvidenceCreateEvidenceGroupUploadUrlResponses = {
     /**
      * Upload url created
      */
@@ -2950,10 +2967,14 @@ export type EvidenceAssignRelationshipResponses = {
     /**
      * Item assigned to case file
      */
-    200: unknown;
+    201: {
+        [key: string]: unknown;
+    };
 };
 
-export type EvidenceObtainReportPreviewData = {
+export type EvidenceAssignRelationshipResponse = EvidenceAssignRelationshipResponses[keyof EvidenceAssignRelationshipResponses];
+
+export type EvidenceObtainCaseFileReportPreviewData = {
     body: EvidenceCaseFilePreviewReportRequestModel;
     path: {
         caseFileId: string;
@@ -2962,7 +2983,7 @@ export type EvidenceObtainReportPreviewData = {
     url: '/api/v1/private/case-files/{caseFileId}/report-preview';
 };
 
-export type EvidenceObtainReportPreviewErrors = {
+export type EvidenceObtainCaseFileReportPreviewErrors = {
     /**
      * Bad request
      */
@@ -2973,7 +2994,7 @@ export type EvidenceObtainReportPreviewErrors = {
     404: unknown;
 };
 
-export type EvidenceObtainReportPreviewResponses = {
+export type EvidenceObtainCaseFileReportPreviewResponses = {
     /**
      * Generated ReportPreview
      */
@@ -2982,7 +3003,7 @@ export type EvidenceObtainReportPreviewResponses = {
     };
 };
 
-export type EvidenceObtainReportPreviewResponse = EvidenceObtainReportPreviewResponses[keyof EvidenceObtainReportPreviewResponses];
+export type EvidenceObtainCaseFileReportPreviewResponse = EvidenceObtainCaseFileReportPreviewResponses[keyof EvidenceObtainCaseFileReportPreviewResponses];
 
 export type EvidenceObtainSignedReportData = {
     body: EvidenceCaseFileReportRequestModel;
@@ -3152,38 +3173,7 @@ export type EvidenceUpdateCaseFileStatusResponses = {
 
 export type EvidenceUpdateCaseFileStatusResponse = EvidenceUpdateCaseFileStatusResponses[keyof EvidenceUpdateCaseFileStatusResponses];
 
-export type EvidenceObtainReportPreview1Data = {
-    body: EvidenceChatPreviewReportRequestModel;
-    path: {
-        chatId: string;
-    };
-    query?: never;
-    url: '/api/v1/private/chat/{chatId}/report-preview';
-};
-
-export type EvidenceObtainReportPreview1Errors = {
-    /**
-     * Bad request
-     */
-    400: unknown;
-    /**
-     * Resource not found
-     */
-    404: unknown;
-};
-
-export type EvidenceObtainReportPreview1Responses = {
-    /**
-     * Generated ReportPreview
-     */
-    200: {
-        [key: string]: unknown;
-    };
-};
-
-export type EvidenceObtainReportPreview1Response = EvidenceObtainReportPreview1Responses[keyof EvidenceObtainReportPreview1Responses];
-
-export type EvidenceSearch1Data = {
+export type EvidenceSearchEvidenceGroupsData = {
     body?: never;
     path?: never;
     query: {
@@ -3192,21 +3182,21 @@ export type EvidenceSearch1Data = {
     url: '/api/v1/private/evidence-groups';
 };
 
-export type EvidenceSearch1Errors = {
+export type EvidenceSearchEvidenceGroupsErrors = {
     /**
      * Bad request
      */
     400: unknown;
 };
 
-export type EvidenceSearch1Responses = {
+export type EvidenceSearchEvidenceGroupsResponses = {
     /**
      * Evidence Groups returned
      */
     200: EvidenceSearchEvidenceGroupCollectionViewModel;
 };
 
-export type EvidenceSearch1Response = EvidenceSearch1Responses[keyof EvidenceSearch1Responses];
+export type EvidenceSearchEvidenceGroupsResponse = EvidenceSearchEvidenceGroupsResponses[keyof EvidenceSearchEvidenceGroupsResponses];
 
 export type EvidenceUpdateEvidenceGroupsData = {
     body: EvidenceBulkPatchRequestModel;
@@ -3235,7 +3225,7 @@ export type EvidenceUpdateEvidenceGroupsResponses = {
 
 export type EvidenceUpdateEvidenceGroupsResponse = EvidenceUpdateEvidenceGroupsResponses[keyof EvidenceUpdateEvidenceGroupsResponses];
 
-export type EvidenceSearch2Data = {
+export type EvidenceSearchEvidencesData = {
     body?: never;
     path?: never;
     query: {
@@ -3244,30 +3234,30 @@ export type EvidenceSearch2Data = {
     url: '/api/v1/private/evidences';
 };
 
-export type EvidenceSearch2Errors = {
+export type EvidenceSearchEvidencesErrors = {
     /**
      * Bad request
      */
     400: unknown;
 };
 
-export type EvidenceSearch2Responses = {
+export type EvidenceSearchEvidencesResponses = {
     /**
      * Evidences returned
      */
     200: EvidenceSearchEvidenceCollectionViewModel;
 };
 
-export type EvidenceSearch2Response = EvidenceSearch2Responses[keyof EvidenceSearch2Responses];
+export type EvidenceSearchEvidencesResponse = EvidenceSearchEvidencesResponses[keyof EvidenceSearchEvidencesResponses];
 
-export type EvidenceUpdateEvidenceData = {
+export type EvidenceUpdateEvidencesData = {
     body: EvidenceBulkPatchRequestModel;
     path?: never;
     query?: never;
     url: '/api/v1/private/evidences';
 };
 
-export type EvidenceUpdateEvidenceErrors = {
+export type EvidenceUpdateEvidencesErrors = {
     /**
      * Bad request
      */
@@ -3278,23 +3268,23 @@ export type EvidenceUpdateEvidenceErrors = {
     500: unknown;
 };
 
-export type EvidenceUpdateEvidenceResponses = {
+export type EvidenceUpdateEvidencesResponses = {
     /**
      * Evidences updated sucessfully
      */
     204: void;
 };
 
-export type EvidenceUpdateEvidenceResponse = EvidenceUpdateEvidenceResponses[keyof EvidenceUpdateEvidenceResponses];
+export type EvidenceUpdateEvidencesResponse = EvidenceUpdateEvidencesResponses[keyof EvidenceUpdateEvidencesResponses];
 
-export type EvidenceRegisterEvidence1Data = {
+export type EvidenceRegisterEvidenceData = {
     body: EvidenceRegisterEvidenceRequestModel;
     path?: never;
     query?: never;
     url: '/api/v1/private/evidences';
 };
 
-export type EvidenceRegisterEvidence1Errors = {
+export type EvidenceRegisterEvidenceErrors = {
     /**
      * Bad request
      */
@@ -3305,16 +3295,16 @@ export type EvidenceRegisterEvidence1Errors = {
     500: unknown;
 };
 
-export type EvidenceRegisterEvidence1Responses = {
+export type EvidenceRegisterEvidenceResponses = {
     /**
      * Evidence registered successfully
      */
     201: EvidenceRegisterEvidenceResponseModel;
 };
 
-export type EvidenceRegisterEvidence1Response = EvidenceRegisterEvidence1Responses[keyof EvidenceRegisterEvidence1Responses];
+export type EvidenceRegisterEvidenceResponse = EvidenceRegisterEvidenceResponses[keyof EvidenceRegisterEvidenceResponses];
 
-export type EvidenceDeleteEvidence1Data = {
+export type EvidenceDeleteEvidenceData = {
     body?: never;
     path: {
         /**
@@ -3326,7 +3316,7 @@ export type EvidenceDeleteEvidence1Data = {
     url: '/api/v1/private/evidences/{evidenceId}';
 };
 
-export type EvidenceDeleteEvidence1Errors = {
+export type EvidenceDeleteEvidenceErrors = {
     /**
      * Not Found
      */
@@ -3337,16 +3327,16 @@ export type EvidenceDeleteEvidence1Errors = {
     500: unknown;
 };
 
-export type EvidenceDeleteEvidence1Responses = {
+export type EvidenceDeleteEvidenceResponses = {
     /**
      * Evidence deleted
      */
     204: void;
 };
 
-export type EvidenceDeleteEvidence1Response = EvidenceDeleteEvidence1Responses[keyof EvidenceDeleteEvidence1Responses];
+export type EvidenceDeleteEvidenceResponse = EvidenceDeleteEvidenceResponses[keyof EvidenceDeleteEvidenceResponses];
 
-export type EvidenceGetEvidence1Data = {
+export type EvidenceGetEvidenceData = {
     body?: never;
     path: {
         /**
@@ -3358,7 +3348,7 @@ export type EvidenceGetEvidence1Data = {
     url: '/api/v1/private/evidences/{evidenceId}';
 };
 
-export type EvidenceGetEvidence1Errors = {
+export type EvidenceGetEvidenceErrors = {
     /**
      * Bad request
      */
@@ -3369,16 +3359,16 @@ export type EvidenceGetEvidence1Errors = {
     404: unknown;
 };
 
-export type EvidenceGetEvidence1Responses = {
+export type EvidenceGetEvidenceResponses = {
     /**
      * Evidence got
      */
     200: EvidenceGetEvidenceViewModel;
 };
 
-export type EvidenceGetEvidence1Response = EvidenceGetEvidence1Responses[keyof EvidenceGetEvidence1Responses];
+export type EvidenceGetEvidenceResponse = EvidenceGetEvidenceResponses[keyof EvidenceGetEvidenceResponses];
 
-export type EvidenceUpdateEvidence1Data = {
+export type EvidenceUpdateEvidenceData = {
     body: EvidenceUpdateEvidenceRequestModel;
     path: {
         /**
@@ -3390,7 +3380,7 @@ export type EvidenceUpdateEvidence1Data = {
     url: '/api/v1/private/evidences/{evidenceId}';
 };
 
-export type EvidenceUpdateEvidence1Errors = {
+export type EvidenceUpdateEvidenceErrors = {
     /**
      * Bad request
      */
@@ -3409,16 +3399,16 @@ export type EvidenceUpdateEvidence1Errors = {
     500: unknown;
 };
 
-export type EvidenceUpdateEvidence1Responses = {
+export type EvidenceUpdateEvidenceResponses = {
     /**
      * Evidence updated
      */
     204: void;
 };
 
-export type EvidenceUpdateEvidence1Response = EvidenceUpdateEvidence1Responses[keyof EvidenceUpdateEvidence1Responses];
+export type EvidenceUpdateEvidenceResponse = EvidenceUpdateEvidenceResponses[keyof EvidenceUpdateEvidenceResponses];
 
-export type EvidenceCreateDownloadUrl1Data = {
+export type EvidenceCreateEvidenceDownloadUrlData = {
     body?: never;
     path: {
         /**
@@ -3430,7 +3420,7 @@ export type EvidenceCreateDownloadUrl1Data = {
     url: '/api/v1/private/evidences/{evidenceId}/download-url';
 };
 
-export type EvidenceCreateDownloadUrl1Errors = {
+export type EvidenceCreateEvidenceDownloadUrlErrors = {
     /**
      * Resource not found
      */
@@ -3441,14 +3431,14 @@ export type EvidenceCreateDownloadUrl1Errors = {
     500: unknown;
 };
 
-export type EvidenceCreateDownloadUrl1Responses = {
+export type EvidenceCreateEvidenceDownloadUrlResponses = {
     /**
      * Download url created
      */
     201: unknown;
 };
 
-export type EvidenceCreateUploadUrl1Data = {
+export type EvidenceCreateEvidenceUploadUrlData = {
     body: EvidenceNewUploadUrlRequestModel;
     path: {
         evidenceId: string;
@@ -3457,7 +3447,7 @@ export type EvidenceCreateUploadUrl1Data = {
     url: '/api/v1/private/evidences/{evidenceId}/upload-url';
 };
 
-export type EvidenceCreateUploadUrl1Errors = {
+export type EvidenceCreateEvidenceUploadUrlErrors = {
     /**
      * Resource not found
      */
@@ -3468,21 +3458,25 @@ export type EvidenceCreateUploadUrl1Errors = {
     500: unknown;
 };
 
-export type EvidenceCreateUploadUrl1Responses = {
+export type EvidenceCreateEvidenceUploadUrlResponses = {
     /**
      * Upload url created
      */
     201: unknown;
 };
 
-export type EvidenceCreateUploadUrl2Data = {
+export type EvidenceCreateTemporaryFileUploadUrlData = {
     body: EvidenceUploadUrlTemporaryFileHttpRequestModel;
     path?: never;
     query?: never;
     url: '/api/v1/private/files';
 };
 
-export type EvidenceCreateUploadUrl2Errors = {
+export type EvidenceCreateTemporaryFileUploadUrlErrors = {
+    /**
+     * Bad request
+     */
+    400: unknown;
     /**
      * Resource not found
      */
@@ -3493,12 +3487,14 @@ export type EvidenceCreateUploadUrl2Errors = {
     500: unknown;
 };
 
-export type EvidenceCreateUploadUrl2Responses = {
+export type EvidenceCreateTemporaryFileUploadUrlResponses = {
     /**
      * Upload url created
      */
-    201: unknown;
+    200: EvidenceUploadUrlTemporaryFileHttpResponseModel;
 };
+
+export type EvidenceCreateTemporaryFileUploadUrlResponse = EvidenceCreateTemporaryFileUploadUrlResponses[keyof EvidenceCreateTemporaryFileUploadUrlResponses];
 
 export type EvidenceDeleteReportData = {
     body?: never;
@@ -3558,6 +3554,10 @@ export type EvidenceGetReportPdfErrors = {
      * Request not acceptable, because the report type requested is not valid
      */
     406: unknown;
+    /**
+     * Unexpected error
+     */
+    500: unknown;
 };
 
 export type EvidenceGetReportPdfResponses = {
@@ -3591,6 +3591,10 @@ export type EvidenceGetReportZipErrors = {
      * Request not acceptable, because the report type requested is not valid
      */
     406: unknown;
+    /**
+     * Unexpected error
+     */
+    500: unknown;
 };
 
 export type EvidenceGetReportZipResponses = {
@@ -3614,6 +3618,10 @@ export type EvidenceStartMultipartUploadData = {
 
 export type EvidenceStartMultipartUploadErrors = {
     /**
+     * Bad request
+     */
+    400: unknown;
+    /**
      * Resource not found
      */
     404: unknown;
@@ -3625,10 +3633,117 @@ export type EvidenceStartMultipartUploadErrors = {
 
 export type EvidenceStartMultipartUploadResponses = {
     /**
-     * Upload url created
+     * Multipart upload started
      */
-    201: unknown;
+    200: string;
 };
+
+export type EvidenceStartMultipartUploadResponse = EvidenceStartMultipartUploadResponses[keyof EvidenceStartMultipartUploadResponses];
+
+export type EvidenceCancelMultipartUploadData = {
+    body?: never;
+    path: {
+        evidenceId: string;
+        filename: string;
+        uploadId: string;
+    };
+    query?: never;
+    url: '/api/v1/private/uploads/{evidenceId}/{filename}/{uploadId}';
+};
+
+export type EvidenceCancelMultipartUploadErrors = {
+    /**
+     * If the request parameters or query string is wrong
+     */
+    400: unknown;
+    /**
+     * Unexpected error
+     */
+    500: unknown;
+};
+
+export type EvidenceCancelMultipartUploadResponses = {
+    /**
+     * Multipart upload cancelled
+     */
+    204: {
+        [key: string]: unknown;
+    };
+};
+
+export type EvidenceCancelMultipartUploadResponse = EvidenceCancelMultipartUploadResponses[keyof EvidenceCancelMultipartUploadResponses];
+
+export type EvidenceGetLinkData = {
+    body?: never;
+    path: {
+        evidenceId: string;
+        filename: string;
+        uploadId: string;
+    };
+    query: {
+        partNumber: number;
+    };
+    url: '/api/v1/private/uploads/{evidenceId}/{filename}/{uploadId}';
+};
+
+export type EvidenceGetLinkErrors = {
+    /**
+     * If the request parameters or query string is wrong
+     */
+    400: unknown;
+    /**
+     * If evidence file upload is not found
+     */
+    404: unknown;
+    /**
+     * Unexpected error
+     */
+    500: unknown;
+};
+
+export type EvidenceGetLinkResponses = {
+    /**
+     * Upload part link generated
+     */
+    202: EvidenceUploadLinkOutputModel;
+};
+
+export type EvidenceGetLinkResponse = EvidenceGetLinkResponses[keyof EvidenceGetLinkResponses];
+
+export type EvidenceCompleteMultipartUploadData = {
+    body?: never;
+    path: {
+        evidenceId: string;
+        filename: string;
+        uploadId: string;
+    };
+    query: {
+        partsCount: number;
+    };
+    url: '/api/v1/private/uploads/{evidenceId}/{filename}/{uploadId}';
+};
+
+export type EvidenceCompleteMultipartUploadErrors = {
+    /**
+     * If the request parameters or query string is wrong
+     */
+    400: unknown;
+    /**
+     * Unexpected error
+     */
+    500: unknown;
+};
+
+export type EvidenceCompleteMultipartUploadResponses = {
+    /**
+     * Multipart upload successfully
+     */
+    202: {
+        [key: string]: unknown;
+    };
+};
+
+export type EvidenceCompleteMultipartUploadResponse = EvidenceCompleteMultipartUploadResponses[keyof EvidenceCompleteMultipartUploadResponses];
 
 export type SignatureDeleteBulkSignatureRequestsData = {
     body: SignatureBulkDeleteSignatureRequestRequestModel;
@@ -3917,6 +4032,14 @@ export type SignatureDeleteSignatureRequestErrors = {
      */
     400: unknown;
     /**
+     * Signature request not found
+     */
+    404: unknown;
+    /**
+     * Signature request status should be draft
+     */
+    409: unknown;
+    /**
      * Unexpected error
      */
     500: unknown;
@@ -4014,9 +4137,28 @@ export type SignatureActivateData = {
     url: '/api/v1/private/signature-requests/{signatureRequestId}/activate';
 };
 
+export type SignatureActivateErrors = {
+    /**
+     * Signature request is not ready to be activated
+     */
+    400: unknown;
+    /**
+     * Signature request not found
+     */
+    404: unknown;
+    /**
+     * Signature request status should be draft
+     */
+    409: unknown;
+    /**
+     * Unexpected error
+     */
+    500: unknown;
+};
+
 export type SignatureActivateResponses = {
     /**
-     * activate 200 response
+     * Signature request activated
      */
     200: SignatureActivateSignatureRequestViewModel;
 };
@@ -4051,7 +4193,7 @@ export type SignatureCancelResponses = {
     /**
      * Signature request cancelled successfully
      */
-    201: SignatureCancelSignatureRequestViewModel;
+    200: SignatureCancelSignatureRequestViewModel;
 };
 
 export type SignatureCancelResponse = SignatureCancelResponses[keyof SignatureCancelResponses];
@@ -4229,7 +4371,7 @@ export type SignatureStartMultipartResponses = {
     /**
      * Document multipart started successfully
      */
-    202: SignatureDocumentMultipartViewModel;
+    201: SignatureDocumentMultipartViewModel;
 };
 
 export type SignatureStartMultipartResponse = SignatureStartMultipartResponses[keyof SignatureStartMultipartResponses];
@@ -4365,7 +4507,7 @@ export type SignatureGetDownloadUrlErrors = {
     500: unknown;
 };
 
-export type SignatureGenerateDownloadLinkData = {
+export type SignatureGenerateFinalDocumentSignedDownloadLinkData = {
     body?: never;
     path: {
         signatureRequestId: string;
@@ -4375,7 +4517,7 @@ export type SignatureGenerateDownloadLinkData = {
     url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/links/signed/download';
 };
 
-export type SignatureGenerateDownloadLinkErrors = {
+export type SignatureGenerateFinalDocumentSignedDownloadLinkErrors = {
     /**
      * Bad request
      */
@@ -4390,14 +4532,14 @@ export type SignatureGenerateDownloadLinkErrors = {
     500: unknown;
 };
 
-export type SignatureGenerateDownloadLinkResponses = {
+export type SignatureGenerateFinalDocumentSignedDownloadLinkResponses = {
     /**
      * Document final link generated successfully
      */
     200: SignatureFileDocumentSignedDownloadUrlViewModel;
 };
 
-export type SignatureGenerateDownloadLinkResponse = SignatureGenerateDownloadLinkResponses[keyof SignatureGenerateDownloadLinkResponses];
+export type SignatureGenerateFinalDocumentSignedDownloadLinkResponse = SignatureGenerateFinalDocumentSignedDownloadLinkResponses[keyof SignatureGenerateFinalDocumentSignedDownloadLinkResponses];
 
 export type SignatureGetUploadUrlData = {
     body?: never;
@@ -4446,8 +4588,23 @@ export type SignatureGetObserversData = {
         page?: number;
         size?: number;
         sort?: Array<string> | null;
+        /**
+         * Ordering of signatories. Only the sequence field is supported.
+         */
+        orderBy?: 'sequence:asc' | 'sequence:desc';
     };
     url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/observers';
+};
+
+export type SignatureGetObserversErrors = {
+    /**
+     * Bad request
+     */
+    400: unknown;
+    /**
+     * Unexpected error
+     */
+    500: unknown;
 };
 
 export type SignatureGetObserversResponses = {
@@ -4532,7 +4689,7 @@ export type SignatureDeleteObserverResponses = {
 
 export type SignatureDeleteObserverResponse = SignatureDeleteObserverResponses[keyof SignatureDeleteObserverResponses];
 
-export type SignatureUpdate1Data = {
+export type SignatureUpdateObserverData = {
     body: SignatureUpdateObserverRequestModel;
     path: {
         signatureRequestId: string;
@@ -4543,29 +4700,33 @@ export type SignatureUpdate1Data = {
     url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/observers/{observerId}';
 };
 
-export type SignatureUpdate1Errors = {
+export type SignatureUpdateObserverErrors = {
     /**
      * Bad request
      */
     400: unknown;
     /**
-     * Signature request status should be draft or signatory not in document or observer existing in this document
+     * Signature request, document or observer not found
      */
-    422: unknown;
+    404: unknown;
+    /**
+     * Signature request status should be draft or observer conflicts with the document
+     */
+    409: unknown;
     /**
      * Unexpected error
      */
     500: unknown;
 };
 
-export type SignatureUpdate1Responses = {
+export type SignatureUpdateObserverResponses = {
     /**
-     * Observer update_1
+     * Observer updated
      */
-    204: SignatureObserverViewModel;
+    204: void;
 };
 
-export type SignatureUpdate1Response = SignatureUpdate1Responses[keyof SignatureUpdate1Responses];
+export type SignatureUpdateObserverResponse = SignatureUpdateObserverResponses[keyof SignatureUpdateObserverResponses];
 
 export type SignatureGetFinalReportPdfData = {
     body?: never;
@@ -4617,7 +4778,7 @@ export type SignatureGetFinalReportZipErrors = {
     406: unknown;
 };
 
-export type SignatureGenerateDownloadLink1Data = {
+export type SignatureGenerateInterimDocumentSignedDownloadLinkData = {
     body?: never;
     path: {
         signatureRequestId: string;
@@ -4628,7 +4789,7 @@ export type SignatureGenerateDownloadLink1Data = {
     url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/reports/{reportId}/links/signed/download';
 };
 
-export type SignatureGenerateDownloadLink1Errors = {
+export type SignatureGenerateInterimDocumentSignedDownloadLinkErrors = {
     /**
      * Bad request
      */
@@ -4643,16 +4804,16 @@ export type SignatureGenerateDownloadLink1Errors = {
     500: unknown;
 };
 
-export type SignatureGenerateDownloadLink1Responses = {
+export type SignatureGenerateInterimDocumentSignedDownloadLinkResponses = {
     /**
      * Document interim link generated successfully
      */
     200: SignatureFileDocumentSignedDownloadUrlViewModel;
 };
 
-export type SignatureGenerateDownloadLink1Response = SignatureGenerateDownloadLink1Responses[keyof SignatureGenerateDownloadLink1Responses];
+export type SignatureGenerateInterimDocumentSignedDownloadLinkResponse = SignatureGenerateInterimDocumentSignedDownloadLinkResponses[keyof SignatureGenerateInterimDocumentSignedDownloadLinkResponses];
 
-export type SignatureUpdateSequenceData = {
+export type SignatureUpdateDocumentSequenceData = {
     body: SignatureUpdateDocumentSequenceRequestModel;
     path: {
         signatureRequestId: string;
@@ -4662,7 +4823,11 @@ export type SignatureUpdateSequenceData = {
     url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/sequence';
 };
 
-export type SignatureUpdateSequenceErrors = {
+export type SignatureUpdateDocumentSequenceErrors = {
+    /**
+     * Bad request
+     */
+    400: unknown;
     /**
      * Relation between signature request and document does not exists
      */
@@ -4677,14 +4842,14 @@ export type SignatureUpdateSequenceErrors = {
     500: unknown;
 };
 
-export type SignatureUpdateSequenceResponses = {
+export type SignatureUpdateDocumentSequenceResponses = {
     /**
      * Sequence updated
      */
     204: void;
 };
 
-export type SignatureUpdateSequenceResponse = SignatureUpdateSequenceResponses[keyof SignatureUpdateSequenceResponses];
+export type SignatureUpdateDocumentSequenceResponse = SignatureUpdateDocumentSequenceResponses[keyof SignatureUpdateDocumentSequenceResponses];
 
 export type SignatureGetSignatoriesData = {
     body?: never;
@@ -4699,8 +4864,23 @@ export type SignatureGetSignatoriesData = {
         page?: number;
         size?: number;
         sort?: Array<string> | null;
+        /**
+         * Ordering of signatories. Only the sequence field is supported.
+         */
+        orderBy?: 'sequence:asc' | 'sequence:desc';
     };
     url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/signatories';
+};
+
+export type SignatureGetSignatoriesErrors = {
+    /**
+     * Bad request
+     */
+    400: unknown;
+    /**
+     * Unexpected error
+     */
+    500: unknown;
 };
 
 export type SignatureGetSignatoriesResponses = {
@@ -4728,9 +4908,13 @@ export type SignatureAddSignatoryErrors = {
      */
     400: unknown;
     /**
-     * Signature request status should be draft or signatory not in document or observer existing in this document
+     * Signature request or document not found
      */
-    422: unknown;
+    404: unknown;
+    /**
+     * Signature request status should be draft or signatory conflicts with the document
+     */
+    409: unknown;
     /**
      * Unexpected error
      */
@@ -4785,7 +4969,7 @@ export type SignatureDeleteSignatoryResponses = {
 
 export type SignatureDeleteSignatoryResponse = SignatureDeleteSignatoryResponses[keyof SignatureDeleteSignatoryResponses];
 
-export type SignatureUpdate2Data = {
+export type SignatureUpdateSignatoryData = {
     body: SignatureUpdateSignatoryRequestModel;
     path: {
         signatureRequestId: string;
@@ -4796,29 +4980,33 @@ export type SignatureUpdate2Data = {
     url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/signatories/{signatoryId}';
 };
 
-export type SignatureUpdate2Errors = {
+export type SignatureUpdateSignatoryErrors = {
     /**
      * Bad request
      */
     400: unknown;
     /**
-     * Signature request status should be draft or signatory not in document or observer existing in this document
+     * Signature request, document or signatory not found
      */
-    422: unknown;
+    404: unknown;
+    /**
+     * Signature request status should be draft or signatory conflicts with the document
+     */
+    409: unknown;
     /**
      * Unexpected error
      */
     500: unknown;
 };
 
-export type SignatureUpdate2Responses = {
+export type SignatureUpdateSignatoryResponses = {
     /**
-     * Signatory update_2
+     * Signatory updated
      */
-    204: SignatureSignatoryViewModel;
+    204: void;
 };
 
-export type SignatureUpdate2Response = SignatureUpdate2Responses[keyof SignatureUpdate2Responses];
+export type SignatureUpdateSignatoryResponse = SignatureUpdateSignatoryResponses[keyof SignatureUpdateSignatoryResponses];
 
 export type SignatureUpdateCoordinatesData = {
     body: SignatureUpdateSignatoryCoordinatesRequestModel;
@@ -4832,6 +5020,10 @@ export type SignatureUpdateCoordinatesData = {
 };
 
 export type SignatureUpdateCoordinatesErrors = {
+    /**
+     * Bad request
+     */
+    400: unknown;
     /**
      * Relation between signature request, document and participant does not exists
      */
@@ -4884,7 +5076,7 @@ export type SignatureResendToSignatoryResponses = {
     202: unknown;
 };
 
-export type SignatureUpdateSequence1Data = {
+export type SignatureUpdateSignatorySequenceData = {
     body: SignatureUpdateSignatorySequenceRequestModel;
     path: {
         signatureRequestId: string;
@@ -4895,7 +5087,11 @@ export type SignatureUpdateSequence1Data = {
     url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/signatories/{signatoryId}/sequence';
 };
 
-export type SignatureUpdateSequence1Errors = {
+export type SignatureUpdateSignatorySequenceErrors = {
+    /**
+     * Bad request
+     */
+    400: unknown;
     /**
      * Relation between signature request, document and participant does not exists
      */
@@ -4910,16 +5106,16 @@ export type SignatureUpdateSequence1Errors = {
     500: unknown;
 };
 
-export type SignatureUpdateSequence1Responses = {
+export type SignatureUpdateSignatorySequenceResponses = {
     /**
      * Sequence updated
      */
     204: void;
 };
 
-export type SignatureUpdateSequence1Response = SignatureUpdateSequence1Responses[keyof SignatureUpdateSequence1Responses];
+export type SignatureUpdateSignatorySequenceResponse = SignatureUpdateSignatorySequenceResponses[keyof SignatureUpdateSignatorySequenceResponses];
 
-export type SignatureUpdate3Data = {
+export type SignatureUpdateValidatorData = {
     body: SignatureUpdateValidatorRequestModel;
     path: {
         signatureRequestId: string;
@@ -4931,29 +5127,33 @@ export type SignatureUpdate3Data = {
     url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/signatories/{signatoryId}/validators/{validatorId}';
 };
 
-export type SignatureUpdate3Errors = {
+export type SignatureUpdateValidatorErrors = {
     /**
      * Bad request
      */
     400: unknown;
     /**
-     * Signature request status should be draft or signatory not in document or observer existing in this document
+     * Signature request, document, signatory or validator not found
      */
-    422: unknown;
+    404: unknown;
+    /**
+     * Signature request status should be draft or validator conflicts with the signatory
+     */
+    409: unknown;
     /**
      * Unexpected error
      */
     500: unknown;
 };
 
-export type SignatureUpdate3Responses = {
+export type SignatureUpdateValidatorResponses = {
     /**
-     * Validator update_3
+     * Validator updated
      */
-    204: SignatureValidatorViewModel;
+    204: void;
 };
 
-export type SignatureUpdate3Response = SignatureUpdate3Responses[keyof SignatureUpdate3Responses];
+export type SignatureUpdateValidatorResponse = SignatureUpdateValidatorResponses[keyof SignatureUpdateValidatorResponses];
 
 export type SignatureResendToValidatorData = {
     body?: never;
@@ -5101,14 +5301,74 @@ export type SignatureDraftData = {
     url: '/api/v1/private/signature-requests/{signatureRequestId}/draft';
 };
 
+export type SignatureDraftErrors = {
+    /**
+     * Bad request
+     */
+    400: unknown;
+    /**
+     * Signature request not found
+     */
+    404: unknown;
+    /**
+     * Signature request status does not allow moving it back to draft
+     */
+    409: unknown;
+    /**
+     * Unexpected error
+     */
+    500: unknown;
+};
+
 export type SignatureDraftResponses = {
     /**
-     * draft 200 response
+     * Signature request moved back to draft
      */
     200: SignatureDraftSignatureRequestViewModel;
 };
 
 export type SignatureDraftResponse = SignatureDraftResponses[keyof SignatureDraftResponses];
+
+export type SignatureGetEditableObserversData = {
+    body?: never;
+    path: {
+        signatureRequestId: string;
+    };
+    query?: {
+        emails?: Array<string>;
+    };
+    url: '/api/v1/private/signature-requests/{signatureRequestId}/observers/editables';
+};
+
+export type SignatureGetEditableObserversErrors = {
+    /**
+     * Bad request
+     */
+    400: unknown;
+    /**
+     * Signature request not found
+     */
+    404: unknown;
+    /**
+     * Signature request status should be active or partially signed
+     */
+    409: unknown;
+    /**
+     * Unexpected error
+     */
+    500: unknown;
+};
+
+export type SignatureGetEditableObserversResponses = {
+    /**
+     * Editable observers obtained successfully
+     */
+    200: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+export type SignatureGetEditableObserversResponse = SignatureGetEditableObserversResponses[keyof SignatureGetEditableObserversResponses];
 
 export type SignatureGenerateData = {
     body: SignatureSignatureRequestReportRequestModel;
@@ -5174,7 +5434,7 @@ export type SignatureResendResponses = {
     202: unknown;
 };
 
-export type SignatureGetSignatories1Data = {
+export type SignatureGetSignatoriesFromSignatureRequestData = {
     body?: never;
     path: {
         signatureRequestId: string;
@@ -5191,14 +5451,66 @@ export type SignatureGetSignatories1Data = {
     url: '/api/v1/private/signature-requests/{signatureRequestId}/signatories';
 };
 
-export type SignatureGetSignatories1Responses = {
+export type SignatureGetSignatoriesFromSignatureRequestErrors = {
+    /**
+     * Bad request
+     */
+    400: unknown;
+    /**
+     * Unexpected error
+     */
+    500: unknown;
+};
+
+export type SignatureGetSignatoriesFromSignatureRequestResponses = {
     /**
      * Signatories obtained successfully
      */
     200: Array<SignatureSignatoryViewModel>;
 };
 
-export type SignatureGetSignatories1Response = SignatureGetSignatories1Responses[keyof SignatureGetSignatories1Responses];
+export type SignatureGetSignatoriesFromSignatureRequestResponse = SignatureGetSignatoriesFromSignatureRequestResponses[keyof SignatureGetSignatoriesFromSignatureRequestResponses];
+
+export type SignatureGetEditableSignatoriesData = {
+    body?: never;
+    path: {
+        signatureRequestId: string;
+    };
+    query?: {
+        emails?: Array<string>;
+    };
+    url: '/api/v1/private/signature-requests/{signatureRequestId}/signatories/editables';
+};
+
+export type SignatureGetEditableSignatoriesErrors = {
+    /**
+     * Bad request
+     */
+    400: unknown;
+    /**
+     * Signature request not found
+     */
+    404: unknown;
+    /**
+     * Signature request status should be active or partially signed
+     */
+    409: unknown;
+    /**
+     * Unexpected error
+     */
+    500: unknown;
+};
+
+export type SignatureGetEditableSignatoriesResponses = {
+    /**
+     * Editable signatories obtained successfully
+     */
+    200: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+export type SignatureGetEditableSignatoriesResponse = SignatureGetEditableSignatoriesResponses[keyof SignatureGetEditableSignatoriesResponses];
 
 export type SignatureGetValidatorsData = {
     body?: never;
@@ -5213,14 +5525,66 @@ export type SignatureGetValidatorsData = {
     url: '/api/v1/private/signature-requests/{signatureRequestId}/validators';
 };
 
+export type SignatureGetValidatorsErrors = {
+    /**
+     * Bad request
+     */
+    400: unknown;
+    /**
+     * Unexpected error
+     */
+    500: unknown;
+};
+
 export type SignatureGetValidatorsResponses = {
     /**
-     * Document validators obtained successfully
+     * Validators obtained successfully
      */
     200: Array<SignatureListValidatorsViewModel>;
 };
 
 export type SignatureGetValidatorsResponse = SignatureGetValidatorsResponses[keyof SignatureGetValidatorsResponses];
+
+export type SignatureGetEditableValidatorsData = {
+    body?: never;
+    path: {
+        signatureRequestId: string;
+    };
+    query?: {
+        emails?: Array<string>;
+    };
+    url: '/api/v1/private/signature-requests/{signatureRequestId}/validators/editables';
+};
+
+export type SignatureGetEditableValidatorsErrors = {
+    /**
+     * Bad request
+     */
+    400: unknown;
+    /**
+     * Signature request not found
+     */
+    404: unknown;
+    /**
+     * Signature request status should be active or partially signed
+     */
+    409: unknown;
+    /**
+     * Unexpected error
+     */
+    500: unknown;
+};
+
+export type SignatureGetEditableValidatorsResponses = {
+    /**
+     * Editable validators obtained successfully
+     */
+    200: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+export type SignatureGetEditableValidatorsResponse = SignatureGetEditableValidatorsResponses[keyof SignatureGetEditableValidatorsResponses];
 
 export type NotificationDeleteNotificationsData = {
     body: NotificationBulkDeleteEntityRequestModel;
@@ -5273,6 +5637,10 @@ export type NotificationSearchErrors = {
      * Bad request
      */
     400: unknown;
+    /**
+     * Unexpected error
+     */
+    500: unknown;
 };
 
 export type NotificationSearchResponses = {
@@ -5360,6 +5728,10 @@ export type NotificationActivateNotificationRequestData = {
 
 export type NotificationActivateNotificationRequestErrors = {
     /**
+     * Bad request
+     */
+    400: unknown;
+    /**
      * Request not found
      */
     404: unknown;
@@ -5391,6 +5763,10 @@ export type NotificationAddRequestAttachmentData = {
 
 export type NotificationAddRequestAttachmentErrors = {
     /**
+     * Bad request
+     */
+    400: unknown;
+    /**
      * Unexpected error
      */
     500: unknown;
@@ -5416,6 +5792,10 @@ export type NotificationDeleteAttachmentData = {
 };
 
 export type NotificationDeleteAttachmentErrors = {
+    /**
+     * Bad request
+     */
+    400: unknown;
     /**
      * Request or attachment not found
      */
@@ -5469,7 +5849,7 @@ export type NotificationDeleteNotificationErrors = {
 
 export type NotificationDeleteNotificationResponses = {
     /**
-     * Notification deleted successfully
+     * Receivers deleted successfully
      */
     204: void;
 };

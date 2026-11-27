@@ -11,6 +11,7 @@
   },
   "description": "MCP server for EAD Factory: qualified evidence, signature, notifications and chat via AI agents.",
   "devDependencies": {
+    "@types/node": "^22.0.0",
     "tsup": "^8.5.0",
     "typescript": "^5.5.0"
   },

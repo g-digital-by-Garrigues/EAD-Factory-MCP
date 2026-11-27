@@ -14,7 +14,7 @@ const rawInputSchema = z.object({
 });
 // Story 6.5 (FR-27/P-A5): fills in descriptions for commonly reused field names
 // (e.g. caseFileId) that Hey API's generated schema doesn't carry on its own.
-const inputSchema = applyFieldGlosses(rawInputSchema, {"caseFileId":"MANDATORY. UUID of the parent case file. Obtain from evidence_case_file_create.","evidenceGroupId":"MANDATORY. UUID of the evidence group. Obtain from evidence_group_create.","evidenceId":"MANDATORY. UUID of the evidence record. Obtain from evidence_group_evidence_register or generate_evidence.","reportId":"MANDATORY. UUID of the report.","signatureRequestId":"MANDATORY. UUID of the signature request. Obtain from create_signature_request.","documentId":"MANDATORY. UUID of the document within the signature request. Obtain from add_document_to_signature_request.","signatoryId":"MANDATORY. UUID of the signatory. Obtain from add_signatory_to_document.","validatorId":"MANDATORY. UUID of the validator. Obtain from add_validator_to_signatory.","observerId":"MANDATORY. UUID of the observer. Obtain from add_observer_to_document.","requestId":"UUID of the notification request. Obtain from notification_request_create.","attachmentId":"MANDATORY. UUID of the attachment. Obtain from notification_document_add."});
+const inputSchema = applyFieldGlosses(rawInputSchema, {"caseFileId":"MANDATORY. UUID of the parent case file. Obtain from evidence_case_file_create.","evidenceGroupId":"MANDATORY. UUID of the evidence group. Obtain from evidence_group_create.","evidenceId":"MANDATORY. UUID of the evidence record. Obtain from evidence_group_evidence_register or generate_evidence.","reportId":"MANDATORY. UUID of the report.","signatureRequestId":"MANDATORY. UUID of the signature request. Obtain from create_signature_request.","documentId":"MANDATORY. UUID of the document within the signature request. Obtain from add_document_to_signature_request.","signatoryId":"MANDATORY. UUID of the signatory. Obtain from add_signatory_to_document.","validatorId":"MANDATORY. UUID of the validator. Obtain from add_validator_to_signatory.","observerId":"MANDATORY. UUID of the observer. Obtain from add_observer_to_document.","requestId":"UUID of the notification request. Obtain from notification_request_create.","attachmentId":"MANDATORY. UUID of the attachment. Obtain from notification_document_add.","template":"MANDATORY. Uppercase identifier matching ^[A-Z][A-Z0-9_]+$, e.g. DEFAULT_TEMPLATE. A lowercase value is rejected client-side before the request is sent.","ignoreNotCompletedEvidences":"OPTIONAL. When true, evidences that are not COMPLETED are excluded from the report/preview instead of failing the generation. Defaults to the tenant configuration."});
 
 export const evidence_case_file_report_generate = defineTool({
   name: "evidence_case_file_report_generate",
@@ -39,6 +39,9 @@ export const evidence_case_file_report_generate = defineTool({
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),
         },
+        // This API ignores bracketed query parameters, so an object parameter must go
+        // out as `size=1`, not the client's default deepObject `filter[size]=1`.
+        querySerializer: { object: { style: "form", explode: true } },
       }),
     );
 

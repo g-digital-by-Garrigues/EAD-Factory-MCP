@@ -18,7 +18,7 @@ const inputSchema = applyFieldGlosses(rawInputSchema, {"caseFileId":"MANDATORY. 
 
 export const notification_document_upload_url_create = defineTool({
   name: "notification_document_upload_url_create",
-  description: "Creates a presigned upload URL for a document attachment already registered via notification_document_add — PUT the file bytes to the returned URL. Requires: notification_request_create → requestId, notification_document_add → attachmentId.",
+  description: "Creates a fresh presigned upload URL for a document attachment already registered via notification_document_add — needed only when the uploadLinks url that call returned has expired. Requires: notification_request_create → requestId, and the attachment's id as attachmentId (the fileId in notification_document_add's uploadLinks). Who uploads: this tool only returns the presigned URL — you must PUT the raw file bytes to it yourself (no Authorization header; the composite tools also send x-amz-checksum-sha256 with the base64 SHA-256 of the file). No MCP tool uploads notification attachments, so this PUT is always yours.",
   inputSchema,
   outputSchema: zNotificationCreateUploadUrlResponse,
   annotations: {
@@ -39,6 +39,9 @@ export const notification_document_upload_url_create = defineTool({
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),
         },
+        // This API ignores bracketed query parameters, so an object parameter must go
+        // out as `size=1`, not the client's default deepObject `filter[size]=1`.
+        querySerializer: { object: { style: "form", explode: true } },
       }),
     );
 
@@ -61,6 +64,7 @@ export const notification_document_upload_url_create = defineTool({
       // consumed response.response's body to populate response.error by this point.
       throw UpstreamHttpError.fromParsedError(response.response?.status ?? 0, response.error, "notification_document_upload_url_create");
     }
-    return response.data;
+    // Story 6.6 (FR-30/§5.4): tells the agent what to call next without a separate lookup.
+    return { ...response.data, nextSteps: [{"suggestedTool":"notification_request_send","why":"First PUT the file's bytes to this result's `url` (you do this; no tool does). Then pass the same `requestId`."}] };
   },
 });

@@ -91,7 +91,16 @@ export const signature_request_full = defineTool({
     "add_observer_to_document) before activating it yourself. " +
     "On success returns the request id, each document's id, and each signatory's id. " +
     "Use the atomic tools instead when you need to inspect or react to each intermediate step, " +
-    "or need validators/observers before activation.",
+    "or need validators/observers before activation. " +
+    // Story 21-08 (Codex usability item 5): one minimal payload that passes inputSchema, kept as
+    // the LAST sentence so story 20-05 can keep or replace it in one place. The coordinates entry
+    // is deliberate: whether EAD Factory auto-positions a signature without one is unverified
+    // (21-06's live checklist), and an example with coordinates is valid either way.
+    "Example: signature_request_full({ name: 'NDA Acme', createdBy: 'jane@company.com', " +
+    "documents: [{ file: { source: 'path', path: '/absolute/path/nda.pdf' }, filename: 'nda.pdf', " +
+    "title: 'NDA', signatureType: 'ADVANCED', signatories: [{ name: 'Ana', email: " +
+    "'ana@example.com', coordinates: [{ page: 1, x: 100, y: 100 }] }] }] }) — on a remote (HTTP) " +
+    "server send each file as { source: 'base64', filename, contentBase64 } instead.",
   inputSchema,
   pollable: false,
   idempotencyWindowSeconds: 60,
@@ -241,13 +250,13 @@ export const signature_request_full = defineTool({
       ? [
           {
             suggestedTool: "get_signature_request",
-            why: "Check signing progress now that the request has been activated.",
+            why: "The request is active: pass this result's `signatureRequestId` as `signatureRequestId` to check signing progress.",
           },
         ]
       : [
           {
             suggestedTool: "activate_signature_request",
-            why: "The request is still in draft (activate: false) — add validators/observers if needed, then activate to send signing notifications.",
+            why: "The request is still in draft (activate: false): add validators/observers if needed, then pass this result's `signatureRequestId` as `signatureRequestId` to send the signing notifications.",
           },
         ];
 

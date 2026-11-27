@@ -8,11 +8,18 @@
 // `pollForCompletion` (Story 5.2's bounded-polling degraded mode), copying the shape already
 // shipped in evidence_create_sealed.ts (Story 6.3).
 //
-// `taskSupport: "required"` (not "optional"): unlike a bounded, single-resource operation,
-// activation fan-out duration scales with receiver count and is not verified against a live
-// upstream this session (no test credentials — same caveat Story 6.3 documented for its
-// composite tools) — Story 5.1's own guidance is to use "optional" ONLY for verified
-// bounded-duration ops, so "required" is the conservative default here.
+// `taskSupport: "optional"` (Story 21-09): E19's live production run showed requests reach
+// SENT within seconds to minutes, and pollForCompletion below bounds its own completion at
+// 20 checks, 5 s apart (~100 s) — the task always reaches a terminal state, so the SDK's
+// automatic polling loop for a task-unaware client always terminates. This was the one tool
+// still on "required" pending that verification.
+//
+// Why 100 s and not evidence_create_sealed.ts's 5 minutes (Hugo, 2026-09-15, Story 21-09
+// review): a task-unaware client holds the tools/call open for the whole budget, and a
+// shorter wait fits more client timeouts. The cost is accepted: a send still in flight after
+// ~100 s reports "Polling timed out" while delivery carries on, and an identical retry within
+// idempotencyWindowSeconds replays that same task instead of re-activating — the agent reads
+// the current state with notification_request_status.
 //
 // checkStatus polls `Notifications_search` (`notification_request_status`'s own backing op)
 // filtered by requestId — the only status mechanism this API exposes (there is no GET for
@@ -46,15 +53,17 @@ export const notification_request_send = defineTool({
   name: "notification_request_send",
   description:
     "Activates a notification request, triggering delivery to every added receiver across their " +
-    "configured channels (email/SMS/Noticeman/WhatsApp/RCS). Runs as an MCP Task (bounded-polling " +
-    "until every receiver's notification leaves its in-flight state — EAD Factory's upstream emits " +
-    "no events for this transition). Requires: notification_request_create -> requestId, at least " +
-    "one receiver added via notification_receiver_add. On completion, returns each notification's " +
-    "id and final delivery state (per-receiver failures are reported in the result, not treated as " +
-    "a Task failure). REQUIRES an MCP client with Tasks support — from a client without it this " +
-    "call fails; in that case create the request with autosend: true (notification_request_create) " +
-    "and poll notification_request_status yourself. " +
-    "Use notification_request_status to check progress without waiting.",
+    "configured channels (email/SMS/Noticeman/WhatsApp/RCS). Bounded-polls until every receiver's " +
+    "notification leaves its in-flight state (EAD Factory's upstream emits no events for this " +
+    "transition): task-aware MCP clients get an asynchronous Task; any other client receives the " +
+    "final result synchronously. Polling stops after about 100 seconds: if delivery is still in " +
+    "flight by then, the result is a polling timeout while delivery carries on — read the current " +
+    "state with notification_request_status instead of calling this tool again. Requires: " +
+    "notification_request_create -> requestId, at least one receiver added via " +
+    "notification_receiver_add. On completion, returns each notification's id and final delivery " +
+    "state (per-receiver failures are reported in the result, not treated as a Task failure). To " +
+    "fire-and-forget without waiting, use notification_request_create with autosend: true " +
+    "instead, and poll notification_request_status yourself.",
   inputSchema,
   annotations: {
     title: "Notification Request Send",
@@ -64,7 +73,7 @@ export const notification_request_send = defineTool({
     openWorldHint: false,
   },
   pollable: true,
-  taskSupport: "required",
+  taskSupport: "optional",
   idempotencyWindowSeconds: 86400,
   async execute(input, ctx) {
     const { requestId } = input as { requestId: string };
@@ -100,7 +109,7 @@ export const notification_request_send = defineTool({
     const { requestId } = kickoffResult as { requestId: string };
     return {
       intervalMs: 5000,
-      maxAttempts: 60,
+      maxAttempts: 20,
       async checkStatus() {
         const token = ctx.auth?.token ?? "";
         const sdkClient = createClient(
@@ -146,7 +155,7 @@ export const notification_request_send = defineTool({
             nextSteps: [
               {
                 suggestedTool: "notification_certificate_generate",
-                why: "Generate a delivery certificate now that every notification has left its in-flight state.",
+                why: "Every notification has left its in-flight state: pass this result's `requestId` as `requestId` and each `notifications[].notificationId` as `notificationIds`, with a `template` and `languageCode`, to generate a delivery certificate.",
               },
             ],
           },

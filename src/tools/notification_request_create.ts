@@ -37,6 +37,9 @@ export const notification_request_create = defineTool({
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),
         },
+        // This API ignores bracketed query parameters, so an object parameter must go
+        // out as `size=1`, not the client's default deepObject `filter[size]=1`.
+        querySerializer: { object: { style: "form", explode: true } },
       }),
     );
 
@@ -58,6 +61,7 @@ export const notification_request_create = defineTool({
       // consumed response.response's body to populate response.error by this point.
       throw UpstreamHttpError.fromParsedError(response.response?.status ?? 0, response.error, "notification_request_create");
     }
-    return response.data;
+    // Story 6.6 (FR-30/§5.4): tells the agent what to call next without a separate lookup.
+    return { ...response.data, nextSteps: [{"suggestedTool":"notification_receiver_add","why":"Pass this result's `requestId` as `requestId` to add the receivers."}] };
   },
 });

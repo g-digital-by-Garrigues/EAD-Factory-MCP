@@ -16,7 +16,7 @@ const inputSchema = applyFieldGlosses(rawInputSchema, {"caseFileId":"MANDATORY. 
 
 export const signature_request_list = defineTool({
   name: "signature_request_list",
-  description: "List signature requests, optionally filtered by close condition among other criteria. Use to find a request when you don't have its id (e.g. by name or status). Signature-request close condition: ALL_REQUIRED = The request only closes once EVERY signatory has signed. | PARTIAL_ALLOWED = The request can close once the minimum required signatories have signed, even if others haven't yet.",
+  description: "List signature requests, optionally filtered by close condition among other criteria. Use to find a request when you don't have its id (e.g. by name or status). Signature-request close condition: ALL_REQUIRED = The request only closes once EVERY signatory has signed. PARTIAL_ALLOWED = The request can close once the minimum required signatories have signed, even if others haven't yet.",
   inputSchema,
   outputSchema: zSignatureGetSignatureRequestsResponse,
   annotations: {
@@ -27,7 +27,7 @@ export const signature_request_list = defineTool({
     openWorldHint: false,
   },
   pollable: false,
-  idempotencyWindowSeconds: 60,
+  idempotencyWindowSeconds: 0,
   async execute(input, ctx) {
     const token = ctx.auth?.token ?? "";
     const sdkClient = createClient(
@@ -37,6 +37,9 @@ export const signature_request_list = defineTool({
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),
         },
+        // This API ignores bracketed query parameters, so an object parameter must go
+        // out as `size=1`, not the client's default deepObject `filter[size]=1`.
+        querySerializer: { object: { style: "form", explode: true } },
       }),
     );
 

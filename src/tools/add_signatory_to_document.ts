@@ -39,6 +39,9 @@ export const add_signatory_to_document = defineTool({
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),
         },
+        // This API ignores bracketed query parameters, so an object parameter must go
+        // out as `size=1`, not the client's default deepObject `filter[size]=1`.
+        querySerializer: { object: { style: "form", explode: true } },
       }),
     );
 
@@ -62,6 +65,6 @@ export const add_signatory_to_document = defineTool({
       throw UpstreamHttpError.fromParsedError(response.response?.status ?? 0, response.error, "add_signatory_to_document");
     }
     // Story 6.6 (FR-30/§5.4): tells the agent what to call next without a separate lookup.
-    return { ...response.data, nextSteps: [{"suggestedTool":"activate_signature_request","why":"Once every document has its signatories, activate to send signing notifications."}] };
+    return { ...response.data, nextSteps: [{"suggestedTool":"activate_signature_request","why":"Once every document has its signatories, pass the same `signatureRequestId` to send the signing notifications."},{"suggestedTool":"signature_coordinate_set","why":"To place the signature explicitly first, pass this result's `id` as `signatoryId`, with the same `documentId` and `signatureRequestId`."}] };
   },
 });

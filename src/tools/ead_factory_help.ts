@@ -21,8 +21,8 @@ signatures, and certified notifications. Four managers, namespaced by tool-name 
 (P-A2): evidence_*, signature_* (plus 9 legacy top-level names kept for continuity —
 generate_evidence, get_evidence, create_signature_request, add_document_to_signature_request,
 add_signatory_to_document, add_validator_to_signatory, add_observer_to_document,
-activate_signature_request, get_signature_request), notification_*, and chat_* (curation
-deferred, OQ-F).
+activate_signature_request, get_signature_request), notification_*, and chat_* — Chat has no
+tools in this server yet (its capabilities entry says available: false).
 
 Evidence and Signature each follow the same shape: create a container (case file / signature
 request), add content to it, then seal/activate it. Notification follows a similar shape:
@@ -30,10 +30,16 @@ create a request (draft), add receivers and documents to it, then send it. Prefe
 composite tools (evidence_create_sealed, signature_request_full) for the common case of doing
 all of that in one call for Evidence/Signature; Notification has no composite tool yet — use
 the atomic tools in sequence. Use the atomic tools when you need to inspect or react to each
-step, or need validators/observers before activating a signature request.`,
+step, or need validators/observers before activating a signature request.
+
+To check that credentials and gateway routes work before a real call, run ead_factory_health:
+it requests a fresh token and makes one read-only call per manager, creating nothing. It is not
+available when the server runs with MCP_HTTP_PUBLIC=true (each caller brings its own token).`,
 
   capabilities: [
     {
+      manager: "evidence",
+      available: true,
       group: "Evidence (qualified, timestamped documents)",
       keyTools: [
         "evidence_case_file_create",
@@ -50,6 +56,8 @@ step, or need validators/observers before activating a signature request.`,
         "(minus case file creation) in one call.",
     },
     {
+      manager: "signature",
+      available: true,
       group: "Signature (qualified electronic signatures)",
       keyTools: [
         "create_signature_request",
@@ -65,6 +73,8 @@ step, or need validators/observers before activating a signature request.`,
         "(activate: false to stop before activation and add validators/observers first).",
     },
     {
+      manager: "notification",
+      available: true,
       group: "Notification (certified notification delivery)",
       keyTools: [
         "notification_request_create",
@@ -83,7 +93,12 @@ step, or need validators/observers before activating a signature request.`,
         "notifications have left their in-flight state.",
     },
     {
-      group: "Chat (deferred — OQ-F)",
+      manager: "chat",
+      // Story 21-08: machine-readable, so an agent does not have to interpret prose to know
+      // that no Chat flow can succeed here.
+      available: false,
+      reason: "No Chat tools are curated in this server yet — do not attempt Chat flows.",
+      group: "Chat (not available)",
       keyTools: [],
       startingPoint: "",
       description:

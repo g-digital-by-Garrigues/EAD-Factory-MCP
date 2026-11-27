@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { EvidenceAssignRelationshipData, EvidenceAssignRelationshipErrors, EvidenceAssignRelationshipResponses, EvidenceCloseEvidenceGroupData, EvidenceCloseEvidenceGroupErrors, EvidenceCloseEvidenceGroupResponses, EvidenceCreateCaseFileData, EvidenceCreateCaseFileErrors, EvidenceCreateCaseFileResponses, EvidenceCreateDownloadUrl1Data, EvidenceCreateDownloadUrl1Errors, EvidenceCreateDownloadUrl1Responses, EvidenceCreateDownloadUrlData, EvidenceCreateDownloadUrlErrors, EvidenceCreateDownloadUrlResponses, EvidenceCreateEvidenceGroupData, EvidenceCreateEvidenceGroupErrors, EvidenceCreateEvidenceGroupResponses, EvidenceCreateUploadUrl1Data, EvidenceCreateUploadUrl1Errors, EvidenceCreateUploadUrl1Responses, EvidenceCreateUploadUrl2Data, EvidenceCreateUploadUrl2Errors, EvidenceCreateUploadUrl2Responses, EvidenceCreateUploadUrlData, EvidenceCreateUploadUrlErrors, EvidenceCreateUploadUrlResponses, EvidenceDeleteCaseFilesData, EvidenceDeleteCaseFilesErrors, EvidenceDeleteCaseFilesResponses, EvidenceDeleteEvidence1Data, EvidenceDeleteEvidence1Errors, EvidenceDeleteEvidence1Responses, EvidenceDeleteEvidenceData, EvidenceDeleteEvidenceErrors, EvidenceDeleteEvidenceGroupsData, EvidenceDeleteEvidenceGroupsErrors, EvidenceDeleteEvidenceGroupsResponses, EvidenceDeleteEvidenceResponses, EvidenceDeleteReportData, EvidenceDeleteReportErrors, EvidenceDeleteReportResponses, EvidenceDiscardGroupData, EvidenceDiscardGroupErrors, EvidenceDiscardGroupResponses, EvidenceGetCaseFileData, EvidenceGetCaseFileErrors, EvidenceGetCaseFileResponses, EvidenceGetEvidence1Data, EvidenceGetEvidence1Errors, EvidenceGetEvidence1Responses, EvidenceGetEvidenceData, EvidenceGetEvidenceErrors, EvidenceGetEvidenceGroupData, EvidenceGetEvidenceGroupErrors, EvidenceGetEvidenceGroupResponses, EvidenceGetEvidenceResponses, EvidenceGetReportPdfData, EvidenceGetReportPdfErrors, EvidenceGetReportPdfResponses, EvidenceGetReportZipData, EvidenceGetReportZipErrors, EvidenceGetReportZipResponses, EvidenceObtainReportPreview1Data, EvidenceObtainReportPreview1Errors, EvidenceObtainReportPreview1Responses, EvidenceObtainReportPreviewData, EvidenceObtainReportPreviewErrors, EvidenceObtainReportPreviewResponses, EvidenceObtainSignedReportData, EvidenceObtainSignedReportErrors, EvidenceObtainSignedReportResponses, EvidenceRegisterEvidence1Data, EvidenceRegisterEvidence1Errors, EvidenceRegisterEvidence1Responses, EvidenceRegisterEvidenceData, EvidenceRegisterEvidenceErrors, EvidenceRegisterEvidenceResponses, EvidenceReportPdfData, EvidenceReportPdfErrors, EvidenceReportPdfResponses, EvidenceReportZipData, EvidenceReportZipErrors, EvidenceReportZipResponses, EvidenceSearch1Data, EvidenceSearch1Errors, EvidenceSearch1Responses, EvidenceSearch2Data, EvidenceSearch2Errors, EvidenceSearch2Responses, EvidenceSearchData, EvidenceSearchErrors, EvidenceSearchResponses, EvidenceStartMultipartUploadData, EvidenceStartMultipartUploadErrors, EvidenceStartMultipartUploadResponses, EvidenceThumbnailUrlData, EvidenceThumbnailUrlErrors, EvidenceThumbnailUrlResponses, EvidenceUpdateCaseFileData, EvidenceUpdateCaseFileErrors, EvidenceUpdateCaseFileResponses, EvidenceUpdateCaseFilesData, EvidenceUpdateCaseFilesErrors, EvidenceUpdateCaseFilesResponses, EvidenceUpdateCaseFileStatusData, EvidenceUpdateCaseFileStatusErrors, EvidenceUpdateCaseFileStatusResponses, EvidenceUpdateEvidence1Data, EvidenceUpdateEvidence1Errors, EvidenceUpdateEvidence1Responses, EvidenceUpdateEvidenceData, EvidenceUpdateEvidenceErrors, EvidenceUpdateEvidenceGroupData, EvidenceUpdateEvidenceGroupErrors, EvidenceUpdateEvidenceGroupResponses, EvidenceUpdateEvidenceGroupsData, EvidenceUpdateEvidenceGroupsErrors, EvidenceUpdateEvidenceGroupsResponses, EvidenceUpdateEvidenceResponses, EvidenceUpdateReportData, EvidenceUpdateReportErrors, EvidenceUpdateReportResponses, NotificationActivateNotificationRequestData, NotificationActivateNotificationRequestErrors, NotificationActivateNotificationRequestResponses, NotificationAddReceiversData, NotificationAddReceiversErrors, NotificationAddReceiversResponses, NotificationAddRequestAttachmentData, NotificationAddRequestAttachmentErrors, NotificationAddRequestAttachmentResponses, NotificationCancelData, NotificationCancelErrors, NotificationCancelResponses, NotificationCloneData, NotificationCloneErrors, NotificationCloneResponses, NotificationCreateUploadUrlData, NotificationCreateUploadUrlErrors, NotificationCreateUploadUrlResponses, NotificationDeleteAttachmentData, NotificationDeleteAttachmentErrors, NotificationDeleteAttachmentResponses, NotificationDeleteData, NotificationDeleteErrors, NotificationDeleteNotificationData, NotificationDeleteNotificationErrors, NotificationDeleteNotificationResponses, NotificationDeleteNotificationsData, NotificationDeleteNotificationsErrors, NotificationDeleteNotificationsResponses, NotificationDeleteResponses, NotificationGenerateReportData, NotificationGenerateReportErrors, NotificationGenerateReportResponses, NotificationGetDownloadUrlData, NotificationGetDownloadUrlErrors, NotificationGetNotificationData, NotificationGetNotificationErrors, NotificationGetNotificationResponses, NotificationGetReportPdfData, NotificationGetReportPdfErrors, NotificationGetReportPdfResponses, NotificationRegisterNotificationData, NotificationRegisterNotificationErrors, NotificationRegisterNotificationResponses, NotificationResendData, NotificationResendErrors, NotificationResendResponses, NotificationSearchData, NotificationSearchErrors, NotificationSearchResponses, NotificationUpdate1Data, NotificationUpdate1Errors, NotificationUpdate1Responses, NotificationUpdateData, NotificationUpdateErrors, NotificationUpdateResponses, SignatureActivateData, SignatureActivateResponses, SignatureAddDocumentData, SignatureAddDocumentErrors, SignatureAddDocumentResponses, SignatureAddObserverData, SignatureAddObserverErrors, SignatureAddObserverResponses, SignatureAddSignatoryData, SignatureAddSignatoryErrors, SignatureAddSignatoryResponses, SignatureAddValidatorData, SignatureAddValidatorErrors, SignatureAddValidatorResponses, SignatureCancelData, SignatureCancelErrors, SignatureCancelMultipartData, SignatureCancelMultipartErrors, SignatureCancelMultipartResponses, SignatureCancelResponses, SignatureCloseData, SignatureCloseErrors, SignatureCloseResponses, SignatureCompleteMultipartData, SignatureCompleteMultipartErrors, SignatureCompleteMultipartResponses, SignatureCreateSignatureRequestData, SignatureCreateSignatureRequestErrors, SignatureCreateSignatureRequestResponses, SignatureDeleteBulkSignatureRequestsData, SignatureDeleteBulkSignatureRequestsErrors, SignatureDeleteBulkSignatureRequestsResponses, SignatureDeleteDocumentData, SignatureDeleteDocumentErrors, SignatureDeleteDocumentResponses, SignatureDeleteObserverData, SignatureDeleteObserverErrors, SignatureDeleteObserverResponses, SignatureDeleteSignatoryData, SignatureDeleteSignatoryErrors, SignatureDeleteSignatoryResponses, SignatureDeleteSignatureRequestData, SignatureDeleteSignatureRequestErrors, SignatureDeleteSignatureRequestResponses, SignatureDeleteValidatorData, SignatureDeleteValidatorErrors, SignatureDeleteValidatorResponses, SignatureDraftData, SignatureDraftResponses, SignatureGenerateData, SignatureGenerateDownloadConvertedLinkData, SignatureGenerateDownloadConvertedLinkErrors, SignatureGenerateDownloadConvertedLinkResponses, SignatureGenerateDownloadLink1Data, SignatureGenerateDownloadLink1Errors, SignatureGenerateDownloadLink1Responses, SignatureGenerateDownloadLinkData, SignatureGenerateDownloadLinkErrors, SignatureGenerateDownloadLinkResponses, SignatureGenerateErrors, SignatureGenerateResponses, SignatureGetDocumentData, SignatureGetDocumentErrors, SignatureGetDocumentResponses, SignatureGetDocumentsData, SignatureGetDocumentsErrors, SignatureGetDocumentsResponses, SignatureGetDownloadUrlData, SignatureGetDownloadUrlErrors, SignatureGetFinalReportPdfData, SignatureGetFinalReportPdfErrors, SignatureGetFinalReportZipData, SignatureGetFinalReportZipErrors, SignatureGetMultipartUploadLinkData, SignatureGetMultipartUploadLinkErrors, SignatureGetMultipartUploadLinkResponses, SignatureGetObserversData, SignatureGetObserversResponses, SignatureGetReportPdfData, SignatureGetReportPdfErrors, SignatureGetReportPdfResponses, SignatureGetReportZipData, SignatureGetReportZipErrors, SignatureGetReportZipResponses, SignatureGetSignatories1Data, SignatureGetSignatories1Responses, SignatureGetSignatoriesData, SignatureGetSignatoriesResponses, SignatureGetSignatureRequestData, SignatureGetSignatureRequestErrors, SignatureGetSignatureRequestResponses, SignatureGetSignatureRequestsData, SignatureGetSignatureRequestsErrors, SignatureGetSignatureRequestsResponses, SignatureGetUploadUrlData, SignatureGetUploadUrlErrors, SignatureGetUploadUrlResponses, SignatureGetValidatorsData, SignatureGetValidatorsResponses, SignatureResendData, SignatureResendErrors, SignatureResendResponses, SignatureResendToSignatoryData, SignatureResendToSignatoryErrors, SignatureResendToSignatoryResponses, SignatureResendToValidatorData, SignatureResendToValidatorErrors, SignatureResendToValidatorResponses, SignatureStartMultipartData, SignatureStartMultipartErrors, SignatureStartMultipartResponses, SignatureUpdate1Data, SignatureUpdate1Errors, SignatureUpdate1Responses, SignatureUpdate2Data, SignatureUpdate2Errors, SignatureUpdate2Responses, SignatureUpdate3Data, SignatureUpdate3Errors, SignatureUpdate3Responses, SignatureUpdateCoordinatesData, SignatureUpdateCoordinatesErrors, SignatureUpdateCoordinatesResponses, SignatureUpdateData, SignatureUpdateErrors, SignatureUpdateResponses, SignatureUpdateSequence1Data, SignatureUpdateSequence1Errors, SignatureUpdateSequence1Responses, SignatureUpdateSequenceData, SignatureUpdateSequenceErrors, SignatureUpdateSequenceResponses, SignatureUpdateSignatureRequestsData, SignatureUpdateSignatureRequestsErrors, SignatureUpdateSignatureRequestsResponses, SignatureWellSignedDocumentGenerationData, SignatureWellSignedDocumentGenerationErrors, SignatureWellSignedDocumentGenerationResponses } from './types.gen';
+import type { EvidenceAssignRelationshipData, EvidenceAssignRelationshipErrors, EvidenceAssignRelationshipResponses, EvidenceCancelMultipartUploadData, EvidenceCancelMultipartUploadErrors, EvidenceCancelMultipartUploadResponses, EvidenceCloseEvidenceGroupData, EvidenceCloseEvidenceGroupErrors, EvidenceCloseEvidenceGroupResponses, EvidenceCompleteMultipartUploadData, EvidenceCompleteMultipartUploadErrors, EvidenceCompleteMultipartUploadResponses, EvidenceCreateCaseFileData, EvidenceCreateCaseFileErrors, EvidenceCreateCaseFileResponses, EvidenceCreateEvidenceDownloadUrlData, EvidenceCreateEvidenceDownloadUrlErrors, EvidenceCreateEvidenceDownloadUrlResponses, EvidenceCreateEvidenceGroupData, EvidenceCreateEvidenceGroupDownloadUrlData, EvidenceCreateEvidenceGroupDownloadUrlErrors, EvidenceCreateEvidenceGroupDownloadUrlResponses, EvidenceCreateEvidenceGroupErrors, EvidenceCreateEvidenceGroupResponses, EvidenceCreateEvidenceGroupUploadUrlData, EvidenceCreateEvidenceGroupUploadUrlErrors, EvidenceCreateEvidenceGroupUploadUrlResponses, EvidenceCreateEvidenceUploadUrlData, EvidenceCreateEvidenceUploadUrlErrors, EvidenceCreateEvidenceUploadUrlResponses, EvidenceCreateTemporaryFileUploadUrlData, EvidenceCreateTemporaryFileUploadUrlErrors, EvidenceCreateTemporaryFileUploadUrlResponses, EvidenceDeleteCaseFilesData, EvidenceDeleteCaseFilesErrors, EvidenceDeleteCaseFilesResponses, EvidenceDeleteEvidenceData, EvidenceDeleteEvidenceErrors, EvidenceDeleteEvidenceGroupsData, EvidenceDeleteEvidenceGroupsErrors, EvidenceDeleteEvidenceGroupsResponses, EvidenceDeleteEvidenceInGroupData, EvidenceDeleteEvidenceInGroupErrors, EvidenceDeleteEvidenceInGroupResponses, EvidenceDeleteEvidenceResponses, EvidenceDeleteReportData, EvidenceDeleteReportErrors, EvidenceDeleteReportResponses, EvidenceDiscardGroupData, EvidenceDiscardGroupErrors, EvidenceDiscardGroupResponses, EvidenceGetCaseFileData, EvidenceGetCaseFileErrors, EvidenceGetCaseFileResponses, EvidenceGetEvidenceData, EvidenceGetEvidenceErrors, EvidenceGetEvidenceGroupData, EvidenceGetEvidenceGroupErrors, EvidenceGetEvidenceGroupResponses, EvidenceGetEvidenceInGroupData, EvidenceGetEvidenceInGroupErrors, EvidenceGetEvidenceInGroupResponses, EvidenceGetEvidenceResponses, EvidenceGetLinkData, EvidenceGetLinkErrors, EvidenceGetLinkResponses, EvidenceGetReportPdfData, EvidenceGetReportPdfErrors, EvidenceGetReportPdfResponses, EvidenceGetReportZipData, EvidenceGetReportZipErrors, EvidenceGetReportZipResponses, EvidenceObtainCaseFileReportPreviewData, EvidenceObtainCaseFileReportPreviewErrors, EvidenceObtainCaseFileReportPreviewResponses, EvidenceObtainSignedReportData, EvidenceObtainSignedReportErrors, EvidenceObtainSignedReportResponses, EvidenceRegisterEvidenceData, EvidenceRegisterEvidenceErrors, EvidenceRegisterEvidenceInGroupData, EvidenceRegisterEvidenceInGroupErrors, EvidenceRegisterEvidenceInGroupResponses, EvidenceRegisterEvidenceResponses, EvidenceReportPdfData, EvidenceReportPdfErrors, EvidenceReportPdfResponses, EvidenceReportZipData, EvidenceReportZipErrors, EvidenceReportZipResponses, EvidenceSearchCaseFilesData, EvidenceSearchCaseFilesErrors, EvidenceSearchCaseFilesResponses, EvidenceSearchEvidenceGroupsData, EvidenceSearchEvidenceGroupsErrors, EvidenceSearchEvidenceGroupsResponses, EvidenceSearchEvidencesData, EvidenceSearchEvidencesErrors, EvidenceSearchEvidencesResponses, EvidenceStartMultipartUploadData, EvidenceStartMultipartUploadErrors, EvidenceStartMultipartUploadResponses, EvidenceThumbnailUrlData, EvidenceThumbnailUrlErrors, EvidenceThumbnailUrlResponses, EvidenceUpdateCaseFileData, EvidenceUpdateCaseFileErrors, EvidenceUpdateCaseFileResponses, EvidenceUpdateCaseFilesData, EvidenceUpdateCaseFilesErrors, EvidenceUpdateCaseFilesResponses, EvidenceUpdateCaseFileStatusData, EvidenceUpdateCaseFileStatusErrors, EvidenceUpdateCaseFileStatusResponses, EvidenceUpdateEvidenceData, EvidenceUpdateEvidenceErrors, EvidenceUpdateEvidenceGroupData, EvidenceUpdateEvidenceGroupErrors, EvidenceUpdateEvidenceGroupResponses, EvidenceUpdateEvidenceGroupsData, EvidenceUpdateEvidenceGroupsErrors, EvidenceUpdateEvidenceGroupsResponses, EvidenceUpdateEvidenceResponses, EvidenceUpdateEvidencesData, EvidenceUpdateEvidencesErrors, EvidenceUpdateEvidencesResponses, EvidenceUpdateReportData, EvidenceUpdateReportErrors, EvidenceUpdateReportResponses, NotificationActivateNotificationRequestData, NotificationActivateNotificationRequestErrors, NotificationActivateNotificationRequestResponses, NotificationAddReceiversData, NotificationAddReceiversErrors, NotificationAddReceiversResponses, NotificationAddRequestAttachmentData, NotificationAddRequestAttachmentErrors, NotificationAddRequestAttachmentResponses, NotificationCancelData, NotificationCancelErrors, NotificationCancelResponses, NotificationCloneData, NotificationCloneErrors, NotificationCloneResponses, NotificationCreateUploadUrlData, NotificationCreateUploadUrlErrors, NotificationCreateUploadUrlResponses, NotificationDeleteAttachmentData, NotificationDeleteAttachmentErrors, NotificationDeleteAttachmentResponses, NotificationDeleteData, NotificationDeleteErrors, NotificationDeleteNotificationData, NotificationDeleteNotificationErrors, NotificationDeleteNotificationResponses, NotificationDeleteNotificationsData, NotificationDeleteNotificationsErrors, NotificationDeleteNotificationsResponses, NotificationDeleteResponses, NotificationGenerateReportData, NotificationGenerateReportErrors, NotificationGenerateReportResponses, NotificationGetDownloadUrlData, NotificationGetDownloadUrlErrors, NotificationGetNotificationData, NotificationGetNotificationErrors, NotificationGetNotificationResponses, NotificationGetReportPdfData, NotificationGetReportPdfErrors, NotificationGetReportPdfResponses, NotificationRegisterNotificationData, NotificationRegisterNotificationErrors, NotificationRegisterNotificationResponses, NotificationResendData, NotificationResendErrors, NotificationResendResponses, NotificationSearchData, NotificationSearchErrors, NotificationSearchResponses, NotificationUpdate1Data, NotificationUpdate1Errors, NotificationUpdate1Responses, NotificationUpdateData, NotificationUpdateErrors, NotificationUpdateResponses, SignatureActivateData, SignatureActivateErrors, SignatureActivateResponses, SignatureAddDocumentData, SignatureAddDocumentErrors, SignatureAddDocumentResponses, SignatureAddObserverData, SignatureAddObserverErrors, SignatureAddObserverResponses, SignatureAddSignatoryData, SignatureAddSignatoryErrors, SignatureAddSignatoryResponses, SignatureAddValidatorData, SignatureAddValidatorErrors, SignatureAddValidatorResponses, SignatureCancelData, SignatureCancelErrors, SignatureCancelMultipartData, SignatureCancelMultipartErrors, SignatureCancelMultipartResponses, SignatureCancelResponses, SignatureCloseData, SignatureCloseErrors, SignatureCloseResponses, SignatureCompleteMultipartData, SignatureCompleteMultipartErrors, SignatureCompleteMultipartResponses, SignatureCreateSignatureRequestData, SignatureCreateSignatureRequestErrors, SignatureCreateSignatureRequestResponses, SignatureDeleteBulkSignatureRequestsData, SignatureDeleteBulkSignatureRequestsErrors, SignatureDeleteBulkSignatureRequestsResponses, SignatureDeleteDocumentData, SignatureDeleteDocumentErrors, SignatureDeleteDocumentResponses, SignatureDeleteObserverData, SignatureDeleteObserverErrors, SignatureDeleteObserverResponses, SignatureDeleteSignatoryData, SignatureDeleteSignatoryErrors, SignatureDeleteSignatoryResponses, SignatureDeleteSignatureRequestData, SignatureDeleteSignatureRequestErrors, SignatureDeleteSignatureRequestResponses, SignatureDeleteValidatorData, SignatureDeleteValidatorErrors, SignatureDeleteValidatorResponses, SignatureDraftData, SignatureDraftErrors, SignatureDraftResponses, SignatureGenerateData, SignatureGenerateDownloadConvertedLinkData, SignatureGenerateDownloadConvertedLinkErrors, SignatureGenerateDownloadConvertedLinkResponses, SignatureGenerateErrors, SignatureGenerateFinalDocumentSignedDownloadLinkData, SignatureGenerateFinalDocumentSignedDownloadLinkErrors, SignatureGenerateFinalDocumentSignedDownloadLinkResponses, SignatureGenerateInterimDocumentSignedDownloadLinkData, SignatureGenerateInterimDocumentSignedDownloadLinkErrors, SignatureGenerateInterimDocumentSignedDownloadLinkResponses, SignatureGenerateResponses, SignatureGetDocumentData, SignatureGetDocumentErrors, SignatureGetDocumentResponses, SignatureGetDocumentsData, SignatureGetDocumentsErrors, SignatureGetDocumentsResponses, SignatureGetDownloadUrlData, SignatureGetDownloadUrlErrors, SignatureGetEditableObserversData, SignatureGetEditableObserversErrors, SignatureGetEditableObserversResponses, SignatureGetEditableSignatoriesData, SignatureGetEditableSignatoriesErrors, SignatureGetEditableSignatoriesResponses, SignatureGetEditableValidatorsData, SignatureGetEditableValidatorsErrors, SignatureGetEditableValidatorsResponses, SignatureGetFinalReportPdfData, SignatureGetFinalReportPdfErrors, SignatureGetFinalReportZipData, SignatureGetFinalReportZipErrors, SignatureGetMultipartUploadLinkData, SignatureGetMultipartUploadLinkErrors, SignatureGetMultipartUploadLinkResponses, SignatureGetObserversData, SignatureGetObserversErrors, SignatureGetObserversResponses, SignatureGetReportPdfData, SignatureGetReportPdfErrors, SignatureGetReportPdfResponses, SignatureGetReportZipData, SignatureGetReportZipErrors, SignatureGetReportZipResponses, SignatureGetSignatoriesData, SignatureGetSignatoriesErrors, SignatureGetSignatoriesFromSignatureRequestData, SignatureGetSignatoriesFromSignatureRequestErrors, SignatureGetSignatoriesFromSignatureRequestResponses, SignatureGetSignatoriesResponses, SignatureGetSignatureRequestData, SignatureGetSignatureRequestErrors, SignatureGetSignatureRequestResponses, SignatureGetSignatureRequestsData, SignatureGetSignatureRequestsErrors, SignatureGetSignatureRequestsResponses, SignatureGetUploadUrlData, SignatureGetUploadUrlErrors, SignatureGetUploadUrlResponses, SignatureGetValidatorsData, SignatureGetValidatorsErrors, SignatureGetValidatorsResponses, SignatureResendData, SignatureResendErrors, SignatureResendResponses, SignatureResendToSignatoryData, SignatureResendToSignatoryErrors, SignatureResendToSignatoryResponses, SignatureResendToValidatorData, SignatureResendToValidatorErrors, SignatureResendToValidatorResponses, SignatureStartMultipartData, SignatureStartMultipartErrors, SignatureStartMultipartResponses, SignatureUpdateCoordinatesData, SignatureUpdateCoordinatesErrors, SignatureUpdateCoordinatesResponses, SignatureUpdateData, SignatureUpdateDocumentSequenceData, SignatureUpdateDocumentSequenceErrors, SignatureUpdateDocumentSequenceResponses, SignatureUpdateErrors, SignatureUpdateObserverData, SignatureUpdateObserverErrors, SignatureUpdateObserverResponses, SignatureUpdateResponses, SignatureUpdateSignatoryData, SignatureUpdateSignatoryErrors, SignatureUpdateSignatoryResponses, SignatureUpdateSignatorySequenceData, SignatureUpdateSignatorySequenceErrors, SignatureUpdateSignatorySequenceResponses, SignatureUpdateSignatureRequestsData, SignatureUpdateSignatureRequestsErrors, SignatureUpdateSignatureRequestsResponses, SignatureUpdateValidatorData, SignatureUpdateValidatorErrors, SignatureUpdateValidatorResponses, SignatureWellSignedDocumentGenerationData, SignatureWellSignedDocumentGenerationErrors, SignatureWellSignedDocumentGenerationResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -45,7 +45,7 @@ export const evidenceDeleteEvidenceGroups = <ThrowOnError extends boolean = fals
 /**
  * Search case file with filters
  */
-export const evidenceSearch = <ThrowOnError extends boolean = false>(options: Options<EvidenceSearchData, ThrowOnError>) => (options.client ?? client).get<EvidenceSearchResponses, EvidenceSearchErrors, ThrowOnError>({ url: '/api/v1/private/case-files', ...options });
+export const evidenceSearchCaseFiles = <ThrowOnError extends boolean = false>(options: Options<EvidenceSearchCaseFilesData, ThrowOnError>) => (options.client ?? client).get<EvidenceSearchCaseFilesResponses, EvidenceSearchCaseFilesErrors, ThrowOnError>({ url: '/api/v1/private/case-files', ...options });
 
 /**
  * Update a case files
@@ -137,7 +137,7 @@ export const evidenceCloseEvidenceGroup = <ThrowOnError extends boolean = false>
 /**
  * Register a new evidence in a group
  */
-export const evidenceRegisterEvidence = <ThrowOnError extends boolean = false>(options: Options<EvidenceRegisterEvidenceData, ThrowOnError>) => (options.client ?? client).post<EvidenceRegisterEvidenceResponses, EvidenceRegisterEvidenceErrors, ThrowOnError>({
+export const evidenceRegisterEvidenceInGroup = <ThrowOnError extends boolean = false>(options: Options<EvidenceRegisterEvidenceInGroupData, ThrowOnError>) => (options.client ?? client).post<EvidenceRegisterEvidenceInGroupResponses, EvidenceRegisterEvidenceInGroupErrors, ThrowOnError>({
     url: '/api/v1/private/case-files/{caseFileId}/evidence-groups/{evidenceGroupId}/evidences',
     ...options,
     headers: {
@@ -147,24 +147,24 @@ export const evidenceRegisterEvidence = <ThrowOnError extends boolean = false>(o
 });
 
 /**
- * Delete evidence
+ * Delete evidence in an evidence group
  */
-export const evidenceDeleteEvidence = <ThrowOnError extends boolean = false>(options: Options<EvidenceDeleteEvidenceData, ThrowOnError>) => (options.client ?? client).delete<EvidenceDeleteEvidenceResponses, EvidenceDeleteEvidenceErrors, ThrowOnError>({ url: '/api/v1/private/case-files/{caseFileId}/evidence-groups/{evidenceGroupId}/evidences/{evidenceId}', ...options });
+export const evidenceDeleteEvidenceInGroup = <ThrowOnError extends boolean = false>(options: Options<EvidenceDeleteEvidenceInGroupData, ThrowOnError>) => (options.client ?? client).delete<EvidenceDeleteEvidenceInGroupResponses, EvidenceDeleteEvidenceInGroupErrors, ThrowOnError>({ url: '/api/v1/private/case-files/{caseFileId}/evidence-groups/{evidenceGroupId}/evidences/{evidenceId}', ...options });
 
 /**
  * Get evidence in group details
  */
-export const evidenceGetEvidence = <ThrowOnError extends boolean = false>(options: Options<EvidenceGetEvidenceData, ThrowOnError>) => (options.client ?? client).get<EvidenceGetEvidenceResponses, EvidenceGetEvidenceErrors, ThrowOnError>({ url: '/api/v1/private/case-files/{caseFileId}/evidence-groups/{evidenceGroupId}/evidences/{evidenceId}', ...options });
+export const evidenceGetEvidenceInGroup = <ThrowOnError extends boolean = false>(options: Options<EvidenceGetEvidenceInGroupData, ThrowOnError>) => (options.client ?? client).get<EvidenceGetEvidenceInGroupResponses, EvidenceGetEvidenceInGroupErrors, ThrowOnError>({ url: '/api/v1/private/case-files/{caseFileId}/evidence-groups/{evidenceGroupId}/evidences/{evidenceId}', ...options });
 
 /**
  * Create download url
  */
-export const evidenceCreateDownloadUrl = <ThrowOnError extends boolean = false>(options: Options<EvidenceCreateDownloadUrlData, ThrowOnError>) => (options.client ?? client).get<EvidenceCreateDownloadUrlResponses, EvidenceCreateDownloadUrlErrors, ThrowOnError>({ url: '/api/v1/private/case-files/{caseFileId}/evidence-groups/{evidenceGroupId}/evidences/{evidenceId}/download-url', ...options });
+export const evidenceCreateEvidenceGroupDownloadUrl = <ThrowOnError extends boolean = false>(options: Options<EvidenceCreateEvidenceGroupDownloadUrlData, ThrowOnError>) => (options.client ?? client).get<EvidenceCreateEvidenceGroupDownloadUrlResponses, EvidenceCreateEvidenceGroupDownloadUrlErrors, ThrowOnError>({ url: '/api/v1/private/case-files/{caseFileId}/evidence-groups/{evidenceGroupId}/evidences/{evidenceId}/download-url', ...options });
 
 /**
  * Create upload url
  */
-export const evidenceCreateUploadUrl = <ThrowOnError extends boolean = false>(options: Options<EvidenceCreateUploadUrlData, ThrowOnError>) => (options.client ?? client).post<EvidenceCreateUploadUrlResponses, EvidenceCreateUploadUrlErrors, ThrowOnError>({
+export const evidenceCreateEvidenceGroupUploadUrl = <ThrowOnError extends boolean = false>(options: Options<EvidenceCreateEvidenceGroupUploadUrlData, ThrowOnError>) => (options.client ?? client).post<EvidenceCreateEvidenceGroupUploadUrlResponses, EvidenceCreateEvidenceGroupUploadUrlErrors, ThrowOnError>({
     url: '/api/v1/private/case-files/{caseFileId}/evidence-groups/{evidenceGroupId}/evidences/{evidenceId}/upload-url',
     ...options,
     headers: {
@@ -193,7 +193,7 @@ export const evidenceAssignRelationship = <ThrowOnError extends boolean = false>
 /**
  * Generate Case File ReportPreview
  */
-export const evidenceObtainReportPreview = <ThrowOnError extends boolean = false>(options: Options<EvidenceObtainReportPreviewData, ThrowOnError>) => (options.client ?? client).post<EvidenceObtainReportPreviewResponses, EvidenceObtainReportPreviewErrors, ThrowOnError>({
+export const evidenceObtainCaseFileReportPreview = <ThrowOnError extends boolean = false>(options: Options<EvidenceObtainCaseFileReportPreviewData, ThrowOnError>) => (options.client ?? client).post<EvidenceObtainCaseFileReportPreviewResponses, EvidenceObtainCaseFileReportPreviewErrors, ThrowOnError>({
     url: '/api/v1/private/case-files/{caseFileId}/report-preview',
     ...options,
     headers: {
@@ -253,21 +253,9 @@ export const evidenceUpdateCaseFileStatus = <ThrowOnError extends boolean = fals
 });
 
 /**
- * Generate Chat ReportPreview
- */
-export const evidenceObtainReportPreview1 = <ThrowOnError extends boolean = false>(options: Options<EvidenceObtainReportPreview1Data, ThrowOnError>) => (options.client ?? client).post<EvidenceObtainReportPreview1Responses, EvidenceObtainReportPreview1Errors, ThrowOnError>({
-    url: '/api/v1/private/chat/{chatId}/report-preview',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
  * Search evidence group
  */
-export const evidenceSearch1 = <ThrowOnError extends boolean = false>(options: Options<EvidenceSearch1Data, ThrowOnError>) => (options.client ?? client).get<EvidenceSearch1Responses, EvidenceSearch1Errors, ThrowOnError>({ url: '/api/v1/private/evidence-groups', ...options });
+export const evidenceSearchEvidenceGroups = <ThrowOnError extends boolean = false>(options: Options<EvidenceSearchEvidenceGroupsData, ThrowOnError>) => (options.client ?? client).get<EvidenceSearchEvidenceGroupsResponses, EvidenceSearchEvidenceGroupsErrors, ThrowOnError>({ url: '/api/v1/private/evidence-groups', ...options });
 
 /**
  * Update evidence groups
@@ -284,12 +272,12 @@ export const evidenceUpdateEvidenceGroups = <ThrowOnError extends boolean = fals
 /**
  * Search evidences
  */
-export const evidenceSearch2 = <ThrowOnError extends boolean = false>(options: Options<EvidenceSearch2Data, ThrowOnError>) => (options.client ?? client).get<EvidenceSearch2Responses, EvidenceSearch2Errors, ThrowOnError>({ url: '/api/v1/private/evidences', ...options });
+export const evidenceSearchEvidences = <ThrowOnError extends boolean = false>(options: Options<EvidenceSearchEvidencesData, ThrowOnError>) => (options.client ?? client).get<EvidenceSearchEvidencesResponses, EvidenceSearchEvidencesErrors, ThrowOnError>({ url: '/api/v1/private/evidences', ...options });
 
 /**
  * Update evidences
  */
-export const evidenceUpdateEvidence = <ThrowOnError extends boolean = false>(options: Options<EvidenceUpdateEvidenceData, ThrowOnError>) => (options.client ?? client).patch<EvidenceUpdateEvidenceResponses, EvidenceUpdateEvidenceErrors, ThrowOnError>({
+export const evidenceUpdateEvidences = <ThrowOnError extends boolean = false>(options: Options<EvidenceUpdateEvidencesData, ThrowOnError>) => (options.client ?? client).patch<EvidenceUpdateEvidencesResponses, EvidenceUpdateEvidencesErrors, ThrowOnError>({
     url: '/api/v1/private/evidences',
     ...options,
     headers: {
@@ -301,7 +289,7 @@ export const evidenceUpdateEvidence = <ThrowOnError extends boolean = false>(opt
 /**
  * Register a new evidence
  */
-export const evidenceRegisterEvidence1 = <ThrowOnError extends boolean = false>(options: Options<EvidenceRegisterEvidence1Data, ThrowOnError>) => (options.client ?? client).post<EvidenceRegisterEvidence1Responses, EvidenceRegisterEvidence1Errors, ThrowOnError>({
+export const evidenceRegisterEvidence = <ThrowOnError extends boolean = false>(options: Options<EvidenceRegisterEvidenceData, ThrowOnError>) => (options.client ?? client).post<EvidenceRegisterEvidenceResponses, EvidenceRegisterEvidenceErrors, ThrowOnError>({
     url: '/api/v1/private/evidences',
     ...options,
     headers: {
@@ -313,17 +301,17 @@ export const evidenceRegisterEvidence1 = <ThrowOnError extends boolean = false>(
 /**
  * Delete evidence
  */
-export const evidenceDeleteEvidence1 = <ThrowOnError extends boolean = false>(options: Options<EvidenceDeleteEvidence1Data, ThrowOnError>) => (options.client ?? client).delete<EvidenceDeleteEvidence1Responses, EvidenceDeleteEvidence1Errors, ThrowOnError>({ url: '/api/v1/private/evidences/{evidenceId}', ...options });
+export const evidenceDeleteEvidence = <ThrowOnError extends boolean = false>(options: Options<EvidenceDeleteEvidenceData, ThrowOnError>) => (options.client ?? client).delete<EvidenceDeleteEvidenceResponses, EvidenceDeleteEvidenceErrors, ThrowOnError>({ url: '/api/v1/private/evidences/{evidenceId}', ...options });
 
 /**
  * Get evidence details
  */
-export const evidenceGetEvidence1 = <ThrowOnError extends boolean = false>(options: Options<EvidenceGetEvidence1Data, ThrowOnError>) => (options.client ?? client).get<EvidenceGetEvidence1Responses, EvidenceGetEvidence1Errors, ThrowOnError>({ url: '/api/v1/private/evidences/{evidenceId}', ...options });
+export const evidenceGetEvidence = <ThrowOnError extends boolean = false>(options: Options<EvidenceGetEvidenceData, ThrowOnError>) => (options.client ?? client).get<EvidenceGetEvidenceResponses, EvidenceGetEvidenceErrors, ThrowOnError>({ url: '/api/v1/private/evidences/{evidenceId}', ...options });
 
 /**
  * Update evidence
  */
-export const evidenceUpdateEvidence1 = <ThrowOnError extends boolean = false>(options: Options<EvidenceUpdateEvidence1Data, ThrowOnError>) => (options.client ?? client).patch<EvidenceUpdateEvidence1Responses, EvidenceUpdateEvidence1Errors, ThrowOnError>({
+export const evidenceUpdateEvidence = <ThrowOnError extends boolean = false>(options: Options<EvidenceUpdateEvidenceData, ThrowOnError>) => (options.client ?? client).patch<EvidenceUpdateEvidenceResponses, EvidenceUpdateEvidenceErrors, ThrowOnError>({
     url: '/api/v1/private/evidences/{evidenceId}',
     ...options,
     headers: {
@@ -335,12 +323,12 @@ export const evidenceUpdateEvidence1 = <ThrowOnError extends boolean = false>(op
 /**
  * Create download url
  */
-export const evidenceCreateDownloadUrl1 = <ThrowOnError extends boolean = false>(options: Options<EvidenceCreateDownloadUrl1Data, ThrowOnError>) => (options.client ?? client).get<EvidenceCreateDownloadUrl1Responses, EvidenceCreateDownloadUrl1Errors, ThrowOnError>({ url: '/api/v1/private/evidences/{evidenceId}/download-url', ...options });
+export const evidenceCreateEvidenceDownloadUrl = <ThrowOnError extends boolean = false>(options: Options<EvidenceCreateEvidenceDownloadUrlData, ThrowOnError>) => (options.client ?? client).get<EvidenceCreateEvidenceDownloadUrlResponses, EvidenceCreateEvidenceDownloadUrlErrors, ThrowOnError>({ url: '/api/v1/private/evidences/{evidenceId}/download-url', ...options });
 
 /**
  * Create upload url
  */
-export const evidenceCreateUploadUrl1 = <ThrowOnError extends boolean = false>(options: Options<EvidenceCreateUploadUrl1Data, ThrowOnError>) => (options.client ?? client).post<EvidenceCreateUploadUrl1Responses, EvidenceCreateUploadUrl1Errors, ThrowOnError>({
+export const evidenceCreateEvidenceUploadUrl = <ThrowOnError extends boolean = false>(options: Options<EvidenceCreateEvidenceUploadUrlData, ThrowOnError>) => (options.client ?? client).post<EvidenceCreateEvidenceUploadUrlResponses, EvidenceCreateEvidenceUploadUrlErrors, ThrowOnError>({
     url: '/api/v1/private/evidences/{evidenceId}/upload-url',
     ...options,
     headers: {
@@ -352,7 +340,7 @@ export const evidenceCreateUploadUrl1 = <ThrowOnError extends boolean = false>(o
 /**
  * Create upload url temporary file
  */
-export const evidenceCreateUploadUrl2 = <ThrowOnError extends boolean = false>(options: Options<EvidenceCreateUploadUrl2Data, ThrowOnError>) => (options.client ?? client).post<EvidenceCreateUploadUrl2Responses, EvidenceCreateUploadUrl2Errors, ThrowOnError>({
+export const evidenceCreateTemporaryFileUploadUrl = <ThrowOnError extends boolean = false>(options: Options<EvidenceCreateTemporaryFileUploadUrlData, ThrowOnError>) => (options.client ?? client).post<EvidenceCreateTemporaryFileUploadUrlResponses, EvidenceCreateTemporaryFileUploadUrlErrors, ThrowOnError>({
     url: '/api/v1/private/files',
     ...options,
     headers: {
@@ -377,7 +365,7 @@ export const evidenceGetReportPdf = <ThrowOnError extends boolean = false>(optio
 export const evidenceGetReportZip = <ThrowOnError extends boolean = false>(options: Options<EvidenceGetReportZipData, ThrowOnError>) => (options.client ?? client).get<EvidenceGetReportZipResponses, EvidenceGetReportZipErrors, ThrowOnError>({ url: '/api/v1/private/reports/{reportId}/package', ...options });
 
 /**
- * Create upload url temporary file
+ * Start a temporary file multipart upload
  */
 export const evidenceStartMultipartUpload = <ThrowOnError extends boolean = false>(options: Options<EvidenceStartMultipartUploadData, ThrowOnError>) => (options.client ?? client).post<EvidenceStartMultipartUploadResponses, EvidenceStartMultipartUploadErrors, ThrowOnError>({
     url: '/api/v1/private/uploads/{evidenceId}/{fileName}',
@@ -387,6 +375,21 @@ export const evidenceStartMultipartUpload = <ThrowOnError extends boolean = fals
         ...options.headers
     }
 });
+
+/**
+ * Cancel a temporary file multipart upload
+ */
+export const evidenceCancelMultipartUpload = <ThrowOnError extends boolean = false>(options: Options<EvidenceCancelMultipartUploadData, ThrowOnError>) => (options.client ?? client).delete<EvidenceCancelMultipartUploadResponses, EvidenceCancelMultipartUploadErrors, ThrowOnError>({ url: '/api/v1/private/uploads/{evidenceId}/{filename}/{uploadId}', ...options });
+
+/**
+ * Get a temporary file multipart upload part link
+ */
+export const evidenceGetLink = <ThrowOnError extends boolean = false>(options: Options<EvidenceGetLinkData, ThrowOnError>) => (options.client ?? client).get<EvidenceGetLinkResponses, EvidenceGetLinkErrors, ThrowOnError>({ url: '/api/v1/private/uploads/{evidenceId}/{filename}/{uploadId}', ...options });
+
+/**
+ * Complete a temporary file multipart upload
+ */
+export const evidenceCompleteMultipartUpload = <ThrowOnError extends boolean = false>(options: Options<EvidenceCompleteMultipartUploadData, ThrowOnError>) => (options.client ?? client).post<EvidenceCompleteMultipartUploadResponses, EvidenceCompleteMultipartUploadErrors, ThrowOnError>({ url: '/api/v1/private/uploads/{evidenceId}/{filename}/{uploadId}', ...options });
 
 /**
  * Delete bulk signature requests
@@ -457,7 +460,7 @@ export const signatureCreateSignatureRequest = <ThrowOnError extends boolean = f
 });
 
 /**
- * Create signature request
+ * Delete signature request
  */
 export const signatureDeleteSignatureRequest = <ThrowOnError extends boolean = false>(options: Options<SignatureDeleteSignatureRequestData, ThrowOnError>) => (options.client ?? client).delete<SignatureDeleteSignatureRequestResponses, SignatureDeleteSignatureRequestErrors, ThrowOnError>({ url: '/api/v1/private/signature-requests/{signatureRequestId}', ...options });
 
@@ -478,7 +481,10 @@ export const signatureUpdate = <ThrowOnError extends boolean = false>(options: O
     }
 });
 
-export const signatureActivate = <ThrowOnError extends boolean = false>(options: Options<SignatureActivateData, ThrowOnError>) => (options.client ?? client).post<SignatureActivateResponses, unknown, ThrowOnError>({ url: '/api/v1/private/signature-requests/{signatureRequestId}/activate', ...options });
+/**
+ * Activate signature request
+ */
+export const signatureActivate = <ThrowOnError extends boolean = false>(options: Options<SignatureActivateData, ThrowOnError>) => (options.client ?? client).post<SignatureActivateResponses, SignatureActivateErrors, ThrowOnError>({ url: '/api/v1/private/signature-requests/{signatureRequestId}/activate', ...options });
 
 /**
  * Cancel a signature request
@@ -547,7 +553,7 @@ export const signatureGetDownloadUrl = <ThrowOnError extends boolean = false>(op
 /**
  * Obtain final download link for well signed appearance document
  */
-export const signatureGenerateDownloadLink = <ThrowOnError extends boolean = false>(options: Options<SignatureGenerateDownloadLinkData, ThrowOnError>) => (options.client ?? client).get<SignatureGenerateDownloadLinkResponses, SignatureGenerateDownloadLinkErrors, ThrowOnError>({ url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/links/signed/download', ...options });
+export const signatureGenerateFinalDocumentSignedDownloadLink = <ThrowOnError extends boolean = false>(options: Options<SignatureGenerateFinalDocumentSignedDownloadLinkData, ThrowOnError>) => (options.client ?? client).get<SignatureGenerateFinalDocumentSignedDownloadLinkResponses, SignatureGenerateFinalDocumentSignedDownloadLinkErrors, ThrowOnError>({ url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/links/signed/download', ...options });
 
 /**
  * Get a new upload link
@@ -557,7 +563,7 @@ export const signatureGetUploadUrl = <ThrowOnError extends boolean = false>(opti
 /**
  * Get list of observers of a document
  */
-export const signatureGetObservers = <ThrowOnError extends boolean = false>(options: Options<SignatureGetObserversData, ThrowOnError>) => (options.client ?? client).get<SignatureGetObserversResponses, unknown, ThrowOnError>({ url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/observers', ...options });
+export const signatureGetObservers = <ThrowOnError extends boolean = false>(options: Options<SignatureGetObserversData, ThrowOnError>) => (options.client ?? client).get<SignatureGetObserversResponses, SignatureGetObserversErrors, ThrowOnError>({ url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/observers', ...options });
 
 /**
  * Create observer
@@ -576,7 +582,10 @@ export const signatureAddObserver = <ThrowOnError extends boolean = false>(optio
  */
 export const signatureDeleteObserver = <ThrowOnError extends boolean = false>(options: Options<SignatureDeleteObserverData, ThrowOnError>) => (options.client ?? client).delete<SignatureDeleteObserverResponses, SignatureDeleteObserverErrors, ThrowOnError>({ url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/observers/{observerId}', ...options });
 
-export const signatureUpdate1 = <ThrowOnError extends boolean = false>(options: Options<SignatureUpdate1Data, ThrowOnError>) => (options.client ?? client).patch<SignatureUpdate1Responses, SignatureUpdate1Errors, ThrowOnError>({
+/**
+ * Update observer of a document
+ */
+export const signatureUpdateObserver = <ThrowOnError extends boolean = false>(options: Options<SignatureUpdateObserverData, ThrowOnError>) => (options.client ?? client).patch<SignatureUpdateObserverResponses, SignatureUpdateObserverErrors, ThrowOnError>({
     url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/observers/{observerId}',
     ...options,
     headers: {
@@ -598,9 +607,12 @@ export const signatureGetFinalReportZip = <ThrowOnError extends boolean = false>
 /**
  * Obtain interim download link for well signed appearance document
  */
-export const signatureGenerateDownloadLink1 = <ThrowOnError extends boolean = false>(options: Options<SignatureGenerateDownloadLink1Data, ThrowOnError>) => (options.client ?? client).get<SignatureGenerateDownloadLink1Responses, SignatureGenerateDownloadLink1Errors, ThrowOnError>({ url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/reports/{reportId}/links/signed/download', ...options });
+export const signatureGenerateInterimDocumentSignedDownloadLink = <ThrowOnError extends boolean = false>(options: Options<SignatureGenerateInterimDocumentSignedDownloadLinkData, ThrowOnError>) => (options.client ?? client).get<SignatureGenerateInterimDocumentSignedDownloadLinkResponses, SignatureGenerateInterimDocumentSignedDownloadLinkErrors, ThrowOnError>({ url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/reports/{reportId}/links/signed/download', ...options });
 
-export const signatureUpdateSequence = <ThrowOnError extends boolean = false>(options: Options<SignatureUpdateSequenceData, ThrowOnError>) => (options.client ?? client).patch<SignatureUpdateSequenceResponses, SignatureUpdateSequenceErrors, ThrowOnError>({
+/**
+ * Update document sequence in a signature request
+ */
+export const signatureUpdateDocumentSequence = <ThrowOnError extends boolean = false>(options: Options<SignatureUpdateDocumentSequenceData, ThrowOnError>) => (options.client ?? client).patch<SignatureUpdateDocumentSequenceResponses, SignatureUpdateDocumentSequenceErrors, ThrowOnError>({
     url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/sequence',
     ...options,
     headers: {
@@ -612,8 +624,11 @@ export const signatureUpdateSequence = <ThrowOnError extends boolean = false>(op
 /**
  * Get list of signatories of a document
  */
-export const signatureGetSignatories = <ThrowOnError extends boolean = false>(options: Options<SignatureGetSignatoriesData, ThrowOnError>) => (options.client ?? client).get<SignatureGetSignatoriesResponses, unknown, ThrowOnError>({ url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/signatories', ...options });
+export const signatureGetSignatories = <ThrowOnError extends boolean = false>(options: Options<SignatureGetSignatoriesData, ThrowOnError>) => (options.client ?? client).get<SignatureGetSignatoriesResponses, SignatureGetSignatoriesErrors, ThrowOnError>({ url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/signatories', ...options });
 
+/**
+ * Add signatory to a document
+ */
 export const signatureAddSignatory = <ThrowOnError extends boolean = false>(options: Options<SignatureAddSignatoryData, ThrowOnError>) => (options.client ?? client).post<SignatureAddSignatoryResponses, SignatureAddSignatoryErrors, ThrowOnError>({
     url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/signatories',
     ...options,
@@ -628,7 +643,10 @@ export const signatureAddSignatory = <ThrowOnError extends boolean = false>(opti
  */
 export const signatureDeleteSignatory = <ThrowOnError extends boolean = false>(options: Options<SignatureDeleteSignatoryData, ThrowOnError>) => (options.client ?? client).delete<SignatureDeleteSignatoryResponses, SignatureDeleteSignatoryErrors, ThrowOnError>({ url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/signatories/{signatoryId}', ...options });
 
-export const signatureUpdate2 = <ThrowOnError extends boolean = false>(options: Options<SignatureUpdate2Data, ThrowOnError>) => (options.client ?? client).patch<SignatureUpdate2Responses, SignatureUpdate2Errors, ThrowOnError>({
+/**
+ * Update signatory of a document
+ */
+export const signatureUpdateSignatory = <ThrowOnError extends boolean = false>(options: Options<SignatureUpdateSignatoryData, ThrowOnError>) => (options.client ?? client).patch<SignatureUpdateSignatoryResponses, SignatureUpdateSignatoryErrors, ThrowOnError>({
     url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/signatories/{signatoryId}',
     ...options,
     headers: {
@@ -637,6 +655,9 @@ export const signatureUpdate2 = <ThrowOnError extends boolean = false>(options: 
     }
 });
 
+/**
+ * Update signatory signature coordinates
+ */
 export const signatureUpdateCoordinates = <ThrowOnError extends boolean = false>(options: Options<SignatureUpdateCoordinatesData, ThrowOnError>) => (options.client ?? client).patch<SignatureUpdateCoordinatesResponses, SignatureUpdateCoordinatesErrors, ThrowOnError>({
     url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/signatories/{signatoryId}/coordinates',
     ...options,
@@ -653,7 +674,10 @@ export const signatureUpdateCoordinates = <ThrowOnError extends boolean = false>
  */
 export const signatureResendToSignatory = <ThrowOnError extends boolean = false>(options: Options<SignatureResendToSignatoryData, ThrowOnError>) => (options.client ?? client).post<SignatureResendToSignatoryResponses, SignatureResendToSignatoryErrors, ThrowOnError>({ url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/signatories/{signatoryId}/resend', ...options });
 
-export const signatureUpdateSequence1 = <ThrowOnError extends boolean = false>(options: Options<SignatureUpdateSequence1Data, ThrowOnError>) => (options.client ?? client).patch<SignatureUpdateSequence1Responses, SignatureUpdateSequence1Errors, ThrowOnError>({
+/**
+ * Update signatory sequence in a document
+ */
+export const signatureUpdateSignatorySequence = <ThrowOnError extends boolean = false>(options: Options<SignatureUpdateSignatorySequenceData, ThrowOnError>) => (options.client ?? client).patch<SignatureUpdateSignatorySequenceResponses, SignatureUpdateSignatorySequenceErrors, ThrowOnError>({
     url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/signatories/{signatoryId}/sequence',
     ...options,
     headers: {
@@ -662,7 +686,10 @@ export const signatureUpdateSequence1 = <ThrowOnError extends boolean = false>(o
     }
 });
 
-export const signatureUpdate3 = <ThrowOnError extends boolean = false>(options: Options<SignatureUpdate3Data, ThrowOnError>) => (options.client ?? client).patch<SignatureUpdate3Responses, SignatureUpdate3Errors, ThrowOnError>({
+/**
+ * Update validator of a signatory
+ */
+export const signatureUpdateValidator = <ThrowOnError extends boolean = false>(options: Options<SignatureUpdateValidatorData, ThrowOnError>) => (options.client ?? client).patch<SignatureUpdateValidatorResponses, SignatureUpdateValidatorErrors, ThrowOnError>({
     url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/signatories/{signatoryId}/validators/{validatorId}',
     ...options,
     headers: {
@@ -693,7 +720,15 @@ export const signatureGetMultipartUploadLink = <ThrowOnError extends boolean = f
  */
 export const signatureCompleteMultipart = <ThrowOnError extends boolean = false>(options: Options<SignatureCompleteMultipartData, ThrowOnError>) => (options.client ?? client).post<SignatureCompleteMultipartResponses, SignatureCompleteMultipartErrors, ThrowOnError>({ url: '/api/v1/private/signature-requests/{signatureRequestId}/documents/{documentId}/uploads/{uploadId}', ...options });
 
-export const signatureDraft = <ThrowOnError extends boolean = false>(options: Options<SignatureDraftData, ThrowOnError>) => (options.client ?? client).post<SignatureDraftResponses, unknown, ThrowOnError>({ url: '/api/v1/private/signature-requests/{signatureRequestId}/draft', ...options });
+/**
+ * Move signature request back to draft
+ */
+export const signatureDraft = <ThrowOnError extends boolean = false>(options: Options<SignatureDraftData, ThrowOnError>) => (options.client ?? client).post<SignatureDraftResponses, SignatureDraftErrors, ThrowOnError>({ url: '/api/v1/private/signature-requests/{signatureRequestId}/draft', ...options });
+
+/**
+ * Get list of editable observers of a signature request
+ */
+export const signatureGetEditableObservers = <ThrowOnError extends boolean = false>(options: Options<SignatureGetEditableObserversData, ThrowOnError>) => (options.client ?? client).get<SignatureGetEditableObserversResponses, SignatureGetEditableObserversErrors, ThrowOnError>({ url: '/api/v1/private/signature-requests/{signatureRequestId}/observers/editables', ...options });
 
 /**
  * Interim report of document
@@ -717,12 +752,22 @@ export const signatureResend = <ThrowOnError extends boolean = false>(options: O
 /**
  * Get list of signatories of a signature request
  */
-export const signatureGetSignatories1 = <ThrowOnError extends boolean = false>(options: Options<SignatureGetSignatories1Data, ThrowOnError>) => (options.client ?? client).get<SignatureGetSignatories1Responses, unknown, ThrowOnError>({ url: '/api/v1/private/signature-requests/{signatureRequestId}/signatories', ...options });
+export const signatureGetSignatoriesFromSignatureRequest = <ThrowOnError extends boolean = false>(options: Options<SignatureGetSignatoriesFromSignatureRequestData, ThrowOnError>) => (options.client ?? client).get<SignatureGetSignatoriesFromSignatureRequestResponses, SignatureGetSignatoriesFromSignatureRequestErrors, ThrowOnError>({ url: '/api/v1/private/signature-requests/{signatureRequestId}/signatories', ...options });
 
 /**
- * Get list of validators of a document
+ * Get list of editable signatories of a signature request
  */
-export const signatureGetValidators = <ThrowOnError extends boolean = false>(options: Options<SignatureGetValidatorsData, ThrowOnError>) => (options.client ?? client).get<SignatureGetValidatorsResponses, unknown, ThrowOnError>({ url: '/api/v1/private/signature-requests/{signatureRequestId}/validators', ...options });
+export const signatureGetEditableSignatories = <ThrowOnError extends boolean = false>(options: Options<SignatureGetEditableSignatoriesData, ThrowOnError>) => (options.client ?? client).get<SignatureGetEditableSignatoriesResponses, SignatureGetEditableSignatoriesErrors, ThrowOnError>({ url: '/api/v1/private/signature-requests/{signatureRequestId}/signatories/editables', ...options });
+
+/**
+ * Get list of validators of a signature request
+ */
+export const signatureGetValidators = <ThrowOnError extends boolean = false>(options: Options<SignatureGetValidatorsData, ThrowOnError>) => (options.client ?? client).get<SignatureGetValidatorsResponses, SignatureGetValidatorsErrors, ThrowOnError>({ url: '/api/v1/private/signature-requests/{signatureRequestId}/validators', ...options });
+
+/**
+ * Get list of editable validators of a signature request
+ */
+export const signatureGetEditableValidators = <ThrowOnError extends boolean = false>(options: Options<SignatureGetEditableValidatorsData, ThrowOnError>) => (options.client ?? client).get<SignatureGetEditableValidatorsResponses, SignatureGetEditableValidatorsErrors, ThrowOnError>({ url: '/api/v1/private/signature-requests/{signatureRequestId}/validators/editables', ...options });
 
 /**
  * Delete bulk notifications
@@ -781,7 +826,7 @@ export const notificationAddRequestAttachment = <ThrowOnError extends boolean = 
 export const notificationDeleteAttachment = <ThrowOnError extends boolean = false>(options: Options<NotificationDeleteAttachmentData, ThrowOnError>) => (options.client ?? client).delete<NotificationDeleteAttachmentResponses, NotificationDeleteAttachmentErrors, ThrowOnError>({ url: '/api/v1/private/notifications/requests/{requestId}/attachments/{fileId}', ...options });
 
 /**
- * Delete a notifications collection
+ * Delete receivers from a notification request
  */
 export const notificationDeleteNotification = <ThrowOnError extends boolean = false>(options: Options<NotificationDeleteNotificationData, ThrowOnError>) => (options.client ?? client).delete<NotificationDeleteNotificationResponses, NotificationDeleteNotificationErrors, ThrowOnError>({
     url: '/api/v1/private/notifications/requests/{requestId}/receivers',
