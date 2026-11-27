@@ -138,4 +138,5 @@ signature_request_full,
 ead_factory_help,
 ead_factory_health,
   ],
+  sseBridge: false,
 });
