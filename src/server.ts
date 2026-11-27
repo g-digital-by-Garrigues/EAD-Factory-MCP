@@ -66,6 +66,7 @@ import { notification_certificate_pdf_url_get } from "./tools/notification_certi
 import { evidence_create_sealed } from "./tools/evidence_create_sealed.js";
 import { signature_request_full } from "./tools/signature_request_full.js";
 import { ead_factory_help } from "./tools/ead_factory_help.js";
+import { ead_factory_health } from "./tools/ead_factory_health.js";
 
 await createServer({
   name: "io.github.g-digital-by-Garrigues/ead-factory",
@@ -135,5 +136,6 @@ notification_certificate_pdf_url_get,
 evidence_create_sealed,
 signature_request_full,
 ead_factory_help,
+ead_factory_health,
   ],
 });

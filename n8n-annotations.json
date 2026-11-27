@@ -642,6 +642,12 @@
       "n8n": {
         "exclude": true
       }
+    },
+    {
+      "name": "ead_factory_health",
+      "n8n": {
+        "exclude": true
+      }
     }
   ],
   "fields": [

@@ -6,7 +6,7 @@ Get from zero to your first tool call in under 5 minutes.
 
 ## Step 1 — Get your credentials
 
-Visit [https://digitaltrust.gcloudfactory.com](https://digitaltrust.gcloudfactory.com) to create an account or obtain API credentials.
+Visit [https://webforms.pipedrive.com/f/bYUKJVgt3TZ0QiINtf0mimlgL3BJw79kQaN3i7nXnqoPYabRqYPI5KX9ohhp7T5TTt](https://webforms.pipedrive.com/f/bYUKJVgt3TZ0QiINtf0mimlgL3BJw79kQaN3i7nXnqoPYabRqYPI5KX9ohhp7T5TTt) to request or obtain your API credentials.
 
 You will need a **service account** (OAuth2 `client_credentials`): the token endpoint URL, a client ID, and a client secret.
 

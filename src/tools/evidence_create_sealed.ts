@@ -17,7 +17,7 @@ import {
   evidenceCloseEvidenceGroup,
   evidenceCreateEvidenceGroup,
   evidenceGetEvidenceGroup,
-  evidenceRegisterEvidence,
+  evidenceRegisterEvidenceInGroup,
 } from "../api/sdk.gen.js";
 import { zEvidenceCustodyType, zEvidenceGroupType } from "../api/zod.gen.js";
 import { defineTool, FileInput } from "../core/index.js";
@@ -72,13 +72,19 @@ export const evidence_create_sealed = defineTool({
     "evidence_group_create + N x (evidence_group_evidence_register + upload) + evidence_group_close. " +
     "Bounded-polls until the group reaches CLOSED (EAD Factory's upstream emits no events for " +
     "this transition): task-aware MCP clients get an asynchronous Task; any other client simply " +
-    "receives the final result synchronously. Requires: case_file_create -> caseFileId. " +
+    "receives the final result synchronously. Requires: evidence_case_file_create -> caseFileId. " +
     "Provide `evidenceGroupId` to add to an existing OPEN group instead of creating one. " +
     "Each evidence's file uses the shared FileInput contract (local path, base64, https URL, or " +
     "n8n binary item) — never a bespoke file field. " +
     "On success returns the group id, its final CLOSED status, and each evidence's id + sha256. " +
     "Use the atomic evidence_group_create / evidence_group_evidence_register / evidence_group_close " +
-    "tools instead when you need to inspect or react to each intermediate step.",
+    "tools instead when you need to inspect or react to each intermediate step. " +
+    // Story 21-08 (Codex usability item 5): one minimal payload that passes inputSchema, kept as
+    // the LAST sentence so story 20-05 can keep or replace it in one place.
+    "Example: evidence_create_sealed({ caseFileId: '3fa85f64-5717-4562-b3fc-2c963f66afa6', " +
+    "evidences: [{ file: { source: 'path', path: '/absolute/path/invoice.pdf' } }] }) — use your " +
+    "own case file's id; on a remote (HTTP) server send the file as { source: 'base64', filename: " +
+    "'invoice.pdf', contentBase64: '<base64 bytes>' } instead.",
   inputSchema,
   pollable: true,
   // Story 1.3 (audit U1): "optional", NOT "required" — Story 5.1's guidance allows
@@ -148,7 +154,7 @@ export const evidence_create_sealed = defineTool({
     for (const item of evidences) {
       const resolved = await ctx.files.resolve(item.file);
       const evidenceId = randomUUID();
-      const registerResponse = await evidenceRegisterEvidence({
+      const registerResponse = await evidenceRegisterEvidenceInGroup({
         client: sdkClient,
         path: { caseFileId, evidenceGroupId },
         body: {
@@ -218,9 +224,14 @@ export const evidence_create_sealed = defineTool({
     // input — evidenceGroupId is only present in the input when the caller passed an
     // existing group; when execute() created a new one, this is the only place its id is
     // known (Story 6.3 addition to pollForCompletion's signature).
-    const { caseFileId, evidenceGroupId } = kickoffResult as {
+    const {
+      caseFileId,
+      evidenceGroupId,
+      evidences: sealedEvidences,
+    } = kickoffResult as {
       caseFileId: string;
       evidenceGroupId: string;
+      evidences: { evidenceId: string; sha256: string; title: string }[];
     };
     return {
       intervalMs: 5000,
@@ -252,10 +263,19 @@ export const evidence_create_sealed = defineTool({
             status: "completed",
             result: {
               ...group,
+              // Story 21-11: mcp-core serves `final.result` and discards execute()'s return
+              // value (server.ts, `final.result ?? kickoff`), so the ids and hashes this call
+              // generated had to be carried across explicitly. Without them the agent has no
+              // way back to what it just sealed: the group read-back returns counts only, and
+              // the evidence searches cannot filter by group. `sealedEvidences`, not
+              // `evidences`, because the group's own `evidences` field is a counts object.
+              caseFileId,
+              evidenceGroupId,
+              sealedEvidences,
               nextSteps: [
                 {
                   suggestedTool: "evidence_case_file_report_generate",
-                  why: "Generate a signed report now that the evidence group is CLOSED.",
+                  why: "The evidence group is CLOSED: pass the `caseFileId` you sent to this call as `caseFileId`, with a fresh UUID v4 as `reportId`, an uppercase `template` and a `languageCode`, to generate its signed report.",
                 },
               ],
             },

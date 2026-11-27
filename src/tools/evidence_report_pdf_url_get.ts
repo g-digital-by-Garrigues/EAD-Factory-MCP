@@ -27,7 +27,7 @@ export const evidence_report_pdf_url_get = defineTool({
     openWorldHint: false,
   },
   pollable: false,
-  idempotencyWindowSeconds: 60,
+  idempotencyWindowSeconds: 0,
   async execute(input, ctx) {
     const token = ctx.auth?.token ?? "";
     const sdkClient = createClient(
@@ -37,6 +37,9 @@ export const evidence_report_pdf_url_get = defineTool({
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),
         },
+        // This API ignores bracketed query parameters, so an object parameter must go
+        // out as `size=1`, not the client's default deepObject `filter[size]=1`.
+        querySerializer: { object: { style: "form", explode: true } },
       }),
     );
 

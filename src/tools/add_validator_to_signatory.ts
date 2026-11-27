@@ -18,7 +18,7 @@ const inputSchema = applyFieldGlosses(rawInputSchema, {"caseFileId":"MANDATORY. 
 
 export const add_validator_to_signatory = defineTool({
   name: "add_validator_to_signatory",
-  description: "Adds a validator to a document's signatory: a person who must approve (validate) that signatory's identity or the document before the signature can proceed. Add validators BEFORE activate_signature_request. Requires: add_document_to_signature_request → documentId, add_signatory_to_document → signatoryId. The signature_request_full composite accepts validators inline.",
+  description: "Adds a validator to a document's signatory: a person who must approve (validate) that signatory's identity or the document before the signature can proceed. Add validators BEFORE activate_signature_request. Requires: add_document_to_signature_request → documentId, add_signatory_to_document → signatoryId. The signature_request_full composite does NOT accept validators (unknown fields are dropped): call it with activate: false, add validators with this tool, then call activate_signature_request.",
   inputSchema,
   outputSchema: zSignatureAddValidatorResponse,
   annotations: {
@@ -39,6 +39,9 @@ export const add_validator_to_signatory = defineTool({
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),
         },
+        // This API ignores bracketed query parameters, so an object parameter must go
+        // out as `size=1`, not the client's default deepObject `filter[size]=1`.
+        querySerializer: { object: { style: "form", explode: true } },
       }),
     );
 

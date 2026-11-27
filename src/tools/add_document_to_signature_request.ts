@@ -18,7 +18,7 @@ const inputSchema = applyFieldGlosses(rawInputSchema, {"caseFileId":"MANDATORY. 
 
 export const add_document_to_signature_request = defineTool({
   name: "add_document_to_signature_request",
-  description: "Adds a document to a signature request — the first step of a 2-step upload (add, then PUT the file bytes to the returned upload URL). Use once per document that needs signing. Requires: create_signature_request → signatureRequestId, and the document's SHA-256 hash (compute it before calling, or use the signature_request_full composite tool). Add signatories with add_signatory_to_document before activating. Signature type: INTERPOSITION = EAD Factory mediates the signing act on the signatory's behalf (e.g. an OTP sent via WhatsApp/SMS) — the signatory needs no software or certificate. | ADVANCED = Advanced electronic signature — the signatory signs directly (signing pad or certificate); a stronger legal tier than INTERPOSITION. | OTHER = A signature type not covered by INTERPOSITION or ADVANCED.",
+  description: "Adds a document to a signature request — the first step of a 2-step upload (add, then PUT the file bytes to the returned upload URL). Use once per document that needs signing. Requires: create_signature_request → signatureRequestId, and the document's SHA-256 hash (compute it before calling, or use the signature_request_full composite tool). Add signatories with add_signatory_to_document before activating. Signature type: INTERPOSITION = EAD Factory mediates the signing act on the signatory's behalf (e.g. an OTP sent via WhatsApp/SMS) — the signatory needs no software or certificate. ADVANCED = Advanced electronic signature — the signatory signs directly (signing pad or certificate); a stronger legal tier than INTERPOSITION. OTHER = A signature type not covered by INTERPOSITION or ADVANCED. Who uploads: this tool registers the document and returns a presigned URL — you must PUT the raw file bytes to it yourself (no Authorization header; the composite tools also send x-amz-checksum-sha256 with the base64 SHA-256 of the file). To have the server upload for you, use signature_request_full with a FileInput file instead.",
   inputSchema,
   outputSchema: zSignatureAddDocumentResponse,
   annotations: {
@@ -39,6 +39,9 @@ export const add_document_to_signature_request = defineTool({
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),
         },
+        // This API ignores bracketed query parameters, so an object parameter must go
+        // out as `size=1`, not the client's default deepObject `filter[size]=1`.
+        querySerializer: { object: { style: "form", explode: true } },
       }),
     );
 
@@ -62,6 +65,6 @@ export const add_document_to_signature_request = defineTool({
       throw UpstreamHttpError.fromParsedError(response.response?.status ?? 0, response.error, "add_document_to_signature_request");
     }
     // Story 6.6 (FR-30/§5.4): tells the agent what to call next without a separate lookup.
-    return { ...response.data, nextSteps: [{"suggestedTool":"add_signatory_to_document","why":"Add at least one signatory to this document before activating the request."}] };
+    return { ...response.data, nextSteps: [{"suggestedTool":"add_signatory_to_document","why":"First PUT the document's bytes to this result's `url` (you do this; no tool does). Then pass this result's `id` as `documentId` and the same `signatureRequestId`."}] };
   },
 });

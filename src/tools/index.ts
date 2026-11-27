@@ -63,3 +63,4 @@ export { notification_certificate_pdf_url_get } from "./notification_certificate
 export { evidence_create_sealed } from "./evidence_create_sealed.js";
 export { signature_request_full } from "./signature_request_full.js";
 export { ead_factory_help } from "./ead_factory_help.js";
+export { ead_factory_health } from "./ead_factory_health.js";

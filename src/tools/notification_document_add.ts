@@ -18,7 +18,7 @@ const inputSchema = applyFieldGlosses(rawInputSchema, {"caseFileId":"MANDATORY. 
 
 export const notification_document_add = defineTool({
   name: "notification_document_add",
-  description: "Registers one or more document attachments (metadata only — fileName + SHA-256 hash) on a draft notification request. Use once per batch of documents before activating. Requires: notification_request_create → requestId. This only registers metadata; call notification_document_upload_url_create for each registered attachment to get a URL to PUT the actual file bytes to.",
+  description: "Registers one or more document attachments (metadata only — fileName + SHA-256 hash) on a draft notification request. Use once per batch of documents before activating. Requires: notification_request_create → requestId. This only registers metadata: the result's uploadLinks carry one presigned URL per attachment (url, expiration, fileId) — call notification_document_upload_url_create only when a link has expired, passing its fileId as attachmentId. Who uploads: you must PUT each file's raw bytes to its uploadLinks url yourself (no Authorization header; the composite tools also send x-amz-checksum-sha256 with the base64 SHA-256 of the file). No MCP tool uploads notification attachments, so this PUT is always yours.",
   inputSchema,
   outputSchema: zNotificationAddRequestAttachmentResponse,
   annotations: {
@@ -39,6 +39,9 @@ export const notification_document_add = defineTool({
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),
         },
+        // This API ignores bracketed query parameters, so an object parameter must go
+        // out as `size=1`, not the client's default deepObject `filter[size]=1`.
+        querySerializer: { object: { style: "form", explode: true } },
       }),
     );
 
@@ -61,6 +64,7 @@ export const notification_document_add = defineTool({
       // consumed response.response's body to populate response.error by this point.
       throw UpstreamHttpError.fromParsedError(response.response?.status ?? 0, response.error, "notification_document_add");
     }
-    return response.data;
+    // Story 6.6 (FR-30/§5.4): tells the agent what to call next without a separate lookup.
+    return { ...response.data, nextSteps: [{"suggestedTool":"notification_request_send","why":"First PUT each file's bytes to its `uploadLinks[].url` from this result (you do this; no tool uploads notification attachments). Then pass the same `requestId`."},{"suggestedTool":"notification_document_upload_url_create","why":"Only if an upload link expired: pass the same `requestId`, and that link's `fileId` as `attachmentId`, for a fresh URL."}] };
   },
 });

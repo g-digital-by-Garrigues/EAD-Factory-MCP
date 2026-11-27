@@ -54,15 +54,14 @@ export const zEvidenceNewUploadUrlRequestModel = z.object({
     fileName: z.string().min(1)
 });
 
-/**
- * PreviewReport Request
- */
-export const zEvidenceChatPreviewReportRequestModel = z.object({
-    template: z.string(),
-    languageCode: z.string(),
-    fromDate: z.iso.datetime().nullish(),
-    toDate: z.iso.datetime().nullish(),
-    additionalData: z.record(z.string(), z.unknown()).optional()
+export const zEvidenceUploadUrlTemporaryFileHttpResponseModel = z.object({
+    url: z.string().optional(),
+    expiration: z.iso.datetime().optional()
+});
+
+export const zEvidenceUploadLinkOutputModel = z.object({
+    url: z.string().optional(),
+    expiration: z.iso.datetime().optional()
 });
 
 /**
@@ -71,13 +70,6 @@ export const zEvidenceChatPreviewReportRequestModel = z.object({
 export const zSignatureBulkDeleteSignatureRequestRequestModel = z.object({
     requestId: z.uuid(),
     signatureRequestIds: z.array(z.uuid()).min(1).max(100)
-});
-
-export const zSignatureAddValidatorRequestModel = z.object({
-    name: z.string().min(1),
-    surnames: z.string().optional(),
-    phone: z.string().optional(),
-    email: z.email().min(1)
 });
 
 /**
@@ -179,40 +171,12 @@ export const zSignatureGetUploadUrlViewModel = z.object({
     expiration: z.iso.datetime().optional()
 });
 
-export const zSignatureAddObserverRequestModel = z.object({
-    name: z.string().min(1),
-    surnames: z.string().optional(),
-    email: z.email().min(1)
-});
-
-export const zSignatureUpdateObserverRequestModel = z.object({
-    name: z.string().optional(),
-    surnames: z.string().optional(),
-    email: z.email().optional()
-});
-
 export const zSignatureUpdateDocumentSequenceRequestModel = z.object({
-    sequence: z.int().optional()
-});
-
-export const zSignatureUpdateSignatoryRequestModel = z.object({
-    name: z.string().optional(),
-    surnames: z.string().optional(),
-    phone: z.string().optional(),
-    uniqueValidator: z.boolean().optional(),
-    email: z.email().optional(),
     sequence: z.int().optional()
 });
 
 export const zSignatureUpdateSignatorySequenceRequestModel = z.object({
     sequence: z.int().optional()
-});
-
-export const zSignatureUpdateValidatorRequestModel = z.object({
-    name: z.string().optional(),
-    surnames: z.string().optional(),
-    phone: z.string().optional(),
-    email: z.email().optional()
 });
 
 export const zSignatureUploadLinkOutputModel = z.object({
@@ -676,6 +640,53 @@ export const zEvidenceStartMultipartUploadRequestModel = z.object({
     metadata: z.record(z.string(), z.string()).optional()
 });
 
+export const zSignatureSignatureRequestProvider = z.enum([
+    'NOTICEMAN',
+    'NOTICEMAN_AND_WHATSAPP',
+    'NOTICEMAN_AND_WHATSAPP_AND_RCS',
+    'NOTICEMAN_AND_RCS'
+]);
+
+export const zSignatureAddValidatorRequestModel = z.object({
+    name: z.string().min(1),
+    surnames: z.string().optional(),
+    phone: z.string().optional(),
+    email: z.email().min(1),
+    provider: zSignatureSignatureRequestProvider.optional()
+});
+
+export const zSignatureAddObserverRequestModel = z.object({
+    name: z.string().min(1),
+    surnames: z.string().optional(),
+    email: z.email().min(1),
+    provider: zSignatureSignatureRequestProvider.optional()
+});
+
+export const zSignatureUpdateObserverRequestModel = z.object({
+    name: z.string().optional(),
+    surnames: z.string().optional(),
+    email: z.email().optional(),
+    provider: zSignatureSignatureRequestProvider.optional()
+});
+
+export const zSignatureUpdateSignatoryRequestModel = z.object({
+    name: z.string().optional(),
+    surnames: z.string().optional(),
+    phone: z.string().optional(),
+    uniqueValidator: z.boolean().optional(),
+    email: z.email().optional(),
+    sequence: z.int().optional(),
+    provider: zSignatureSignatureRequestProvider.optional()
+});
+
+export const zSignatureUpdateValidatorRequestModel = z.object({
+    name: z.string().optional(),
+    surnames: z.string().optional(),
+    phone: z.string().optional(),
+    email: z.email().optional(),
+    provider: zSignatureSignatureRequestProvider.optional()
+});
+
 export const zSignatureAbstractCollectionDownloadUrlViewModel = z.object({
     empty: z.boolean().optional()
 });
@@ -721,13 +732,6 @@ export const zSignatureSignatureRequestViewModel1 = z.object({
     closeConfig: zSignatureCloseConfigViewModel.optional(),
     webhookUris: z.array(zSignatureWebhookUriViewModel).optional()
 });
-
-export const zSignatureSignatureRequestProvider = z.enum([
-    'NOTICEMAN',
-    'NOTICEMAN_AND_WHATSAPP',
-    'NOTICEMAN_AND_WHATSAPP_AND_RCS',
-    'NOTICEMAN_AND_RCS'
-]);
 
 export const zSignatureWebhookUri = z.object({
     uri: z.url().regex(/^https:\/\//).optional()
@@ -807,7 +811,8 @@ export const zSignatureAddSignatoryRequestModel = z.object({
     phone: z.string().optional(),
     coordinates: z.array(zSignatureAddSignatoryCoordinatesRequestModel).optional(),
     sequence: z.int().optional(),
-    uniqueValidator: z.boolean().optional()
+    uniqueValidator: z.boolean().optional(),
+    provider: zSignatureSignatureRequestProvider.optional()
 });
 
 export const zSignatureSignatoryCoordinatesRequestModel = z.object({
@@ -1144,6 +1149,7 @@ export const zSignatureSignatoryValidatorViewModel = z.object({
     surnames: z.string().optional(),
     email: z.string().optional(),
     status: zSignatureSignatureValidatorStatus.optional(),
+    provider: z.string().optional(),
     notifications: z.array(zSignatureParticipantNotificationViewModel).optional()
 });
 
@@ -1168,6 +1174,7 @@ export const zSignatureSignatoryViewModel = z.object({
     participantType: zSignatureSignatoryParticipantType.optional(),
     taxId: z.string().optional(),
     roleType: z.string().optional(),
+    provider: z.string().optional(),
     metadata: z.record(z.string(), z.string()).optional()
 });
 
@@ -1389,11 +1396,12 @@ export const zEvidenceDataRequestModel = z.object({
  * PreviewReport Request
  */
 export const zEvidenceCaseFilePreviewReportRequestModel = z.object({
-    template: z.string(),
+    template: z.string().regex(/^[A-Z][A-Z0-9_]+$/),
     languageCode: z.string(),
     data: zEvidenceDataRequestModel.optional(),
     additionalData: z.record(z.string(), z.unknown()).optional(),
-    metadata: z.record(z.string(), z.string()).optional()
+    metadata: z.record(z.string(), z.string()).optional(),
+    ignoreNotCompletedEvidences: z.boolean().optional()
 });
 
 /**
@@ -1402,12 +1410,13 @@ export const zEvidenceCaseFilePreviewReportRequestModel = z.object({
 export const zEvidenceCaseFileReportRequestModel = z.object({
     reportId: z.uuid(),
     filename: z.string().optional(),
-    template: z.string(),
+    template: z.string().regex(/^[A-Z][A-Z0-9_]+$/),
     languageCode: z.string(),
     data: zEvidenceDataRequestModel.optional(),
     additionalData: z.record(z.string(), z.unknown()).and(z.unknown()).optional(),
     metadata: z.record(z.string(), z.string()).and(z.unknown()).optional(),
-    deletionDate: z.iso.datetime().optional()
+    deletionDate: z.iso.datetime().optional(),
+    ignoreNotCompletedEvidences: z.boolean().optional()
 });
 
 export const zSignatureParticipantRole1 = z.enum([
@@ -1443,6 +1452,7 @@ export const zSignatureCreateSignatureRequestModel = z.object({
     language: z.string().optional(),
     uniqueValidator: z.boolean().optional(),
     provider: zSignatureSignatureRequestProvider.optional(),
+    notificationProvider: z.string().regex(/NOTICE_MANAGER|SCASC/).nullish(),
     senderName: z.string().optional(),
     senderAddress: z.email().optional(),
     closeConfig: zSignatureCloseConfig.optional(),
@@ -1747,10 +1757,10 @@ export const zNotificationAddReceiverNoticemanNotificationRequestModel = z.objec
  * Receiver request model
  */
 export const zNotificationReceiverNotificationRequestModel = z.discriminatedUnion('provider', [
-    zNotificationAddReceiverEmailNotificationRequestModel.extend({ provider: z.literal('Notification_AddReceiverEmailNotificationRequestModel') }),
-    zNotificationAddReceiverNoticemanNotificationRequestModel.extend({ provider: z.literal('Notification_AddReceiverNoticemanNotificationRequestModel') }),
-    zNotificationAddReceiverSmsNotificationRequestModel.extend({ provider: z.literal('Notification_AddReceiverSmsNotificationRequestModel') }),
-    zNotificationAddReceiverWfbNotificationRequestModel.extend({ provider: z.literal('Notification_AddReceiverWfbNotificationRequestModel') })
+    zNotificationAddReceiverEmailNotificationRequestModel.extend({ provider: z.literal('SMTP') }),
+    zNotificationAddReceiverNoticemanNotificationRequestModel.extend({ provider: z.literal('NOTICEMAN') }),
+    zNotificationAddReceiverSmsNotificationRequestModel.extend({ provider: z.literal('SMS') }),
+    zNotificationAddReceiverWfbNotificationRequestModel.extend({ provider: z.literal('WFB') })
 ]);
 
 export const zNotificationAddReceiversNotificationRequestModel = z.object({
@@ -1847,14 +1857,14 @@ export const zEvidenceDeleteEvidenceGroupsPath = z.object({
  */
 export const zEvidenceDeleteEvidenceGroupsResponse = z.void();
 
-export const zEvidenceSearchQuery = z.object({
+export const zEvidenceSearchCaseFilesQuery = z.object({
     filter: zEvidenceSearchCaseFileRequestModel
 });
 
 /**
  * Case files retrieved
  */
-export const zEvidenceSearchResponse = zEvidenceSearchCaseFileCollectionViewModel;
+export const zEvidenceSearchCaseFilesResponse = zEvidenceSearchCaseFileCollectionViewModel;
 
 export const zEvidenceUpdateCaseFilesBody = zEvidenceBulkPatchRequestModel;
 
@@ -1945,9 +1955,9 @@ export const zEvidenceCloseEvidenceGroupPath = z.object({
  */
 export const zEvidenceCloseEvidenceGroupResponse = z.record(z.string(), z.unknown());
 
-export const zEvidenceRegisterEvidenceBody = zEvidenceRegisterEvidenceRequestModel;
+export const zEvidenceRegisterEvidenceInGroupBody = zEvidenceRegisterEvidenceRequestModel;
 
-export const zEvidenceRegisterEvidencePath = z.object({
+export const zEvidenceRegisterEvidenceInGroupPath = z.object({
     caseFileId: z.uuid(),
     evidenceGroupId: z.uuid()
 });
@@ -1955,9 +1965,9 @@ export const zEvidenceRegisterEvidencePath = z.object({
 /**
  * Evidence registered successfully
  */
-export const zEvidenceRegisterEvidenceResponse = zEvidenceRegisterEvidenceResponseModel;
+export const zEvidenceRegisterEvidenceInGroupResponse = zEvidenceRegisterEvidenceResponseModel;
 
-export const zEvidenceDeleteEvidencePath = z.object({
+export const zEvidenceDeleteEvidenceInGroupPath = z.object({
     caseFileId: z.uuid(),
     evidenceGroupId: z.uuid(),
     evidenceId: z.uuid()
@@ -1966,9 +1976,9 @@ export const zEvidenceDeleteEvidencePath = z.object({
 /**
  * Evidence deleted
  */
-export const zEvidenceDeleteEvidenceResponse = z.void();
+export const zEvidenceDeleteEvidenceInGroupResponse = z.void();
 
-export const zEvidenceGetEvidencePath = z.object({
+export const zEvidenceGetEvidenceInGroupPath = z.object({
     caseFileId: z.uuid(),
     evidenceGroupId: z.uuid(),
     evidenceId: z.uuid()
@@ -1977,19 +1987,19 @@ export const zEvidenceGetEvidencePath = z.object({
 /**
  * Evidence got
  */
-export const zEvidenceGetEvidenceResponse = zEvidenceGetEvidenceViewModel;
+export const zEvidenceGetEvidenceInGroupResponse = zEvidenceGetEvidenceViewModel;
 
-export const zEvidenceCreateDownloadUrlPath = z.object({
+export const zEvidenceCreateEvidenceGroupDownloadUrlPath = z.object({
     caseFileId: z.uuid(),
     evidenceGroupId: z.uuid(),
     evidenceId: z.uuid()
 });
 
-export const zEvidenceCreateUploadUrlBody = z.object({
+export const zEvidenceCreateEvidenceGroupUploadUrlBody = z.object({
     requestModel: zEvidenceNewUploadUrlRequestModel.optional()
 });
 
-export const zEvidenceCreateUploadUrlPath = z.object({
+export const zEvidenceCreateEvidenceGroupUploadUrlPath = z.object({
     caseFileId: z.uuid(),
     evidenceGroupId: z.uuid(),
     evidenceId: z.uuid()
@@ -2013,16 +2023,21 @@ export const zEvidenceAssignRelationshipPath = z.object({
     caseFileId: z.uuid()
 });
 
-export const zEvidenceObtainReportPreviewBody = zEvidenceCaseFilePreviewReportRequestModel;
+/**
+ * Item assigned to case file
+ */
+export const zEvidenceAssignRelationshipResponse = z.record(z.string(), z.unknown());
 
-export const zEvidenceObtainReportPreviewPath = z.object({
+export const zEvidenceObtainCaseFileReportPreviewBody = zEvidenceCaseFilePreviewReportRequestModel;
+
+export const zEvidenceObtainCaseFileReportPreviewPath = z.object({
     caseFileId: z.uuid()
 });
 
 /**
  * Generated ReportPreview
  */
-export const zEvidenceObtainReportPreviewResponse = z.record(z.string(), z.unknown());
+export const zEvidenceObtainCaseFileReportPreviewResponse = z.record(z.string(), z.unknown());
 
 export const zEvidenceObtainSignedReportBody = zEvidenceCaseFileReportRequestModel;
 
@@ -2078,25 +2093,14 @@ export const zEvidenceUpdateCaseFileStatusPath = z.object({
  */
 export const zEvidenceUpdateCaseFileStatusResponse = z.void();
 
-export const zEvidenceObtainReportPreview1Body = zEvidenceChatPreviewReportRequestModel;
-
-export const zEvidenceObtainReportPreview1Path = z.object({
-    chatId: z.uuid()
-});
-
-/**
- * Generated ReportPreview
- */
-export const zEvidenceObtainReportPreview1Response = z.record(z.string(), z.unknown());
-
-export const zEvidenceSearch1Query = z.object({
+export const zEvidenceSearchEvidenceGroupsQuery = z.object({
     filter: zEvidenceEvidenceGroupSearch
 });
 
 /**
  * Evidence Groups returned
  */
-export const zEvidenceSearch1Response = zEvidenceSearchEvidenceGroupCollectionViewModel;
+export const zEvidenceSearchEvidenceGroupsResponse = zEvidenceSearchEvidenceGroupCollectionViewModel;
 
 export const zEvidenceUpdateEvidenceGroupsBody = zEvidenceBulkPatchRequestModel;
 
@@ -2105,69 +2109,74 @@ export const zEvidenceUpdateEvidenceGroupsBody = zEvidenceBulkPatchRequestModel;
  */
 export const zEvidenceUpdateEvidenceGroupsResponse = z.void();
 
-export const zEvidenceSearch2Query = z.object({
+export const zEvidenceSearchEvidencesQuery = z.object({
     filter: zEvidenceSearchEvidenceRequestModel
 });
 
 /**
  * Evidences returned
  */
-export const zEvidenceSearch2Response = zEvidenceSearchEvidenceCollectionViewModel;
+export const zEvidenceSearchEvidencesResponse = zEvidenceSearchEvidenceCollectionViewModel;
 
-export const zEvidenceUpdateEvidenceBody = zEvidenceBulkPatchRequestModel;
+export const zEvidenceUpdateEvidencesBody = zEvidenceBulkPatchRequestModel;
 
 /**
  * Evidences updated sucessfully
  */
-export const zEvidenceUpdateEvidenceResponse = z.void();
+export const zEvidenceUpdateEvidencesResponse = z.void();
 
-export const zEvidenceRegisterEvidence1Body = zEvidenceRegisterEvidenceRequestModel;
+export const zEvidenceRegisterEvidenceBody = zEvidenceRegisterEvidenceRequestModel;
 
 /**
  * Evidence registered successfully
  */
-export const zEvidenceRegisterEvidence1Response = zEvidenceRegisterEvidenceResponseModel;
+export const zEvidenceRegisterEvidenceResponse = zEvidenceRegisterEvidenceResponseModel;
 
-export const zEvidenceDeleteEvidence1Path = z.object({
+export const zEvidenceDeleteEvidencePath = z.object({
     evidenceId: z.uuid()
 });
 
 /**
  * Evidence deleted
  */
-export const zEvidenceDeleteEvidence1Response = z.void();
+export const zEvidenceDeleteEvidenceResponse = z.void();
 
-export const zEvidenceGetEvidence1Path = z.object({
+export const zEvidenceGetEvidencePath = z.object({
     evidenceId: z.uuid()
 });
 
 /**
  * Evidence got
  */
-export const zEvidenceGetEvidence1Response = zEvidenceGetEvidenceViewModel;
+export const zEvidenceGetEvidenceResponse = zEvidenceGetEvidenceViewModel;
 
-export const zEvidenceUpdateEvidence1Body = zEvidenceUpdateEvidenceRequestModel;
+export const zEvidenceUpdateEvidenceBody = zEvidenceUpdateEvidenceRequestModel;
 
-export const zEvidenceUpdateEvidence1Path = z.object({
+export const zEvidenceUpdateEvidencePath = z.object({
     evidenceId: z.uuid()
 });
 
 /**
  * Evidence updated
  */
-export const zEvidenceUpdateEvidence1Response = z.void();
+export const zEvidenceUpdateEvidenceResponse = z.void();
 
-export const zEvidenceCreateDownloadUrl1Path = z.object({
+export const zEvidenceCreateEvidenceDownloadUrlPath = z.object({
     evidenceId: z.uuid()
 });
 
-export const zEvidenceCreateUploadUrl1Body = zEvidenceNewUploadUrlRequestModel;
+export const zEvidenceCreateEvidenceUploadUrlBody = zEvidenceNewUploadUrlRequestModel;
 
-export const zEvidenceCreateUploadUrl1Path = z.object({
+export const zEvidenceCreateEvidenceUploadUrlPath = z.object({
     evidenceId: z.string()
 });
 
-export const zEvidenceCreateUploadUrl2Body = zEvidenceUploadUrlTemporaryFileHttpRequestModel;
+export const zEvidenceCreateTemporaryFileUploadUrlBody = zEvidenceUploadUrlTemporaryFileHttpRequestModel;
+
+/**
+ * Upload url created
+ */
+export const zEvidenceCreateTemporaryFileUploadUrlResponse = zEvidenceUploadUrlTemporaryFileHttpResponseModel;
 
 export const zEvidenceDeleteReportPath = z.object({
     reportId: z.uuid()
@@ -2202,6 +2211,52 @@ export const zEvidenceStartMultipartUploadPath = z.object({
     evidenceId: z.uuid(),
     fileName: z.string()
 });
+
+/**
+ * Multipart upload started
+ */
+export const zEvidenceStartMultipartUploadResponse = z.string();
+
+export const zEvidenceCancelMultipartUploadPath = z.object({
+    evidenceId: z.uuid(),
+    filename: z.string(),
+    uploadId: z.string()
+});
+
+/**
+ * Multipart upload cancelled
+ */
+export const zEvidenceCancelMultipartUploadResponse = z.record(z.string(), z.unknown());
+
+export const zEvidenceGetLinkPath = z.object({
+    evidenceId: z.uuid(),
+    filename: z.string(),
+    uploadId: z.string()
+});
+
+export const zEvidenceGetLinkQuery = z.object({
+    partNumber: z.int().gte(1).lte(10000)
+});
+
+/**
+ * Upload part link generated
+ */
+export const zEvidenceGetLinkResponse = zEvidenceUploadLinkOutputModel;
+
+export const zEvidenceCompleteMultipartUploadPath = z.object({
+    evidenceId: z.uuid(),
+    filename: z.string(),
+    uploadId: z.string()
+});
+
+export const zEvidenceCompleteMultipartUploadQuery = z.object({
+    partsCount: z.int().gte(1).lte(10000)
+});
+
+/**
+ * Multipart upload successfully
+ */
+export const zEvidenceCompleteMultipartUploadResponse = z.record(z.string(), z.unknown());
 
 export const zSignatureDeleteBulkSignatureRequestsBody = zSignatureBulkDeleteSignatureRequestRequestModel;
 
@@ -2335,7 +2390,7 @@ export const zSignatureActivatePath = z.object({
 });
 
 /**
- * activate 200 response
+ * Signature request activated
  */
 export const zSignatureActivateResponse = zSignatureActivateSignatureRequestViewModel;
 
@@ -2445,7 +2500,7 @@ export const zSignatureGetDownloadUrlPath = z.object({
     documentId: z.uuid()
 });
 
-export const zSignatureGenerateDownloadLinkPath = z.object({
+export const zSignatureGenerateFinalDocumentSignedDownloadLinkPath = z.object({
     signatureRequestId: z.uuid(),
     documentId: z.uuid()
 });
@@ -2453,7 +2508,7 @@ export const zSignatureGenerateDownloadLinkPath = z.object({
 /**
  * Document final link generated successfully
  */
-export const zSignatureGenerateDownloadLinkResponse = zSignatureFileDocumentSignedDownloadUrlViewModel;
+export const zSignatureGenerateFinalDocumentSignedDownloadLinkResponse = zSignatureFileDocumentSignedDownloadUrlViewModel;
 
 export const zSignatureGetUploadUrlPath = z.object({
     signatureRequestId: z.uuid(),
@@ -2476,7 +2531,8 @@ export const zSignatureGetObserversQuery = z.object({
     hasCoordinates: z.boolean().nullish(),
     page: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
     size: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    sort: z.array(z.string()).nullish()
+    sort: z.array(z.string()).nullish(),
+    orderBy: z.enum(['sequence:asc', 'sequence:desc']).optional()
 });
 
 /**
@@ -2507,18 +2563,18 @@ export const zSignatureDeleteObserverPath = z.object({
  */
 export const zSignatureDeleteObserverResponse = z.void();
 
-export const zSignatureUpdate1Body = zSignatureUpdateObserverRequestModel;
+export const zSignatureUpdateObserverBody = zSignatureUpdateObserverRequestModel;
 
-export const zSignatureUpdate1Path = z.object({
+export const zSignatureUpdateObserverPath = z.object({
     signatureRequestId: z.uuid(),
     documentId: z.uuid(),
     observerId: z.uuid()
 });
 
 /**
- * Observer update_1
+ * Observer updated
  */
-export const zSignatureUpdate1Response = zSignatureObserverViewModel;
+export const zSignatureUpdateObserverResponse = z.void();
 
 export const zSignatureGetFinalReportPdfPath = z.object({
     signatureRequestId: z.uuid(),
@@ -2530,7 +2586,7 @@ export const zSignatureGetFinalReportZipPath = z.object({
     documentId: z.uuid()
 });
 
-export const zSignatureGenerateDownloadLink1Path = z.object({
+export const zSignatureGenerateInterimDocumentSignedDownloadLinkPath = z.object({
     signatureRequestId: z.uuid(),
     documentId: z.uuid(),
     reportId: z.uuid()
@@ -2539,11 +2595,11 @@ export const zSignatureGenerateDownloadLink1Path = z.object({
 /**
  * Document interim link generated successfully
  */
-export const zSignatureGenerateDownloadLink1Response = zSignatureFileDocumentSignedDownloadUrlViewModel;
+export const zSignatureGenerateInterimDocumentSignedDownloadLinkResponse = zSignatureFileDocumentSignedDownloadUrlViewModel;
 
-export const zSignatureUpdateSequenceBody = zSignatureUpdateDocumentSequenceRequestModel;
+export const zSignatureUpdateDocumentSequenceBody = zSignatureUpdateDocumentSequenceRequestModel;
 
-export const zSignatureUpdateSequencePath = z.object({
+export const zSignatureUpdateDocumentSequencePath = z.object({
     signatureRequestId: z.uuid(),
     documentId: z.uuid()
 });
@@ -2551,7 +2607,7 @@ export const zSignatureUpdateSequencePath = z.object({
 /**
  * Sequence updated
  */
-export const zSignatureUpdateSequenceResponse = z.void();
+export const zSignatureUpdateDocumentSequenceResponse = z.void();
 
 export const zSignatureGetSignatoriesPath = z.object({
     signatureRequestId: z.uuid(),
@@ -2564,7 +2620,8 @@ export const zSignatureGetSignatoriesQuery = z.object({
     hasCoordinates: z.boolean().nullish(),
     page: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
     size: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    sort: z.array(z.string()).nullish()
+    sort: z.array(z.string()).nullish(),
+    orderBy: z.enum(['sequence:asc', 'sequence:desc']).optional()
 });
 
 /**
@@ -2595,18 +2652,18 @@ export const zSignatureDeleteSignatoryPath = z.object({
  */
 export const zSignatureDeleteSignatoryResponse = z.void();
 
-export const zSignatureUpdate2Body = zSignatureUpdateSignatoryRequestModel;
+export const zSignatureUpdateSignatoryBody = zSignatureUpdateSignatoryRequestModel;
 
-export const zSignatureUpdate2Path = z.object({
+export const zSignatureUpdateSignatoryPath = z.object({
     signatureRequestId: z.uuid(),
     documentId: z.uuid(),
     signatoryId: z.uuid()
 });
 
 /**
- * Signatory update_2
+ * Signatory updated
  */
-export const zSignatureUpdate2Response = zSignatureSignatoryViewModel;
+export const zSignatureUpdateSignatoryResponse = z.void();
 
 export const zSignatureUpdateCoordinatesBody = zSignatureUpdateSignatoryCoordinatesRequestModel;
 
@@ -2627,9 +2684,9 @@ export const zSignatureResendToSignatoryPath = z.object({
     signatoryId: z.uuid()
 });
 
-export const zSignatureUpdateSequence1Body = zSignatureUpdateSignatorySequenceRequestModel;
+export const zSignatureUpdateSignatorySequenceBody = zSignatureUpdateSignatorySequenceRequestModel;
 
-export const zSignatureUpdateSequence1Path = z.object({
+export const zSignatureUpdateSignatorySequencePath = z.object({
     signatureRequestId: z.uuid(),
     documentId: z.uuid(),
     signatoryId: z.uuid()
@@ -2638,11 +2695,11 @@ export const zSignatureUpdateSequence1Path = z.object({
 /**
  * Sequence updated
  */
-export const zSignatureUpdateSequence1Response = z.void();
+export const zSignatureUpdateSignatorySequenceResponse = z.void();
 
-export const zSignatureUpdate3Body = zSignatureUpdateValidatorRequestModel;
+export const zSignatureUpdateValidatorBody = zSignatureUpdateValidatorRequestModel;
 
-export const zSignatureUpdate3Path = z.object({
+export const zSignatureUpdateValidatorPath = z.object({
     signatureRequestId: z.uuid(),
     documentId: z.uuid(),
     signatoryId: z.uuid(),
@@ -2650,9 +2707,9 @@ export const zSignatureUpdate3Path = z.object({
 });
 
 /**
- * Validator update_3
+ * Validator updated
  */
-export const zSignatureUpdate3Response = zSignatureValidatorViewModel;
+export const zSignatureUpdateValidatorResponse = z.void();
 
 export const zSignatureResendToValidatorPath = z.object({
     signatureRequestId: z.uuid(),
@@ -2702,9 +2759,22 @@ export const zSignatureDraftPath = z.object({
 });
 
 /**
- * draft 200 response
+ * Signature request moved back to draft
  */
 export const zSignatureDraftResponse = zSignatureDraftSignatureRequestViewModel;
+
+export const zSignatureGetEditableObserversPath = z.object({
+    signatureRequestId: z.uuid()
+});
+
+export const zSignatureGetEditableObserversQuery = z.object({
+    emails: z.array(z.string()).optional()
+});
+
+/**
+ * Editable observers obtained successfully
+ */
+export const zSignatureGetEditableObserversResponse = z.array(z.record(z.string(), z.unknown()));
 
 export const zSignatureGenerateBody = zSignatureSignatureRequestReportRequestModel;
 
@@ -2721,11 +2791,11 @@ export const zSignatureResendPath = z.object({
     signatureRequestId: z.uuid()
 });
 
-export const zSignatureGetSignatories1Path = z.object({
+export const zSignatureGetSignatoriesFromSignatureRequestPath = z.object({
     signatureRequestId: z.uuid()
 });
 
-export const zSignatureGetSignatories1Query = z.object({
+export const zSignatureGetSignatoriesFromSignatureRequestQuery = z.object({
     ids: z.array(z.uuid()).nullish(),
     emails: z.array(z.string()).nullish(),
     documentId: z.uuid().nullish(),
@@ -2738,7 +2808,20 @@ export const zSignatureGetSignatories1Query = z.object({
 /**
  * Signatories obtained successfully
  */
-export const zSignatureGetSignatories1Response = z.array(zSignatureSignatoryViewModel);
+export const zSignatureGetSignatoriesFromSignatureRequestResponse = z.array(zSignatureSignatoryViewModel);
+
+export const zSignatureGetEditableSignatoriesPath = z.object({
+    signatureRequestId: z.uuid()
+});
+
+export const zSignatureGetEditableSignatoriesQuery = z.object({
+    emails: z.array(z.string()).optional()
+});
+
+/**
+ * Editable signatories obtained successfully
+ */
+export const zSignatureGetEditableSignatoriesResponse = z.array(z.record(z.string(), z.unknown()));
 
 export const zSignatureGetValidatorsPath = z.object({
     signatureRequestId: z.uuid()
@@ -2751,9 +2834,22 @@ export const zSignatureGetValidatorsQuery = z.object({
 });
 
 /**
- * Document validators obtained successfully
+ * Validators obtained successfully
  */
 export const zSignatureGetValidatorsResponse = z.array(zSignatureListValidatorsViewModel);
+
+export const zSignatureGetEditableValidatorsPath = z.object({
+    signatureRequestId: z.uuid()
+});
+
+export const zSignatureGetEditableValidatorsQuery = z.object({
+    emails: z.array(z.string()).optional()
+});
+
+/**
+ * Editable validators obtained successfully
+ */
+export const zSignatureGetEditableValidatorsResponse = z.array(z.record(z.string(), z.unknown()));
 
 export const zNotificationDeleteNotificationsBody = zNotificationBulkDeleteEntityRequestModel;
 
@@ -2829,7 +2925,7 @@ export const zNotificationDeleteNotificationPath = z.object({
 });
 
 /**
- * Notification deleted successfully
+ * Receivers deleted successfully
  */
 export const zNotificationDeleteNotificationResponse = z.void();
 

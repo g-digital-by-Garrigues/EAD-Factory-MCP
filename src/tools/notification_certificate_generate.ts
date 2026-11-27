@@ -37,6 +37,9 @@ export const notification_certificate_generate = defineTool({
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),
         },
+        // This API ignores bracketed query parameters, so an object parameter must go
+        // out as `size=1`, not the client's default deepObject `filter[size]=1`.
+        querySerializer: { object: { style: "form", explode: true } },
       }),
     );
 
@@ -58,6 +61,7 @@ export const notification_certificate_generate = defineTool({
       // consumed response.response's body to populate response.error by this point.
       throw UpstreamHttpError.fromParsedError(response.response?.status ?? 0, response.error, "notification_certificate_generate");
     }
-    return response.data;
+    // Story 6.6 (FR-30/§5.4): tells the agent what to call next without a separate lookup.
+    return { ...response.data, nextSteps: [{"suggestedTool":"notification_certificate_pdf_url_get","why":"Pass this result's `reportId` as `reportId` to get the certificate's download URL."}] };
   },
 });

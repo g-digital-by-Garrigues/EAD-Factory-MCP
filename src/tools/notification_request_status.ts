@@ -27,7 +27,7 @@ export const notification_request_status = defineTool({
     openWorldHint: false,
   },
   pollable: false,
-  idempotencyWindowSeconds: 60,
+  idempotencyWindowSeconds: 0,
   async execute(input, ctx) {
     const token = ctx.auth?.token ?? "";
     const sdkClient = createClient(
@@ -37,6 +37,9 @@ export const notification_request_status = defineTool({
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),
         },
+        // This API ignores bracketed query parameters, so an object parameter must go
+        // out as `size=1`, not the client's default deepObject `filter[size]=1`.
+        querySerializer: { object: { style: "form", explode: true } },
       }),
     );
 
@@ -62,6 +65,7 @@ export const notification_request_status = defineTool({
     // z.array/z.record/z.intersection) — the MCP protocol's structuredContent must be
     // object-shaped, so extractZodShape (server.ts) wraps the ADVERTISED outputSchema
     // under NON_OBJECT_SCHEMA_WRAPPER_KEY; the actual return value must match.
-    return { [NON_OBJECT_SCHEMA_WRAPPER_KEY]: response.data };
+    // Story 6.6 (FR-30/§5.4): tells the agent what to call next without a separate lookup.
+    return { [NON_OBJECT_SCHEMA_WRAPPER_KEY]: response.data, nextSteps: [{"suggestedTool":"notification_certificate_generate","why":"Once the notifications have left their in-flight states: if this call was filtered by `requestId`, pass that `requestId`, the `id` of every record in `data.records` (read every page — see `data._metadata.totalPages`) as `notificationIds`, and a `template` and `languageCode`."}] };
   },
 });

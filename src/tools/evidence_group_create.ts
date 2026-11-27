@@ -39,6 +39,9 @@ export const evidence_group_create = defineTool({
           Authorization: `Bearer ${token}`,
           ...(ctx.correlationId ? { "X-Correlation-Id": ctx.correlationId } : {}),
         },
+        // This API ignores bracketed query parameters, so an object parameter must go
+        // out as `size=1`, not the client's default deepObject `filter[size]=1`.
+        querySerializer: { object: { style: "form", explode: true } },
       }),
     );
 
@@ -66,6 +69,6 @@ export const evidence_group_create = defineTool({
     // object-shaped, so extractZodShape (server.ts) wraps the ADVERTISED outputSchema
     // under NON_OBJECT_SCHEMA_WRAPPER_KEY; the actual return value must match.
     // Story 6.6 (FR-30/§5.4): tells the agent what to call next without a separate lookup.
-    return { [NON_OBJECT_SCHEMA_WRAPPER_KEY]: response.data, nextSteps: [{"suggestedTool":"evidence_group_evidence_register","why":"Register one or more evidence files into this OPEN group."}] };
+    return { [NON_OBJECT_SCHEMA_WRAPPER_KEY]: response.data, nextSteps: [{"suggestedTool":"evidence_group_evidence_register","why":"Pass the `id` you supplied to this call as `evidenceGroupId` and the same `caseFileId`, with a fresh UUID v4 per file as `evidenceId`."}] };
   },
 });
