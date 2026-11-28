@@ -129,14 +129,14 @@ sequenceDiagram
 
 **Testimony** — which proof each evidence gets, and the easiest thing to get wrong:
 - `testimony` lists providers **by family**: `TSP` (qualified electronic timestamp) and `DLT` (distributed ledger), each `{ required, providers: [<provider name>] }`.
-- `requiredTestimonyProviders` lists provider **names, not families** — `"EADTrust"`, never `"TSP"`. **Only TSP timestamping is available today** *(platform behaviour)*: use `EADTrust` ✅; asking for a DLT provider answers `400` `#PROVIDER_NOT_CONFIGURED#`.
+- `requiredTestimonyProviders` lists provider **names, not families** — `"EADTrust"`, never `"TSP"`. TSP provider: `EADTrust` ✅. DLT provider: **`Hedera`, coming soon** — until the platform enables it, asking for a DLT provider answers `400` `#PROVIDER_NOT_CONFIGURED#` *(platform behaviour)*; once enabled, add `DLT: { required: true, providers: ["Hedera"] }` and list `Hedera` in `requiredTestimonyProviders` if it must testify.
 - **Every required provider must also appear in `testimony.<family>.providers`.** Otherwise the platform answers `400` "Testimony providers EADTrust does not exist" — the provider does exist; it is just missing from `testimony` ✅.
 - An empty `requiredTestimonyProviders` means the tenant's default — `EADTrust` in the reference tenant ✅ — which then has to be in `testimony` too. So **`testimony: {}` never passes** ✅.
 - Always write the `providers` list out: a family sent without one (`{ TSP: { required: true } }`) does not get the default filled in *(platform behaviour)*.
 
 **Gotchas**
 - **Closing is the point of no return** — *(platform behaviour)* no evidences can be added afterwards. The `202` means sealing started; the timestamping provider finishes it asynchronously. *(platform behaviour)* If sealing never finishes, the group stays waiting and does not expire, and the signed report will not come out — check the group status first; don't keep regenerating the report.
-- **Timestamps are qualified (TSP) timestamps.** The contract also models `DLT` (distributed-ledger) testimony and timestamp fields, but the platform's guide states that only TSP is available today — a DLT provider answers `400` `#PROVIDER_NOT_CONFIGURED#` *(platform behaviour)*. Don't build anything that waits for a ledger transaction.
+- **Timestamps are qualified (TSP) timestamps.** The contract also models `DLT` (distributed-ledger) testimony and timestamp fields, but the platform's guide states that only TSP is available today — a DLT provider answers `400` `#PROVIDER_NOT_CONFIGURED#` *(platform behaviour)*. Ledger anchoring with **Hedera is coming soon**: until it is enabled in your environment, don't build anything that waits for a ledger transaction.
 - **Two route families for evidences.** In-group routes (`/case-files/{caseFileId}/evidence-groups/{evidenceGroupId}/evidences/...`) and flat routes (`/evidences`, `/evidences/{evidenceId}`, `.../upload-url`, `.../download-url`) both work. Build the flow with the in-group routes; the flat register has no group context (its `201` body is empty ✅).
 - **Parameter naming drifts.** The thumbnail route is `.../evidence-groups/{groupId}/evidences/{evidenceId}/thumbnail-url/{thumbnailSize}` — `{groupId}`, not `{evidenceGroupId}`; same value. A `404` there means "no thumbnail for this evidence", not an integration error.
 - **Download URLs** — `GET .../evidences/{evidenceId}/download-url` answers **`201`**, not `200`. Re-issue an upload URL with `POST .../evidences/{evidenceId}/upload-url` (`fileName` required).
@@ -361,6 +361,6 @@ The chat manager runs **messaging conversations** with a recipient (the provider
 | `200` with body | `PATCH` evidence group (most `PATCH` return `204`) |
 
 **Enum cheat-sheet:**
-- Evidence group `FILE` `PHOTO` `VIDEO` `WEB_PLUGIN` · custody `INTERNAL` `EXTERNAL` · group `OPEN` `CLOSING` `CLOSED` · evidence `IN_PROCESS` `COMPLETED` `ERROR` · case file `OPEN` `CLOSE` · deletion `FILE_ONLY` `FULL` · testimony family `TSP` `DLT` (only TSP available today) · testimony provider `EADTrust`
+- Evidence group `FILE` `PHOTO` `VIDEO` `WEB_PLUGIN` · custody `INTERNAL` `EXTERNAL` · group `OPEN` `CLOSING` `CLOSED` · evidence `IN_PROCESS` `COMPLETED` `ERROR` · case file `OPEN` `CLOSE` · deletion `FILE_ONLY` `FULL` · testimony family `TSP` `DLT` · testimony provider `EADTrust` (TSP) · `Hedera` (DLT, coming soon)
 - Signature type `ADVANCED` `INTERPOSITION` `OTHER` · signing provider `EADTRUST` · close `ALL_REQUIRED` `PARTIAL_ALLOWED` · role `SIGNATORY` `VALIDATOR` `OBSERVER` · legal-entity role `CONTRACT_ISSUER`
 - Notification channel `SMTP` `NOTICEMAN` `SMS` `WFB` `RCS` · recipient type `TO` `CC` `BCC` · NOTICEMAN type `ACCEPTED_OR_NOT` `RECEIVED_AGREE` `LONG_RESPONSE` `NO_RESPONSE` · attachment `WAITING_FILE` `READY_TO_SEND` `REVIEWED` · external attachment `EVIDENCE` `REPORT` `REPORT_PACKAGE`

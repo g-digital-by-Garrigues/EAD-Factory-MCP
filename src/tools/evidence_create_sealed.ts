@@ -41,8 +41,8 @@ const evidenceInput = z.object({
     .optional()
     .describe(
       "Provider NAMES that must testify this evidence (e.g. EADTrust), not families (not 'TSP'). Defaults to " +
-        "the providers named in `testimony`, or EADTrust. Only TSP timestamping (EADTrust) is available " +
-        "today; the platform refuses a DLT provider (400 PROVIDER_NOT_CONFIGURED).",
+        "the providers named in `testimony`, or EADTrust. TSP: EADTrust. DLT: Hedera, coming soon — until " +
+        "the platform enables it, a DLT provider is refused (400 PROVIDER_NOT_CONFIGURED).",
     ),
   testimony: z
     .object({
@@ -55,8 +55,8 @@ const evidenceInput = z.object({
     })
     .optional()
     .describe(
-      "Which proof to request, by family: TSP (qualified timestamp, e.g. EADTrust) and/or DLT (ledger; not " +
-        "available today). Every required provider must appear here. Defaults to { TSP: { required: true, providers: " +
+      "Which proof to request, by family: TSP (qualified timestamp, e.g. EADTrust) and/or DLT (ledger, Hedera; " +
+        "coming soon). Every required provider must appear here. Defaults to { TSP: { required: true, providers: " +
         "['EADTrust'] } }, the platform's default provider.",
     ),
 });
@@ -65,7 +65,8 @@ const evidenceInput = z.object({
 // (an empty list means its default, EADTrust) and refuses any that is missing from `testimony[...].providers`
 // with a misleading "Testimony providers X does not exist" — so an empty `testimony` can never pass. The
 // providers in its configuration, by family: TSP = EADTrust, EADTrustCompanySeal; DLT = Hedera. Its public guide
-// (digitaltrust.gcloudfactory.com) says only TSP is available today: a DLT provider answers 400 PROVIDER_NOT_CONFIGURED.
+// (digitaltrust.gcloudfactory.com) says only TSP is available today (DLT answers 400 PROVIDER_NOT_CONFIGURED);
+// Hedera (DLT) is coming soon (Hugo, 2026-11-28), so it stays placed under DLT.
 const DEFAULT_TSP_PROVIDER = "EADTrust";
 const KNOWN_PROVIDER_FAMILY: Record<string, "TSP" | "DLT"> = {
   EADTrust: "TSP",
