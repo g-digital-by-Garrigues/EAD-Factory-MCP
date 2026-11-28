@@ -1,56 +1,101 @@
-# EAD Factory MCP v1.4.0
+# EAD Factory MCP v1.5.0
+
+The evidence tools now work against the platform, signature and notification flows are
+more reliable, and a new diagnostic tool checks your setup. Verified live on EAD Factory
+INT; production has not been verified yet.
 
 ## Your credential does not change
 
-The service account (OAuth2 client credentials) is still the only supported flow, and
-its variables are exactly what they were. Nothing to re-create, nothing to
-re-configure.
+The service account (OAuth2 client credentials) is still the only supported flow, with
+the same variables as 1.4.0.
 
-| Variable | Secret | Notes |
-|---|---|---|
-| `MCP_SVC_TOKEN_URL` | no | Required. Unchanged. |
-| `MCP_SVC_CLIENT_ID` | no | Required. Unchanged. |
-| `MCP_SVC_CLIENT_SECRET` | yes | Required. Unchanged. |
-| `MCP_SVC_SCOPE` | no | Optional. Unchanged. |
+## Fixed
 
-`MCP_SVC_INTROSPECT_URL` and the `MCP_API_BASE_URL*` set are unchanged too.
+- **No more false errors on evidence.** `evidence_case_file_create`,
+  `evidence_group_create`, `evidence_case_file_relationship_assign` and
+  `generate_evidence` reported MCP error -32602 after a call that had worked. They now
+  return `{ data: {} }`, plus `nextSteps` where the tool has them.
+- **`evidence_create_sealed` works.** It failed at its first step in 1.4.0. It now
+  creates the group id itself and sends it as the unique `code`, asks `EADTrust` for a
+  timestamp by default, accepts an optional per-evidence `testimony` (`TSP` / `DLT`), and
+  rejects an inconsistent testimony before creating anything.
+- **`evidence_multipart_upload_start` works.** It returns the upload id as
+  `{ data: "<id>" }` instead of a JSON parse error. Pass it a new evidence id: it
+  registers the evidence itself, and an existing id answers 409.
+- **`signature_request_full` waits until the documents are ready** before activating,
+  instead of failing with "Network error".
+- **Search filters apply.** Query objects are sent flat (`size=1`, not `filter[size]=1`);
+  the API ignored the bracketed form, so searches came back unfiltered.
+- **`notification_request_send` works from any MCP client** and completes through its own
+  bounded polling (about 100 s).
+- **`notification_receiver_add` accepts `SMTP` / `NOTICEMAN` / `SMS` / `WFB`** as
+  providers, as its description always said.
+- **Errors keep the platform's reason**, including field-by-field validation errors.
+- **A blank `MCP_TRANSPORT=` starts in stdio** (1.4.0 refused to start).
 
-## The server now refuses to start on an incomplete auth config
+## New
 
-It used to log the problem and carry on with no credential at all. The process
-reported healthy while every upstream call went out unauthenticated, and the first
-symptom was a 401 a long way from the cause. It now stops instead.
+- **`ead_factory_health`**: a read-only check of your setup — a fresh token and one
+  read-only call per manager (Evidence, Signature, Notification). Not registered when
+  `MCP_HTTP_PUBLIC=true`.
+- **Optional inputs:** `ignoreNotCompletedEvidences` on both report tools,
+  `notificationProvider` on `create_signature_request`, and `provider` on
+  `add_signatory_to_document`, `add_validator_to_signatory` and
+  `add_observer_to_document`.
+- **Timestamping:** only TSP (`EADTrust`) is available today. DLT (Hedera) is coming soon;
+  until the platform enables it, asking for a DLT provider answers 400
+  `PROVIDER_NOT_CONFIGURED`.
 
-The case that changes in practice: `MCP_SVC_CLIENT_ID` and `MCP_SVC_CLIENT_SECRET`
-set, `MCP_SVC_TOKEN_URL` missing. That deployment used to boot. It now refuses to
-start, and says why.
+## May affect existing callers
 
-`MCP_SVC_TOKEN_URL` was already declared required, so nothing that was configured
-correctly is affected by this.
-
-## `MCP_AUTH_JWT` is no longer recognised
-
-It was never part of this server's declared configuration — it has never appeared in
-`.env.example` — but earlier copies of this README listed it, and setting it did work.
-It selected a pre-seeded-session path shared with the other products in this suite,
-and it was evaluated **before** the service account, so it silently overrode one that
-was correctly configured.
-
-That path is gone. If you still set the variable, it is ignored: the server boots with
-no credential and every tool that needs authentication returns an error. Remove it and
-configure the service account.
-
-## The install snippets now name what you have to fill in
-
-Every client install block shipped `"MCP_SVC_CLIENT_ID": ""` and `"MCP_SVC_TOKEN_URL": ""`.
-Copied as-is, that is a server that starts and fails on the first authenticated call.
-They now carry named placeholders, so the blanks are visible before you run anything.
+- `evidence_case_file_relationship_assign` and `evidence_multipart_upload_start` now
+  return `{ data: … }`; `evidence_create_sealed` returns `sealedEvidences` (id and
+  sha256). In 1.4.0 these calls ended in an error anyway.
+- `template` on `evidence_case_file_report_preview` / `_generate` must match
+  `^[A-Z][A-Z0-9_]+$`.
+- Known, unchanged: search filters that take arrays (`id`, `groupId`, `groupType`) fail
+  before any request is sent.
 
 ## Tools
 
-64 tools, unchanged. Same names, same inputs.
+65 tools, up from 64 (64 when `MCP_HTTP_PUBLIC=true`).
+
+## Configuration
+
+Nothing to change. `.env.example` now also documents six optional variables the server
+already read: `MCP_TRANSPORT`, `MCP_BRIDGE_STATE_FILE`, `MCP_FILE_MAX_BYTES`,
+`MCP_FILE_ALLOWED_ROOTS`, `MCP_FILE_URL_ALLOWED_HOSTS` and `MCP_OTEL_ENABLED`. The Docker
+image starts the HTTP transport; to use it from an MCP client over stdio, add
+`-e MCP_TRANSPORT=stdio` to `docker run`.
+
+## Upgrading the n8n connector
 
 <!-- N8N_UPGRADE -->
+### From 1.4.x
+
+**The credential does not change.** A credential you create from now on has its API Base
+URL pre-filled with the production gateway (`https://api.gcloudfactory.com`); change it
+to reach another environment. Credentials you already have keep the URL you stored.
+
+**One operation is gone: Notice Manager → NM Create Document Download Url.** It is now a
+helper inside the MCP server that follows the platform's redirect, so it has no single
+REST call behind it. If a saved workflow still contains it, that node no longer has a
+valid operation: remove it.
+
+**JSON fields you type into the node now reach the API as JSON** — the filter, order and
+page of list operations and the other JSON fields. In 1.4.0 a typed value was sent as
+plain text and refused; values written as expressions were not affected.
+
+**Search filters now apply.** A list that used to come back unfiltered now respects its
+filter, so a workflow may see fewer items than before.
+
+**Evidence operations no longer fail after a call that worked**, and a few gained
+optional fields: `provider` on the signatory / validator / observer operations,
+`notificationProvider` on Create Signature Request, and `ignoreNotCompletedEvidences` on
+the case-file report operations.
+
+### From 1.3.x
+
 **The credential does not change. Update the node and carry on.** Nothing to
 re-create, nothing to re-select on your nodes.
 
