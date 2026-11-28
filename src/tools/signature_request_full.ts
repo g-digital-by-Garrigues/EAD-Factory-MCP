@@ -15,9 +15,26 @@ import {
   signatureAddDocument,
   signatureAddSignatory,
   signatureCreateSignatureRequest,
+  signatureGetSignatureRequest,
 } from "../api/sdk.gen.js";
 import { zSignatureSigningObjectConfigurationSigningTypes } from "../api/zod.gen.js";
-import { defineTool, FileInput } from "../core/index.js";
+import { defineTool, FileInput, toolError } from "../core/index.js";
+
+// Story 21-06 (live on INT, 2026-11-27): the platform processes each uploaded document asynchronously, and
+// activation is refused ("Not all documents are ready", 400) until every one is READY_TO_SIGN. The tool used
+// to activate right after uploading. It now waits for READY_TO_SIGN, bounded so the whole call stays under a
+// client's ~60 s timeout; past that it returns the draft and says how to activate it.
+const READY_POLL_ATTEMPTS = 15;
+const READY_POLL_INTERVAL_MS = 3_000;
+
+// A plain Error is reported to the agent as a transient "Network error"; these are not.
+function fail(message: string, remediation: string): never {
+  throw toolError({
+    operation: "signature_request_full",
+    upstream: new Error(message),
+    remediation,
+  });
+}
 
 // Matches zSignatureAddSignatoryCoordinatesRequestModel exactly (dist-repos/ead-factory/
 // src/api/zod.gen.ts): x/y/page are all REQUIRED within each coordinate entry, but the
@@ -135,13 +152,17 @@ export const signature_request_full = defineTool({
       body: { name, createdBy, ...(description ? { description } : {}) } as any,
     });
     if (createResponse.error !== undefined) {
-      throw new Error(
+      fail(
         `signature_request_full: create request failed — ${JSON.stringify(createResponse.error)}`,
+        "Check the request fields; nothing was created.",
       );
     }
     const created = createResponse.data as { id?: string } | undefined;
     if (!created?.id) {
-      throw new Error("signature_request_full: create request did not return an id");
+      fail(
+        "signature_request_full: create request did not return an id",
+        "Retry; nothing usable was created.",
+      );
     }
     const signatureRequestId = created.id;
 
@@ -166,14 +187,16 @@ export const signature_request_full = defineTool({
         } as any,
       });
       if (addDocResponse.error !== undefined) {
-        throw new Error(
-          `signature_request_full: add document '${doc.filename}' failed — ${JSON.stringify(addDocResponse.error)}`,
+        fail(
+          `signature_request_full: add document '${doc.filename}' failed for signatureRequestId '${signatureRequestId}' — ${JSON.stringify(addDocResponse.error)}`,
+          "The request exists as a draft: fix the document and add it with add_document_to_signature_request, or cancel the request.",
         );
       }
       const addedDoc = addDocResponse.data as { id?: string; url?: string } | undefined;
       if (!addedDoc?.id || !addedDoc.url) {
-        throw new Error(
-          `signature_request_full: add document '${doc.filename}' did not return an id/upload url`,
+        fail(
+          `signature_request_full: add document '${doc.filename}' did not return an id/upload url (signatureRequestId '${signatureRequestId}')`,
+          "The request exists as a draft: retry the document with add_document_to_signature_request.",
         );
       }
       const documentId = addedDoc.id;
@@ -188,8 +211,9 @@ export const signature_request_full = defineTool({
         signal: AbortSignal.timeout(120_000),
       });
       if (!uploadResponse.ok) {
-        throw new Error(
-          `signature_request_full: upload failed for '${doc.filename}' (HTTP ${uploadResponse.status})`,
+        fail(
+          `signature_request_full: upload failed for '${doc.filename}' (HTTP ${uploadResponse.status}; signatureRequestId '${signatureRequestId}', documentId '${documentId}')`,
+          "The document is registered but has no bytes, so the request cannot be activated: cancel it with signature_request_cancel and run signature_request_full again.",
         );
       }
 
@@ -212,14 +236,16 @@ export const signature_request_full = defineTool({
           } as any,
         });
         if (addSignatoryResponse.error !== undefined) {
-          throw new Error(
-            `signature_request_full: add signatory '${signatory.email}' to '${doc.filename}' failed — ${JSON.stringify(addSignatoryResponse.error)}`,
+          fail(
+            `signature_request_full: add signatory '${signatory.email}' to '${doc.filename}' failed (signatureRequestId '${signatureRequestId}') — ${JSON.stringify(addSignatoryResponse.error)}`,
+            "The request exists as a draft: fix the signatory and add it with add_signatory_to_document.",
           );
         }
         const addedSignatory = addSignatoryResponse.data as { id?: string } | undefined;
         if (!addedSignatory?.id) {
-          throw new Error(
-            `signature_request_full: add signatory '${signatory.email}' did not return an id`,
+          fail(
+            `signature_request_full: add signatory '${signatory.email}' did not return an id (signatureRequestId '${signatureRequestId}')`,
+            "Check the request with get_signature_request before retrying.",
           );
         }
         signatoryResults.push({ signatoryId: addedSignatory.id, email: signatory.email });
@@ -228,7 +254,39 @@ export const signature_request_full = defineTool({
       documentResults.push({ documentId, filename: doc.filename, signatories: signatoryResults });
     }
 
+    let activated = false;
+    let stillProcessing = false;
     if (activate) {
+      // Wait until the platform has processed every document (see READY_POLL_* above).
+      for (let attempt = 1; ; attempt++) {
+        const got = await signatureGetSignatureRequest({
+          client: sdkClient,
+          path: { signatureRequestId },
+        });
+        const docs =
+          (got.data as { documents?: { id?: string; status?: string }[] } | undefined)?.documents ??
+          [];
+        const failed = docs.filter((d) => d.status === "ERROR");
+        if (failed.length > 0) {
+          fail(
+            `signature_request_full: document(s) ${failed.map((d) => d.id).join(", ")} ended in ERROR while the platform processed them; the request '${signatureRequestId}' was NOT activated (documents created: ${JSON.stringify(documentResults)})`,
+            "Check the file (it must match the hash you sent), then cancel this request or replace the document before activating.",
+          );
+        }
+        if (
+          got.error === undefined &&
+          docs.length > 0 &&
+          docs.every((d) => d.status === "READY_TO_SIGN")
+        )
+          break;
+        if (attempt >= READY_POLL_ATTEMPTS) {
+          stillProcessing = true;
+          break;
+        }
+        await new Promise((r) => setTimeout(r, READY_POLL_INTERVAL_MS));
+      }
+    }
+    if (activate && !stillProcessing) {
       const activateResponse = await signatureActivate({
         client: sdkClient,
         path: { signatureRequestId },
@@ -238,15 +296,17 @@ export const signature_request_full = defineTool({
         // (and the signature request itself) were successfully created before this
         // failure; without these ids the caller has to re-discover them via
         // signature_request_list to resume or clean up.
-        throw new Error(
+        fail(
           `signature_request_full: activate failed for signatureRequestId '${signatureRequestId}' ` +
             `(documents already created: ${JSON.stringify(documentResults)}) — ${JSON.stringify(activateResponse.error)}`,
+          "The request is still a draft with its documents and signatories: fix what the error names, then call activate_signature_request with this signatureRequestId.",
         );
       }
+      activated = true;
     }
 
     // Story 6.6 (FR-30/§5.4): tells the agent what to call next.
-    const nextSteps = activate
+    const nextSteps = activated
       ? [
           {
             suggestedTool: "get_signature_request",
@@ -256,13 +316,16 @@ export const signature_request_full = defineTool({
       : [
           {
             suggestedTool: "activate_signature_request",
-            why: "The request is still in draft (activate: false): add validators/observers if needed, then pass this result's `signatureRequestId` as `signatureRequestId` to send the signing notifications.",
+            why: stillProcessing
+              ? "The platform was still processing the documents after ~45 s, so the request was left in draft: check get_signature_request until every document is READY_TO_SIGN, then pass this result's `signatureRequestId` as `signatureRequestId`."
+              : "The request is still in draft (activate: false): add validators/observers if needed, then pass this result's `signatureRequestId` as `signatureRequestId` to send the signing notifications.",
           },
         ];
 
     return {
       signatureRequestId,
-      activated: activate,
+      activated,
+      ...(stillProcessing ? { documentsStillProcessing: true } : {}),
       documents: documentResults,
       nextSteps,
     };
