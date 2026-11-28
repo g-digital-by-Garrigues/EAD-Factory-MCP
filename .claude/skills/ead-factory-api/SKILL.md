@@ -18,7 +18,11 @@ Every manager is reached at `{host}/{manager-prefix}`, then `/api/v1/private/...
 
 So an evidence call on the integration host is `https://api.int.gcloudfactory.com/digital-trust/api/v1/private/case-files`. The signature **contract document** is served from a different host than the other three; the signature **API** is not — call it on the same host as the other managers.
 
-> **Provenance.** ✅ **Tested** = executed against the integration environment (2026-07). Unmarked statements come from the published contracts. *(platform behaviour)* = stated by the platform's own documentation but not expressed in the contracts — rely on it, but verify it in your environment before building on it.
+**The platform's own documentation:** a guide per manager at **`https://digitaltrust.gcloudfactory.com`** (getting started, HTTP standards, step-by-step guides, every operation with its mandatory fields), and a Swagger UI per manager — `https://api.gcloudfactory.com/digital-trust/swagger-ui/`, `https://api.eadtrust.gcloudfactory.com/signature-manager/swagger-ui`, `https://api.gcloudfactory.com/notifications/swagger-ui/`, `https://api.gcloudfactory.com/chat-bot-manager/swagger-ui/`. **Where the guide and the contract disagree, the guide matches the platform** ✅ — the contracts mark fewer fields required than the platform enforces.
+
+> **Provenance.** ✅ **Tested** = executed against the integration environment (2026-07, and the whole evidence flow again in 2026-11). Unmarked statements come from the published contracts. *(platform behaviour)* = stated by the platform's documentation (`https://digitaltrust.gcloudfactory.com`) or its team, but not expressed in the contracts — rely on it, but verify it in your environment before building on it.
+>
+> **The contracts under-declare what Digital Trust requires.** They mark most create fields optional, but — as the platform's guide also says — the platform refuses a case file without `title`, `category` and `code`, an evidence group without `code`, and an evidence whose `testimony` doesn't name its providers. Follow the bodies in §3, not the contract's `required` lists.
 
 ---
 
@@ -54,7 +58,7 @@ curl -s "$HOST/digital-trust/api/v1/private/case-files?page=0&size=1" \
 ## 2. Shared conventions
 
 - **Route shapes.** Private routes are `/api/v1/private/...`. Special cases: bulk deletes under `/api/v1/private/bulk/...`, one versioned chat route (`/api/v2/private/chats/{chatId}`), and inbound webhook routes (`/api/v1/webhook/...`, `/api/v1/provider/webhook`, `/api/v1/private/webhooks`, `/api/v1/private/webhook/scasc`) that **the platform's providers call — never call them yourself.**
-- **Identifiers.** Digital Trust creates take ids **you** generate as v4 UUIDs (`id` of case file and group, `evidenceId`, `reportId`); bulk deletes need a `requestId` UUID; a notification `requestId` is optional. Signature requests and documents get **server-generated** ids — read them from the `201` body. Registering an evidence again with an existing `evidenceId` is rejected with `409` ✅ — on a retry, treat that `409` as "already created" and read the resource.
+- **Identifiers.** Digital Trust creates take ids **you** generate as v4 UUIDs (`id` of case file and group, `evidenceId`, `reportId`); bulk deletes need a `requestId` UUID; a notification `requestId` is optional. Case files and evidence groups also need a **`code` unique in your tenant** — reusing the resource's own `id` is the simplest choice ✅. Signature requests and documents get **server-generated** ids — read them from the `201` body. Registering an evidence again with an existing `evidenceId` is rejected with `409` ✅ — on a retry, treat that `409` as "already created" and read the resource.
 - **Hashes** are lowercase hex sha-256 (`^[a-f0-9]{64}$`).
 - **Uploads: declare → presigned URL → `PUT` bytes.** You never post file bytes to a manager. Declaring the file (with its hash) returns `{ url, expiration }` for evidences with `INTERNAL` custody, signature documents and notification attachments; separate `upload-url` routes only re-issue an expired URL. `PUT` the raw bytes to the URL **without** your bearer token, with `Content-Type` and `x-amz-checksum-sha256: <base64 of the raw sha-256 digest>` (not the hex). Uploads with that header succeed ✅; a `403 SignatureDoesNotMatch` means the checksum header is missing or wrong.
   ```bash
@@ -67,7 +71,9 @@ curl -s "$HOST/digital-trust/api/v1/private/case-files?page=0&size=1" \
 - **Async is the norm.** `202` means accepted, not done: closing an evidence group, activating a notification request, generating a chat report or a well-signed appearance document, resends, completing a multipart upload. **Poll with bounds**: first check after ~5 s, then every 5 s (or backoff capped at ~15 s), stop after ~12 attempts and report "still processing". Never poll in a tight loop or fan out concurrent polls.
 - **Bulk deletes.** `DELETE .../bulk/<resource>` with `{ "requestId": <uuid>, "ids": [<uuid>, …] }` (1–100 ids; the signature variant names the list `signatureRequestIds`). `204` = **request accepted, not finished**; `404` = some id not found; `409` = some item is busy in another process. *(platform behaviour)* These deletes are **physical and cascading** (a case file takes its groups, evidences and files with it) with no undo, and a large batch keeps showing items for a while — check again later instead of retrying.
 - **Search & pagination.** Lists return `{ "records": [...], "_metadata": { currentPage, totalPages, pageSize, totalRecords } }`. The contracts declare filters as one object parameter (`filter`, `pageable`, `requestModel`); **send its fields as flat query parameters** (`?status=OPEN&page=0&size=20`) — bracketed forms (`filter[size]=2`) are silently ignored ✅. Always walk `totalPages`; nothing warns you when you stop early.
-- **Response quirks.** Some date-times come back without a timezone (`2026-07-08T07:24:48.01275`) ✅ — parse leniently. Several creates (case file, evidence group) declare only `201`/`500`; a `500` has been seen on case-file create where the server failed while formatting a validation error ✅ — check required fields and formats before retrying.
+- **Response quirks.** Some date-times come back without a timezone (`2026-07-08T07:24:48.01275`) ✅ — parse leniently. Several Digital Trust `201`s have **no body and no `Content-Type`** — case-file create, evidence-group create, the flat evidence register and the case-file relationship ✅: don't try to parse JSON from them; the ids you sent are the ids. The multipart upload start returns its upload id as **plain text**, although the contract declares JSON ✅.
+- **Errors.** Digital Trust answers `{ "errors": { "code", "message" } }` (e.g. `409` with `code: "evidence_already_exist"`) ✅; its validation failures carry `errors.validation` as `{ "<field>": ["<message>"] }` *(platform behaviour)*. The signature and notification managers answer `{ "errors": [ { "status", "detail", "code" } ] }` ✅.
+- **A `500` on a Digital Trust create is usually your request, not an outage.** A missing required field comes back as `500 internal_error` — the server fails while formatting the validation error, so the response doesn't name the field ✅ — and a missing `code` as `500` "Argument [code] value is null…" ✅. Check the bodies in §3; retrying the same body won't help.
 - **`createdBy` / `owner`** are free-text audit labels, not auth fields.
 
 ---
@@ -81,9 +87,9 @@ sequenceDiagram
     participant App
     participant DT as Digital Trust
     participant S3 as Presigned URL
-    App->>DT: POST /case-files (id)
-    App->>DT: POST /case-files/{cf}/evidence-groups (id, type)
-    App->>DT: POST .../evidence-groups/{g}/evidences (evidenceId, hash, custodyType=INTERNAL, ...)
+    App->>DT: POST /case-files (id, title, category, code) → 201, no body
+    App->>DT: POST /case-files/{cf}/evidence-groups (id, type, code) → 201, no body
+    App->>DT: POST .../evidence-groups/{g}/evidences (evidenceId, hash, custodyType=INTERNAL, testimony, ...)
     DT-->>App: 201 { url, expiration }
     App->>S3: PUT bytes (x-amz-checksum-sha256)
     App->>DT: POST .../evidence-groups/{g}/close (evidencesCount) → 202
@@ -94,13 +100,16 @@ sequenceDiagram
 
 ```
 1. POST /api/v1/private/case-files
-      { "id":<uuid>, "title"?, "code"?, "category"?, "owner"?, "description"?, "metadata"? }      → 201
+      { "id":<uuid>, "title":"...", "category":"...", "code":<unique, e.g. the id>,
+        "owner"?, "description"?, "metadata"? }                     → 201 (no body)
 2. POST /api/v1/private/case-files/{caseFileId}/evidence-groups
-      { "id":<uuid>, "type":"FILE", "name"?, "code"?, "description"?, "createdBy"?, "metadata"? } → 201
+      { "id":<uuid>, "type":"FILE", "code":<unique, ≤ 50 chars, e.g. the id>,
+        "name"?, "description"?, "createdBy"?, "metadata"? }        → 201 (no body)
 3. POST .../case-files/{caseFileId}/evidence-groups/{evidenceGroupId}/evidences
       { "evidenceId":<uuid>, "hash":"<hex>", "custodyType":"INTERNAL", "capturedAt":<iso>,
-        "testimony":{}, "requiredTestimonyProviders":[],
-        "title"?, "type":"application/pdf"?, "fileName"?, "fileSize"?, "createdBy"?, "metadata"?,
+        "testimony":{ "TSP":{ "required":true, "providers":["EADTrust"] } },
+        "requiredTestimonyProviders":["EADTrust"],
+        "title"?, "type":"application/pdf"?, "fileName", "fileSize"?, "createdBy"?, "metadata"?,
         "deletionDate"?, "deletionType"? }                         → 201 { "url", "expiration" }
 4. PUT <url>   (raw bytes + checksum header; INTERNAL custody only)
 5. POST .../evidence-groups/{evidenceGroupId}/close
@@ -112,20 +121,28 @@ sequenceDiagram
 |---|---|---|
 | Group type | `type` (fixed at creation) | `FILE` · `PHOTO` · `VIDEO` · `WEB_PLUGIN` |
 | Custody | `custodyType` | `INTERNAL` (platform stores the file → you get an upload URL) · `EXTERNAL` (you keep the file; only its hash is registered) |
-| Timestamping | `testimony`, `requiredTestimonyProviders` | Both keys are required. `testimony` may carry `TSP` / `DLT` entries `{ required, providers[] }`; `requiredTestimonyProviders` overrides the tenant configuration — send `{}` and `[]` to use the tenant's providers |
+| Timestamping | `testimony`, `requiredTestimonyProviders` | Both keys are required — see **Testimony** below. Typical value: `testimony: { TSP: { required: true, providers: ["EADTrust"] } }` with `requiredTestimonyProviders: ["EADTrust"]` ✅ |
 | Scheduled deletion | `deletionDate` + `deletionType` | `FILE_ONLY` (delete file, keep record) · `FULL`; the type is required when a date is given |
 | Group status | read | `OPEN` → `CLOSING` → `CLOSED`; counts in `evidences.{total,inProcess,failed,completed}` |
-| Evidence status | read | `IN_PROCESS` · `COMPLETED` · `ERROR` |
+| Evidence status | read | an object: `status: { status: "IN_PROCESS" \| "COMPLETED" \| "ERROR", tspTimestamp: { "<provider>": "<step>" } }` ✅ — e.g. `{ status: "IN_PROCESS", tspTimestamp: { EADTrust: "STARTED" } }`, then `COMPLETED` a few seconds later |
 | Case-file status | `PUT .../case-files/{id}/status` `{ "status" }` | `OPEN` · `CLOSE` |
+
+**Testimony** — which proof each evidence gets, and the easiest thing to get wrong:
+- `testimony` lists providers **by family**: `TSP` (qualified electronic timestamp) and `DLT` (distributed ledger), each `{ required, providers: [<provider name>] }`.
+- `requiredTestimonyProviders` lists provider **names, not families** — `"EADTrust"`, never `"TSP"`. **Only TSP timestamping is available today** *(platform behaviour)*: use `EADTrust` ✅; asking for a DLT provider answers `400` `#PROVIDER_NOT_CONFIGURED#`.
+- **Every required provider must also appear in `testimony.<family>.providers`.** Otherwise the platform answers `400` "Testimony providers EADTrust does not exist" — the provider does exist; it is just missing from `testimony` ✅.
+- An empty `requiredTestimonyProviders` means the tenant's default — `EADTrust` in the reference tenant ✅ — which then has to be in `testimony` too. So **`testimony: {}` never passes** ✅.
+- Always write the `providers` list out: a family sent without one (`{ TSP: { required: true } }`) does not get the default filled in *(platform behaviour)*.
 
 **Gotchas**
 - **Closing is the point of no return** — *(platform behaviour)* no evidences can be added afterwards. The `202` means sealing started; the timestamping provider finishes it asynchronously. *(platform behaviour)* If sealing never finishes, the group stays waiting and does not expire, and the signed report will not come out — check the group status first; don't keep regenerating the report.
-- **Timestamps are qualified (TSP) timestamps.** The contract also models `DLT` (distributed-ledger) testimony and timestamp fields, but whether ledger anchoring is actually available is tenant- and platform-dependent: confirm it with the platform before building anything that waits for a ledger transaction.
+- **Timestamps are qualified (TSP) timestamps.** The contract also models `DLT` (distributed-ledger) testimony and timestamp fields, but the platform's guide states that only TSP is available today — a DLT provider answers `400` `#PROVIDER_NOT_CONFIGURED#` *(platform behaviour)*. Don't build anything that waits for a ledger transaction.
 - **Two route families for evidences.** In-group routes (`/case-files/{caseFileId}/evidence-groups/{evidenceGroupId}/evidences/...`) and flat routes (`/evidences`, `/evidences/{evidenceId}`, `.../upload-url`, `.../download-url`) both work. Build the flow with the in-group routes; the flat register has no group context (its `201` body is empty ✅).
 - **Parameter naming drifts.** The thumbnail route is `.../evidence-groups/{groupId}/evidences/{evidenceId}/thumbnail-url/{thumbnailSize}` — `{groupId}`, not `{evidenceGroupId}`; same value. A `404` there means "no thumbnail for this evidence", not an integration error.
 - **Download URLs** — `GET .../evidences/{evidenceId}/download-url` answers **`201`**, not `200`. Re-issue an upload URL with `POST .../evidences/{evidenceId}/upload-url` (`fileName` required).
 - **Updates.** Most `PATCH` return `204` with no body; `PATCH .../evidence-groups/{id}` returns `200` with a body; `PATCH /evidences/{id}` can return `422` when the change doesn't fit the current state. Multi-item `PATCH` (no id in the path) takes `{ "ids":[...], "patch":[{ "operation":"REPLACE"|"REMOVE", "path", "value" }] }`.
-- **Linking a chat** to a case file: `POST .../case-files/{caseFileId}/relationship` `{ "itemType":"CHAT_CONVERSATION", "itemValue":<chat id> }`.
+- **Linking a chat** to a case file: `POST .../case-files/{caseFileId}/relationship` `{ "itemType":"CHAT_CONVERSATION", "itemValue":<chat id> }` → `201`, no body ✅.
+- **Deleting an evidence** — `DELETE /evidences/{evidenceId}` answers `409` ("can't be deleted") while the evidence is still being timestamped (`IN_PROCESS`), and `204` once it is `COMPLETED` ✅ — usually a few seconds. Poll `GET /evidences/{evidenceId}` with bounds; don't retry the delete in a loop.
 
 **Signed reports (evidence certificates)**
 - `POST .../case-files/{caseFileId}/reports` `{ "reportId":<uuid>, "template":"DEFAULT_TEMPLATE", "languageCode":"es_ES", "data"?, "additionalData"?, "metadata"?, "filename"?, "deletionDate"?, "ignoreNotCompletedEvidences"? }` → `201` — *(platform behaviour)* acceptance; the report is generated asynchronously. `reportId`, `template` and `languageCode` are all **required**; `template` must match `^[A-Z][A-Z0-9_]+$` (send it uppercase). `data.groups[]` scopes the report to chosen groups/evidences; `additionalData` is a free map the template reads (e.g. links or custody dates). `ignoreNotCompletedEvidences: true` excludes evidences not yet `COMPLETED` instead of failing; omit it for the tenant default.
@@ -134,12 +151,14 @@ sequenceDiagram
 
 **Large files (multipart)** — only for large files; normal files use the presigned URL above.
 ```
-POST   /api/v1/private/uploads/{evidenceId}/{fileName}                 { createdBy, title, capturedAt, testimony, ... } → 200 "<uploadId>"
+POST   /api/v1/private/uploads/{evidenceId}/{fileName}                 { createdBy, title, capturedAt, testimony, requiredTestimonyProviders, caseFileId?, evidenceGroupId?, metadata? } → 200 <uploadId as plain text>
 GET    /api/v1/private/uploads/{evidenceId}/{filename}/{uploadId}?partNumber=<n>   → 202 { url, expiration }  (once per part)
 POST   /api/v1/private/uploads/{evidenceId}/{filename}/{uploadId}?partsCount=<n>   → 202  (mandatory: without it the file doesn't exist)
 DELETE /api/v1/private/uploads/{evidenceId}/{filename}/{uploadId}                  → 204  (abort; frees uploaded parts)
 ```
 Note `{fileName}` on start but `{filename}` on the other three — same value, two spellings.
+- **The start registers the evidence itself.** Use a **new** `evidenceId` and don't register it first: an id that already exists answers `409 evidence_already_exist` ✅. `testimony` and `requiredTestimonyProviders` follow the same rules as a normal registration (see **Testimony**).
+- The `200` body is the upload id as **plain text** (e.g. `MrwRXaYD…`), although the contract declares JSON ✅ — read it as text.
 
 **Single-file signing** — `POST /api/v1/private/sign-file` `{ "fileId":<uuid>, "signName", "custodyType", "filename"?, "hash"? }` → `201` (*(platform behaviour)* asynchronous), then `GET /sign-file/{fileId}/download-url` → **`201`** `{ url, expiration }`. The contract does not describe how the file content is supplied; confirm with the platform before relying on this route.
 
@@ -206,6 +225,7 @@ sequenceDiagram
 **Gotchas**
 - ✅ An `ADVANCED` document rejects a signatory without `phone`: `409 PHONE_REQUIRED_BY_SIGNATURE_TYPE`.
 - ✅ Activating a request that has no documents returns `400` ("not ready to be activated"). *(platform behaviour)* Before activating, every document must be uploaded and have at least one signatory. `409` means the request is no longer `DRAFT`.
+- ✅ **Wait for the documents before activating.** Right after the upload each document is still being processed; activating then answers `400` "Not all documents are ready". Poll `GET /signature-requests/{id}` (bounded) until every document is `READY_TO_SIGN` — a few seconds in the integration environment — then activate.
 - Almost every structural edit (documents, participants, coordinates, sequence, request `PATCH`/`DELETE`) is **DRAFT-only** (`409`/`422` otherwise). `POST .../{id}/draft` moves a request back to draft when its status allows (`409` if not).
 - ✅ `GET /signature-requests/{id}` returns a **single object** and `GET /signature-requests` returns `{ records, _metadata }`, although the contract declares both as arrays.
 - **Live requests:** `GET .../{id}/signatories/editables`, `.../validators/editables`, `.../observers/editables` (optionally `?emails=`) list participants that can still change — they answer `409` unless the request is `ACTIVE` or `PARTIALLY_SIGNED`. The matching bulk edit for live requests is `PATCH .../{id}/bulkedit/editable-participants` (deprecated). `PATCH .../{id}/bulkedit/v2` `{ "participants":[{ "where":{ email?, documentId?, sequence? }, "patch":[{ operation, path, value }] }] }` is the current version but answers `409` unless the request is `DRAFT`.
@@ -325,12 +345,15 @@ The chat manager runs **messaging conversations** with a recipient (the provider
 
 **Base URL:** `{host}/{prefix}/api/v1/private/...` — `/digital-trust`, `/signature-manager`, `/notifications`, `/chat-bot-manager`.
 
-**Patterns:** client v4 UUIDs in Digital Trust (409 on a duplicate) · server ids in Signature · lowercase hex sha-256 · declare → presigned URL → `PUT` with `x-amz-checksum-sha256` (base64) · downloads return `{ url, expiration }` · build then activate for signature and notification · lists `{ records, _metadata }` with flat query params · bounded polling.
+**Patterns:** client v4 UUIDs in Digital Trust (409 on a duplicate), plus a unique `code` on case files and groups · testimony providers by name, each listed in `testimony` · server ids in Signature · lowercase hex sha-256 · declare → presigned URL → `PUT` with `x-amz-checksum-sha256` (base64) · downloads return `{ url, expiration }` · build then activate for signature and notification · lists `{ records, _metadata }` with flat query params · bounded polling.
 
 **Status codes that look wrong but aren't:**
 | Code | Where |
 |---|---|
 | `201` on a `GET` | evidence download-url (both families), sign-file download-url, chat message attachment |
+| `201`, no body, no `Content-Type` | case-file create, evidence-group create, flat evidence register, case-file relationship |
+| `200`, plain text | evidence multipart start (the upload id; the contract says JSON) |
+| `500` | a Digital Trust create with a missing required field or `code` — your request, not an outage |
 | `202` | evidence group close, evidence multipart part link + complete, notification activate, chat report, signature resends, well-signed appearance document, signature multipart complete |
 | `307` | signature `links/download`, signature final `reports/file` + `reports/package`, notification attachment `download-url` (a `POST`) |
 | `204` = accepted | every bulk delete |
@@ -338,6 +361,6 @@ The chat manager runs **messaging conversations** with a recipient (the provider
 | `200` with body | `PATCH` evidence group (most `PATCH` return `204`) |
 
 **Enum cheat-sheet:**
-- Evidence group `FILE` `PHOTO` `VIDEO` `WEB_PLUGIN` · custody `INTERNAL` `EXTERNAL` · group `OPEN` `CLOSING` `CLOSED` · evidence `IN_PROCESS` `COMPLETED` `ERROR` · case file `OPEN` `CLOSE` · deletion `FILE_ONLY` `FULL`
+- Evidence group `FILE` `PHOTO` `VIDEO` `WEB_PLUGIN` · custody `INTERNAL` `EXTERNAL` · group `OPEN` `CLOSING` `CLOSED` · evidence `IN_PROCESS` `COMPLETED` `ERROR` · case file `OPEN` `CLOSE` · deletion `FILE_ONLY` `FULL` · testimony family `TSP` `DLT` (only TSP available today) · testimony provider `EADTrust`
 - Signature type `ADVANCED` `INTERPOSITION` `OTHER` · signing provider `EADTRUST` · close `ALL_REQUIRED` `PARTIAL_ALLOWED` · role `SIGNATORY` `VALIDATOR` `OBSERVER` · legal-entity role `CONTRACT_ISSUER`
 - Notification channel `SMTP` `NOTICEMAN` `SMS` `WFB` `RCS` · recipient type `TO` `CC` `BCC` · NOTICEMAN type `ACCEPTED_OR_NOT` `RECEIVED_AGREE` `LONG_RESPONSE` `NO_RESPONSE` · attachment `WAITING_FILE` `READY_TO_SEND` `REVIEWED` · external attachment `EVIDENCE` `REPORT` `REPORT_PACKAGE`

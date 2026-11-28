@@ -68,6 +68,6 @@ export const evidence_case_file_create = defineTool({
     // object-shaped, so extractZodShape (server.ts) wraps the ADVERTISED outputSchema
     // under NON_OBJECT_SCHEMA_WRAPPER_KEY; the actual return value must match.
     // Story 6.6 (FR-30/§5.4): tells the agent what to call next without a separate lookup.
-    return { [NON_OBJECT_SCHEMA_WRAPPER_KEY]: data, nextSteps: [{"suggestedTool":"evidence_group_create","why":"Pass the `id` you supplied to this call as `caseFileId`, with a fresh UUID v4 as `id` and a `type` (e.g. FILE), to open a group for evidence."},{"suggestedTool":"evidence_create_sealed","why":"Or pass the `id` you supplied to this call as `caseFileId` to create a group, upload the files and seal it in one call."}] };
+    return { [NON_OBJECT_SCHEMA_WRAPPER_KEY]: data, nextSteps: [{"suggestedTool":"evidence_group_create","why":"Pass the `id` you supplied to this call as `caseFileId`, with a fresh UUID v4 as `id`, the same value as `code` (the platform requires a unique code) and a `type` (e.g. FILE), to open a group for evidence."},{"suggestedTool":"evidence_create_sealed","why":"Or pass the `id` you supplied to this call as `caseFileId` to create a group, upload the files and seal it in one call."}] };
   },
 });
