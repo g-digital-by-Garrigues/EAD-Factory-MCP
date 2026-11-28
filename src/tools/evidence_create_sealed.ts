@@ -39,8 +39,82 @@ const evidenceInput = z.object({
   requiredTestimonyProviders: z
     .array(z.string())
     .optional()
-    .describe("TSP/DLT provider names required to testify this evidence. Defaults to none."),
+    .describe(
+      "Provider NAMES that must testify this evidence (e.g. EADTrust), not families (not 'TSP'). Defaults to " +
+        "the providers named in `testimony`, or EADTrust. Without `testimony`, only EADTrust and " +
+        "EADTrustCompanySeal (TSP) and Hedera (DLT) can be placed; for others, pass `testimony`.",
+    ),
+  testimony: z
+    .object({
+      TSP: z
+        .object({ required: z.boolean().optional(), providers: z.array(z.string()).optional() })
+        .optional(),
+      DLT: z
+        .object({ required: z.boolean().optional(), providers: z.array(z.string()).optional() })
+        .optional(),
+    })
+    .optional()
+    .describe(
+      "Which proof to request, by family: TSP (qualified timestamp, e.g. EADTrust) and/or DLT (ledger, e.g. " +
+        "Hedera). Every required provider must appear here. Defaults to { TSP: { required: true, providers: " +
+        "['EADTrust'] } }, the platform's default provider.",
+    ),
 });
+
+// E21 21-06 (live on INT, 2026-11-28; read in g-digital-trust-api): the platform resolves the required providers
+// (an empty list means its default, EADTrust) and refuses any that is missing from `testimony[...].providers`
+// with a misleading "Testimony providers X does not exist" — so an empty `testimony` can never pass. The
+// providers it knows, by family: TSP = EADTrust, EADTrustCompanySeal; DLT = Hedera.
+const DEFAULT_TSP_PROVIDER = "EADTrust";
+const KNOWN_PROVIDER_FAMILY: Record<string, "TSP" | "DLT"> = {
+  EADTrust: "TSP",
+  EADTrustCompanySeal: "TSP",
+  Hedera: "DLT",
+};
+type TestimonyInput = {
+  TSP?: { required?: boolean; providers?: string[] };
+  DLT?: { required?: boolean; providers?: string[] };
+};
+/** The testimony fields to register one evidence with; throws a clear error the platform would hide. */
+function testimonyFor(item: {
+  testimony?: TestimonyInput;
+  requiredTestimonyProviders?: string[];
+}): { testimony: TestimonyInput; requiredTestimonyProviders: string[] } {
+  if (item.testimony && (item.testimony.TSP || item.testimony.DLT)) {
+    const families = [item.testimony.TSP, item.testimony.DLT];
+    const required =
+      item.requiredTestimonyProviders ??
+      families.filter((t) => t?.required !== false).flatMap((t) => t?.providers ?? []);
+    const listed = new Set(families.flatMap((t) => t?.providers ?? []));
+    const effective = required.length > 0 ? required : [DEFAULT_TSP_PROVIDER];
+    const missing = effective.filter((p) => !listed.has(p));
+    if (missing.length > 0) {
+      throw new Error(
+        `evidence_create_sealed: required testimony provider(s) ${missing.join(", ")} not listed in ` +
+          "`testimony` — the platform refuses every required provider that `testimony` does not name " +
+          `(no provider required means ${DEFAULT_TSP_PROVIDER}). Add it to testimony.TSP.providers or ` +
+          "testimony.DLT.providers, or drop it from requiredTestimonyProviders.",
+      );
+    }
+    return { testimony: item.testimony, requiredTestimonyProviders: required };
+  }
+  const providers = item.requiredTestimonyProviders?.length
+    ? item.requiredTestimonyProviders
+    : [DEFAULT_TSP_PROVIDER];
+  const unknown = providers.filter((p) => !(p in KNOWN_PROVIDER_FAMILY));
+  if (unknown.length > 0) {
+    throw new Error(
+      `evidence_create_sealed: cannot tell the family of testimony provider(s) ${unknown.join(", ")} — ` +
+        "pass `testimony` saying which ones are TSP (qualified timestamp) and which DLT (ledger).",
+    );
+  }
+  const testimony: TestimonyInput = {};
+  for (const family of ["TSP", "DLT"] as const) {
+    const named = providers.filter((p) => KNOWN_PROVIDER_FAMILY[p] === family);
+    if (named.length > 0) testimony[family] = { required: true, providers: named };
+  }
+  return { testimony, requiredTestimonyProviders: providers };
+}
 
 const inputSchema = z.object({
   caseFileId: z.string().uuid().describe("MANDATORY. UUID of the parent case file."),
@@ -110,6 +184,10 @@ export const evidence_create_sealed = defineTool({
       evidences: z.infer<typeof evidenceInput>[];
     };
 
+    // Check every evidence's testimony before creating anything: a refusal after the group exists
+    // would leave an empty open group behind.
+    const testimonies = evidences.map((item) => testimonyFor(item));
+
     const token = ctx.auth?.token ?? "";
     const sdkClient = createClient(
       createConfig({
@@ -128,11 +206,16 @@ export const evidence_create_sealed = defineTool({
 
     let evidenceGroupId = existingGroupId;
     if (!evidenceGroupId) {
+      // E21 21-06: `code` is optional in the contract but the platform answers 500 without it (its uniqueness
+      // check takes a non-nullable argument); it must be unique in the tenant, so the group's own id is used.
+      // The 201 has an empty body, so the id we mint is the group id — never read it back from the response.
+      const newGroupId = randomUUID();
       const groupResponse = await evidenceCreateEvidenceGroup({
         client: sdkClient,
         path: { caseFileId },
         body: {
-          id: randomUUID(),
+          id: newGroupId,
+          code: newGroupId,
           type: groupType,
           ...(groupName ? { name: groupName } : {}),
           // biome-ignore lint/suspicious/noExplicitAny: generated SDK body type — shape validated by zod at generation time
@@ -143,15 +226,11 @@ export const evidence_create_sealed = defineTool({
           `evidence_create_sealed: create group failed — ${JSON.stringify(groupResponse.error)}`,
         );
       }
-      const created = groupResponse.data as { id?: string } | undefined;
-      if (!created?.id) {
-        throw new Error("evidence_create_sealed: create group did not return an id");
-      }
-      evidenceGroupId = created.id;
+      evidenceGroupId = newGroupId;
     }
 
     const registered: { evidenceId: string; sha256: string; title: string }[] = [];
-    for (const item of evidences) {
+    for (const [index, item] of evidences.entries()) {
       const resolved = await ctx.files.resolve(item.file);
       const evidenceId = randomUUID();
       const registerResponse = await evidenceRegisterEvidenceInGroup({
@@ -165,8 +244,7 @@ export const evidence_create_sealed = defineTool({
           fileSize: resolved.size,
           custodyType: item.custodyType,
           capturedAt: item.capturedAt ?? new Date().toISOString(),
-          testimony: {},
-          requiredTestimonyProviders: item.requiredTestimonyProviders ?? [],
+          ...testimonies[index],
           // biome-ignore lint/suspicious/noExplicitAny: generated SDK body type — shape validated by zod at generation time
         } as any,
       });

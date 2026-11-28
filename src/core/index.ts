@@ -73,6 +73,7 @@ export {
 export type { ToolAnnotations, ToolContext, ToolResult, ToolSpec } from "./tools/index.js";
 // Tool authoring
 export { applyFieldGlosses, defineTool, globalRegistry, ToolRegistry } from "./tools/index.js";
+export { normalizeResponseData } from "./tools/response-data.js";
 export { HttpTransport } from "./transport/http.js";
 export type { HttpRequestContext } from "./transport/request-context.js";
 export { httpRequestContext } from "./transport/request-context.js";

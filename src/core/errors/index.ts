@@ -238,6 +238,48 @@ function describeFieldIssue(issue: unknown): string {
   return String(issue);
 }
 
+/** Keys a lone platform reason carries; any other key in `errors` names a field (or a `validation` map). */
+const REASON_KEYS = new Set(["code", "message", "detail", "status"]);
+/** Keys that make one item of an `errors` list a field issue rather than the request's reason. */
+const FIELD_KEYS = ["field", "property", "path", "pointer", "source", "parameter"];
+
+/**
+ * The single reason inside { errors: { code, message } } (Digital Trust) or { errors: [ { status, detail, code } ] }
+ * (Signature/Notification managers) — undefined for anything that lists fields, so those keep every issue.
+ */
+function nestedPlatformError(body: unknown): { message?: string; code?: string } | undefined {
+  if (typeof body !== "object" || body === null || !("errors" in (body as object)))
+    return undefined;
+  const errors = (body as { errors: unknown }).errors;
+  let one: unknown;
+  if (Array.isArray(errors)) {
+    if (errors.length !== 1) return undefined;
+    one = errors[0];
+    if (typeof one !== "object" || one === null || FIELD_KEYS.some((k) => k in (one as object)))
+      return undefined;
+  } else {
+    one = errors;
+    if (typeof one !== "object" || one === null) return undefined;
+    if (!Object.keys(one).every((k) => REASON_KEYS.has(k))) return undefined;
+  }
+  const o = one as { message?: unknown; detail?: unknown; code?: unknown };
+  const message =
+    typeof o.detail === "string" ? o.detail : typeof o.message === "string" ? o.message : undefined;
+  if (message === undefined) return undefined;
+  return { message, ...(typeof o.code === "string" ? { code: o.code } : {}) };
+}
+
+/** The `code` beside a Digital Trust `validation` map; never a field map's own `code` field. */
+function digitalTrustValidationCode(body: unknown): string | undefined {
+  if (typeof body !== "object" || body === null) return undefined;
+  const errors = (body as { errors?: unknown }).errors;
+  if (typeof errors !== "object" || errors === null || Array.isArray(errors)) return undefined;
+  const { code, validation } = errors as { code?: unknown; validation?: unknown };
+  return typeof validation === "object" && validation !== null && typeof code === "string"
+    ? code
+    : undefined;
+}
+
 /** Longest text kept for one field's issues: a platform `info` can echo a whole submitted value. */
 const FIELD_ISSUE_MAX_CHARS = 300;
 function capIssue(text: string): string {
@@ -286,12 +328,23 @@ export class UpstreamHttpError extends Error {
       (status === 422 || status === 400) &&
       body !== null &&
       typeof body === "object" &&
-      "errors" in (body as object)
+      "errors" in (body as object) &&
+      // A single platform error ({ errors: { code, message } }) is a reason, not a list of fields.
+      nestedPlatformError(body) === undefined
     ) {
       const errors = (body as { errors: unknown }).errors;
-      if (typeof errors === "object" && errors !== null) {
+      // g-digital-trust-api ErrorResponseBody: { errors: { code, validation: { field: [messages] } } }.
+      const validation =
+        typeof errors === "object" && errors !== null && !Array.isArray(errors)
+          ? (errors as { validation?: unknown }).validation
+          : undefined;
+      const fields =
+        typeof validation === "object" && validation !== null && !Array.isArray(validation)
+          ? validation
+          : errors;
+      if (typeof fields === "object" && fields !== null) {
         fieldErrors = {};
-        for (const [k, v] of Object.entries(errors as Record<string, unknown>)) {
+        for (const [k, v] of Object.entries(fields as Record<string, unknown>)) {
           fieldErrors[k] = capIssue(
             (Array.isArray(v) ? v : [v]).map(describeFieldIssue).join(", "),
           );
@@ -301,15 +354,18 @@ export class UpstreamHttpError extends Error {
       }
     }
 
+    // E21 21-06: EAD Factory's managers nest their reason — { errors: { code, message } } (Digital Trust) or
+    // { errors: [ { detail, message, code } ] } (Signature/Notification managers).
+    const nested = nestedPlatformError(body);
     const message =
       typeof body === "object" && body !== null && "message" in (body as object)
         ? String((body as { message: unknown }).message)
-        : `${operation} returned HTTP ${status}`;
+        : (nested?.message ?? `${operation} returned HTTP ${status}`);
 
     const code =
       typeof body === "object" && body !== null && "code" in (body as object)
         ? String((body as { code: unknown }).code)
-        : undefined;
+        : (nested?.code ?? digitalTrustValidationCode(body));
 
     return new UpstreamHttpError(status, message, fieldErrors, code);
   }
