@@ -30,6 +30,18 @@ configSchema:
     MCP_API_BASE_URL_SIGNATURE:
       description: "Full base URL override for the signature manager, used as-is (default: https://api.gcloudfactory.com/signature-manager)"
       type: string
+    MCP_BRIDGE_STATE_FILE:
+      description: Path to a file where the SSE bridge persists its state (pollable-task delivery) across restarts. Omit to disable persistence — pollable tasks still work, but in-flight SSE subscriptions are lost on restart.
+      type: string
+    MCP_FILE_ALLOWED_ROOTS:
+      description: Comma-separated absolute directory paths. When set, a local "path" file source must resolve under one of them (symlinks excluded). Empty (default) = no restriction.
+      type: string
+    MCP_FILE_MAX_BYTES:
+      description: Maximum accepted file size in bytes for any tool that ingests a file (path/base64/url source), default 1073741824 = 1 GiB. Oversized files are rejected before upload; see each file-accepting tool's error for the exact remediation.
+      type: string
+    MCP_FILE_URL_ALLOWED_HOSTS:
+      description: Comma-separated hostnames. When set, a "url" file source's host must be in this list, checked before any network call. Empty (default) = no restriction.
+      type: string
     MCP_HTTP_HOST:
       description: Interface the HTTP transport binds to. Default 127.0.0.1 (localhost only). Set 0.0.0.0 to expose on all interfaces (containers do this automatically).
       type: string
@@ -39,11 +51,14 @@ configSchema:
     MCP_HTTP_PUBLIC:
       description: Set to "true" for public/multi-tenant deployments. Activates Host validation and refuses to start unless (1) MCP_ALLOWED_ORIGINS or MCP_ALLOWED_HOSTS is set AND (2) inbound Bearer introspection is configured (MCP_SVC_INTROSPECT_URL + MCP_SVC_CLIENT_ID/SECRET) or MCP_ALLOW_UNVERIFIED_BEARER=true is set explicitly (fail-closed).
       type: string
+    MCP_OTEL_ENABLED:
+      description: Set to "true" to emit OpenTelemetry traces/metrics (requires @opentelemetry/sdk-node to be installed separately). Off by default — zero overhead for npx/stdio users.
+      type: string
     MCP_SVC_CLIENT_ID:
       description: OAuth2 client_credentials client ID.
       type: string
     MCP_SVC_CLIENT_SECRET:
-      description: OAuth2 client_credentials client secret. (See https://digitaltrust.gcloudfactory.com for credential acquisition.)
+      description: OAuth2 client_credentials client secret. (See https://webforms.pipedrive.com/f/bYUKJVgt3TZ0QiINtf0mimlgL3BJw79kQaN3i7nXnqoPYabRqYPI5KX9ohhp7T5TTt for credential acquisition.)
       format: password
       type: string
     MCP_SVC_INTROSPECT_URL:
@@ -54,6 +69,9 @@ configSchema:
       type: string
     MCP_SVC_TOKEN_URL:
       description: Token endpoint URL for the OAuth2 client_credentials flow.
+      type: string
+    MCP_TRANSPORT:
+      description: "Which transport to run: \"stdio\" for local/CLI use, \"http\" to host the server. Empty or unset means stdio. The Docker image sets http itself, so keep this variable out of any env file you pass to the container. Unknown values fail fast at startup."
       type: string
     PORT:
       description: HTTP port when running in hosted (HTTP) mode; ignored in stdio mode
@@ -73,13 +91,19 @@ env:
   MCP_API_BASE_URL_EVIDENCE: ""
   MCP_API_BASE_URL_NOTIFICATION: ""
   MCP_API_BASE_URL_SIGNATURE: ""
+  MCP_BRIDGE_STATE_FILE: ""
+  MCP_FILE_ALLOWED_ROOTS: ""
+  MCP_FILE_MAX_BYTES: ""
+  MCP_FILE_URL_ALLOWED_HOSTS: ""
   MCP_HTTP_HOST: ""
   MCP_HTTP_MAX_BODY_BYTES: ""
   MCP_HTTP_PUBLIC: ""
+  MCP_OTEL_ENABLED: ""
   MCP_SVC_CLIENT_ID: ""
   MCP_SVC_INTROSPECT_URL: ""
   MCP_SVC_SCOPE: ""
   MCP_SVC_TOKEN_URL: ""
+  MCP_TRANSPORT: ""
   PORT: ""
 runtime: typescript
 
